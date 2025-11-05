@@ -3,17 +3,37 @@ using UnityEngine.InputSystem;
 
 public class InventoryManager : MonoBehaviour
 {
-    public GameObject InventoryMenu;
-    private bool menuActivated;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private InputActionReference inventoryAction;
+    [SerializeField] private GameObject InventoryMenu;
+    
+    private bool menuActivated = false;
+
+    void OnEnable()
     {
-        
+        if (inventoryAction != null)
+        {
+            
+            inventoryAction.action.Enable();
+            inventoryAction.action.performed += OnInventory;
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    void OnDisable()
     {
+        if (inventoryAction != null)
+        {
+            
+            inventoryAction.action.performed -= OnInventory;
+            inventoryAction.action.Disable();
+        }
+    }
+
+    private void OnInventory(InputAction.CallbackContext context)
+    {
+        menuActivated = !menuActivated;
+        InventoryMenu.SetActive(menuActivated);
         
+        // Pause/unpause time
+        Time.timeScale = menuActivated ? 0f : 1f;
     }
 }
