@@ -36,4 +36,11 @@ public class InventoryManager : MonoBehaviour
         // Pause/unpause time
         Time.timeScale = menuActivated ? 0f : 1f;
     }
+
+    public void AddItem(string itemName, Sprite icon, int quantity)
+    {
+        // Logic to add item to inventory UI
+        Debug.Log("itemName =" + itemName + " quantity =" + quantity);
+    }
+
 }
