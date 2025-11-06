@@ -237,6 +237,7 @@ GameObject:
   - component: {fileID: 189364459}
   - component: {fileID: 189364458}
   - component: {fileID: 189364461}
+  - component: {fileID: 189364462}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -488,6 +489,22 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64
+--- !u!114 &189364462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 189364453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87e2a0dd75eb5401395c1c2331d50b9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  currentHealth: 0
+  isInvincible: 0
+  healthBar: {fileID: 1282442054}
 --- !u!1 &450203907
 GameObject:
   m_ObjectHideFlags: 0

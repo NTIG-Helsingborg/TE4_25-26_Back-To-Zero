@@ -17,9 +17,8 @@ MonoBehaviour:
   activeTime: 0.3
   harvestRange: 3
   healPercentage: 0.5
-  harvestDuration: 0.3
+  harvestDuration: 2.5
   harvestLayers:
     serializedVersion: 2
     m_Bits: 4294967295
   harvestColor: {r: 1, g: 0.2, b: 0.2, a: 0.5}
-
