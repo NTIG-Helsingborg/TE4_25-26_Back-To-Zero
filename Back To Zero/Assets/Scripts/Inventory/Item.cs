@@ -5,6 +5,7 @@ public class Item : MonoBehaviour
     [SerializeField] private string itemName;
     [SerializeField] private Sprite itemIcon;
     [SerializeField] private int quantity;
+    [TextArea][SerializeField] private string itemDescription;
 
     private InventoryManager inventoryManager;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -25,9 +26,11 @@ public class Item : MonoBehaviour
             if (inventoryManager != null)
             {
                 // Add item to inventory
-                inventoryManager.AddItem(itemName, itemIcon, quantity);
-                // Destroy the item in the world
-                Destroy(gameObject);
+                int leftOverItems = inventoryManager.AddItem(itemName, itemIcon, quantity, itemDescription);
+                if(leftOverItems <= 0)
+                    Destroy(gameObject);
+                else
+                    quantity = leftOverItems;
             }
             
         }
