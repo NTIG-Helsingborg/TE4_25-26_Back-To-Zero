@@ -1,6 +1,9 @@
 # Unity - Optimized for large projects
 # This .gitignore file should be placed at the root of your Unity project directory
 
+.json
+.slnx
+
 # macOS system files
 .DS_Store
 .DS_Store?
