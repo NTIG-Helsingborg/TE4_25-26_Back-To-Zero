@@ -35,6 +35,9 @@ public class Health : MonoBehaviour
         {
             currentHealth = maxHealth;
         }
+        
+        // Update the health bar UI
+        healthBar.fillAmount = Mathf.Clamp(((float)currentHealth / (float)maxHealth), 0, 1);
     }
 
     private void Die()

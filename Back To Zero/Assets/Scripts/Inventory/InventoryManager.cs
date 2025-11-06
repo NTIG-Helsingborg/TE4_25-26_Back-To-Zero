@@ -6,6 +6,8 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private InputActionReference inventoryAction;
     [SerializeField] private GameObject InventoryMenu;
     private ItemSlot[] itemSlot;
+
+    public ItemSO[] itemSOs;
     
     [Header("Slots Setup")]
     [Tooltip("Parent transform that contains all ItemSlot components as children.")]
@@ -59,6 +61,18 @@ public class InventoryManager : MonoBehaviour
         
         // Pause/unpause time
         Time.timeScale = menuActivated ? 0f : 1f;
+    }
+
+    public void UseItem(string itemName)
+    {
+        for(int i = 0; i < itemSOs.Length; i++)
+        {
+            if(itemSOs[i].itemName == itemName)
+            {
+                itemSOs[i].UseItem();
+                break;
+            }
+        }
     }
 
     public int AddItem(string itemName, Sprite itemIcon, int quantity, string itemDescription)
