@@ -646,6 +646,7 @@ GameObject:
   - component: {fileID: 607689488}
   - component: {fileID: 607689490}
   - component: {fileID: 607689491}
+  - component: {fileID: 607689493}
   - component: {fileID: 607689492}
   m_Layer: 0
   m_Name: Player
@@ -977,6 +978,20 @@ TrailRenderer:
   m_Autodestruct: 0
   m_Emitting: 0
   m_ApplyActiveColorSpace: 1
+--- !u!114 &607689493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 607689483}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de3e8dd05d5d240f28903333a80c60c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ability: {fileID: 11400000, guid: b8c4d0e6f2a3559906b7c8d9e0f1a2b3, type: 2}
+  key: 49
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0

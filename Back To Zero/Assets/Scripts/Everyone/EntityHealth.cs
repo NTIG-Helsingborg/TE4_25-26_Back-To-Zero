@@ -20,7 +20,10 @@ public class Health : MonoBehaviour
         if (!isInvincible)
         {
             currentHealth -= damage;
-            healthBar.fillAmount = Mathf.Clamp(((float)currentHealth / (float)maxHealth), 0, 1);
+            if (healthBar != null)
+            {
+                healthBar.fillAmount = Mathf.Clamp(((float)currentHealth / (float)maxHealth), 0, 1);
+            }
         }
         if (currentHealth <= 0)
         {
@@ -35,6 +38,26 @@ public class Health : MonoBehaviour
         {
             currentHealth = maxHealth;
         }
+        
+        if (healthBar != null)
+        {
+            healthBar.fillAmount = Mathf.Clamp(((float)currentHealth / (float)maxHealth), 0, 1);
+        }
+    }
+
+    public int GetMaxHealth()
+    {
+        return maxHealth;
+    }
+
+    public int GetCurrentHealth()
+    {
+        return currentHealth;
+    }
+
+    public void InstantKill()
+    {
+        Die();
     }
 
     private void Die()
