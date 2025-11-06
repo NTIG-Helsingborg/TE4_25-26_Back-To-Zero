@@ -1274,7 +1274,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawnPoint: {x: 0, y: 0, z: 0}
-  respawnDelay: 7
+  respawnDelay: 6
   useCurrentPositionAsSpawn: 1
   freezePositionOnDeath: 1
   deathTxt: {fileID: 563108741}
