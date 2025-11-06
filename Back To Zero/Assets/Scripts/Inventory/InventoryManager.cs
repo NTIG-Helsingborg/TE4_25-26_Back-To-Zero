@@ -5,6 +5,7 @@ public class InventoryManager : MonoBehaviour
 {
     [SerializeField] private InputActionReference inventoryAction;
     [SerializeField] private GameObject InventoryMenu;
+    [SerializeField] private ItemSlot[] itemSlots;
     
     private bool menuActivated = false;
 
@@ -37,10 +38,9 @@ public class InventoryManager : MonoBehaviour
         Time.timeScale = menuActivated ? 0f : 1f;
     }
 
-    public void AddItem(string itemName, Sprite icon, int quantity)
+    public void AddItem(string itemName, Sprite itemIcon, int quantity)
     {
-        // Logic to add item to inventory UI
-        Debug.Log("itemName =" + itemName + " quantity =" + quantity);
+        
     }
 
 }
