@@ -15,9 +15,9 @@ MonoBehaviour:
   name: 
   cooldownTime: 0
   activeTime: 0
-  damage: 0
-  range: 0
-  speed: 0
-  HpCost: 0
-  BloodKnifePrefab: {fileID: 0}
+  damage: 10
+  range: 50
+  speed: 15
+  HpCost: 5
+  BloodKnifePrefab: {fileID: 3137868050130833703, guid: aba6c88923875fa499c13ae470d1028a, type: 3}
   firePointChildName: SpellTransform
