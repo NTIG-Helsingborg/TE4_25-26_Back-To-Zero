@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf1f409ab8f4c144da05c62f71c52d43, type: 3}
-  m_Name: Blood Knife
+  m_Name: BloodKnife
   m_EditorClassIdentifier: 
   name: 
   cooldownTime: 0
@@ -19,7 +19,5 @@ MonoBehaviour:
   range: 0
   speed: 0
   HpCost: 0
-  playerObject: {fileID: 0}
   BloodKnifePrefab: {fileID: 0}
-  firePoint: {fileID: 0}
   firePointChildName: SpellTransform

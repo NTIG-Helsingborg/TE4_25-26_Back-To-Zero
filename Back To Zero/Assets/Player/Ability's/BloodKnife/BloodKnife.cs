@@ -1,47 +1,69 @@
 using UnityEngine;
-using System.Collections;
-[CreateAssetMenu]
+
+[CreateAssetMenu(menuName = "Abilities/Blood Knife")]
 public class BloodKnife : Ability
 {
     [Header("Blood Knife Settings")]
     public float damage;
-    public float range;
-    public float speed;
+    public float range; 
+    public float speed;   
     public float HpCost;
 
-
-
-    public GameObject playerObject;
+    [Header("References")]
     public GameObject BloodKnifePrefab;
-    public Transform firePoint;
 
     [SerializeField] private string firePointChildName = "SpellTransform";
-
-
-    public void Active()
+    public override void Activate()
     {
-        playerObject = GameObject.FindGameObjectWithTag("Player");
-        if (firePoint == null)
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
         {
-            foreach (var t in playerObject.GetComponentsInChildren<Transform>(true))
-            {
-                if (t.name == firePointChildName)
-                {
-                    firePoint = t;
-                    break;
-                }
-            }
-        }
-
-        if (firePoint == null)
-        {
-            Debug.LogError($"[BloodKnife] Child '{firePointChildName}' not found on Player.");
+            Debug.LogError("[BloodKnife] No Player tagged 'Player' in scene.");
             return;
         }
-    } 
-    // Update is called once per frame
-    void Update()
+
+        var firePoint = FindChildByName(player.transform, firePointChildName);
+        if (firePoint == null)
+        {
+            Debug.LogError($"[BloodKnife] Could not find child '{firePointChildName}' under Player hierarchy.");
+            return;
+        }
+
+        if (BloodKnifePrefab == null)
+        {
+            Debug.LogError("[BloodKnife] No projectile prefab assigned.");
+            return;
+        }
+
+        // var ph = player.GetComponent<Health>();
+        // if (ph && HpCost > 0 && ph.GetCurrentHealth() < Mathf.RoundToInt(HpCost)) return;
+
+        var go = Object.Instantiate(BloodKnifePrefab, firePoint.position, firePoint.rotation);
+
+        var proj = go.GetComponent<Projectiles>();
+        if (proj != null)
+        {
+            proj.Initialize(damage, speed, range, player);
+        }
+        else
+        {
+            var rb = go.GetComponent<Rigidbody2D>();
+            if (rb != null) rb.linearVelocity = firePoint.right * speed; // fix: use velocity
+            Object.Destroy(go, Mathf.Max(0.01f, range / Mathf.Max(0.01f, speed)));
+        }
+
+        // Charge HP cost after successful spawn (ignores invincibility)
+        var playerHealth = player.GetComponent<Health>();
+        if (playerHealth != null && HpCost > 0f)
+        {
+            playerHealth.SpendHealth(Mathf.RoundToInt(HpCost));
+        }
+    }
+
+    private static Transform FindChildByName(Transform root, string name)
     {
-        Instantiate(BloodKnifePrefab, firePoint.position, firePoint.rotation);
+        foreach (var t in root.GetComponentsInChildren<Transform>(true))
+            if (t.name == name) return t;
+        return null;
     }
 }

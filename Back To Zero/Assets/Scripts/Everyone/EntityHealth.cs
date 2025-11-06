@@ -13,6 +13,24 @@ public class Health : MonoBehaviour
     {
         currentHealth = maxHealth;
     }
+    public void SpendHealth(int amount)
+    {
+        if (amount <= 0) return;
+
+        // ignore isInvincible on purpose
+        currentHealth -= amount;
+
+        if (healthBar != null)
+        {
+            healthBar.fillAmount = Mathf.Clamp(((float)currentHealth / (float)maxHealth), 0, 1);
+        }
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
 
     public void TakeDamage(int damage)
     {
