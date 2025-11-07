@@ -208,6 +208,12 @@ public class Health : MonoBehaviour
     {
         StopHarvestShake();
         Debug.Log(gameObject.name + " died");
+        
+        if (gameObject.CompareTag("Player"))
+        {
+            return;
+        }
+        
         Destroy(gameObject);
     }
 }

@@ -35,11 +35,21 @@ public class HarvestAbility : Ability
     
     public override void Activate()
     {
+        Debug.Log("Harvest activated!");
+        
         playerObject = GameObject.FindGameObjectWithTag("Player");
-        if (playerObject == null) return;
+        if (playerObject == null)
+        {
+            Debug.LogError("Player not found!");
+            return;
+        }
         
         playerHealth = playerObject.GetComponent<Health>();
-        if (playerHealth == null) return;
+        if (playerHealth == null)
+        {
+            Debug.LogError("Player Health not found!");
+            return;
+        }
         
         SyncGlobalSettings();
         
@@ -89,6 +99,10 @@ public class HarvestAbility : Ability
         
         if (harvestedEntities.Count > 0)
         {
+            Debug.Log($"Harvesting {harvestedEntities.Count} entities for {totalHealAmount} HP");
+            
+            FreezeEntities(harvestedEntities, true);
+            
             StartHarvestVisuals(harvestedEntities);
             yield return new WaitForSeconds(harvestDuration);
             
@@ -104,6 +118,10 @@ public class HarvestAbility : Ability
             
             if (playerHealth != null && totalHealAmount > 0)
                 playerHealth.Heal(totalHealAmount);
+        }
+        else
+        {
+            Debug.Log("No entities in range to harvest");
         }
     }
 
@@ -153,12 +171,36 @@ public class HarvestAbility : Ability
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            spriteRenderer.color = Color.Lerp(originalColor, flashColor, Mathf.PingPong(elapsed / duration * 4, 1));
+            spriteRenderer.color = Color.Lerp(originalColor, flashColor, Mathf.PingPong(elapsed / duration * 16, 1));
             yield return null;
         }
         
         if (spriteRenderer != null)
             spriteRenderer.color = originalColor;
+    }
+    
+    private void FreezeEntities(List<GameObject> entities, bool freeze)
+    {
+        foreach (GameObject entity in entities)
+        {
+            if (entity == null) continue;
+            
+            Rigidbody2D rb = entity.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                if (freeze)
+                    rb.linearVelocity = Vector2.zero;
+                rb.constraints = freeze ? RigidbodyConstraints2D.FreezeAll : RigidbodyConstraints2D.None;
+            }
+            
+            MonoBehaviour[] scripts = entity.GetComponents<MonoBehaviour>();
+            foreach (var script in scripts)
+            {
+                string scriptName = script.GetType().Name;
+                if (scriptName.Contains("Move") || scriptName.Contains("Chase") || scriptName.Contains("AI"))
+                    script.enabled = !freeze;
+            }
+        }
     }
 }
 

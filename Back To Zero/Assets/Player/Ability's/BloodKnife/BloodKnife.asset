@@ -16,8 +16,8 @@ MonoBehaviour:
   cooldownTime: 0
   activeTime: 0
   damage: 10
-  range: 50
-  speed: 15
-  HpCost: 5
+  range: 10
+  speed: 18
+  HpCost: 10
   BloodKnifePrefab: {fileID: 3137868050130833703, guid: aba6c88923875fa499c13ae470d1028a, type: 3}
   firePointChildName: SpellTransform

@@ -19,6 +19,7 @@ MonoBehaviour:
   healPercentage: 0.5
   harvestActivationPercentage: 40
   harvestDuration: 1
+  harvestDuration: 2.5
   harvestLayers:
     serializedVersion: 2
     m_Bits: 4294967295
