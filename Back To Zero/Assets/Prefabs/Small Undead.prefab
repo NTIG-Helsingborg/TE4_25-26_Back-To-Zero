@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 3130104666088847791}
   - component: {fileID: 3766288606180320288}
   - component: {fileID: 8453131836141307993}
+  - component: {fileID: 9120635151144956574}
   m_Layer: 0
   m_Name: Small Undead
   m_TagString: Untagged
@@ -284,6 +285,30 @@ MonoBehaviour:
   currentHealth: 0
   isInvincible: 0
   healthBar: {fileID: 4632695191735877443}
+  grantsExperienceOnDeath: 0
+  experienceReward: 10
+  enableHarvestFeedback: 1
+--- !u!114 &9120635151144956574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1275082337609965979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83e536a6d8a64404fbeac67ebdec7e66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  experienceCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  levelText: {fileID: 0}
+  experienceText: {fileID: 0}
+  experienceFill: {fileID: 0}
 --- !u!1 &5476134379506366217
 GameObject:
   m_ObjectHideFlags: 0

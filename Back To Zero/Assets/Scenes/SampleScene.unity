@@ -704,6 +704,9 @@ MonoBehaviour:
   currentHealth: 0
   isInvincible: 0
   healthBar: {fileID: 771221766}
+  grantsExperienceOnDeath: 1
+  experienceReward: 60
+  enableHarvestFeedback: 1
 --- !u!114 &607689489
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1134,6 +1137,17 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &755280556 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7522221991542851822, guid: 5754797e852e043ddb548c8a196b1b4a, type: 3}
+  m_PrefabInstance: {fileID: 4314236288651483567}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &771221766 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2093031434533309500, guid: 4cf52470352a74bf3b195505735fa866, type: 3}
@@ -1250,6 +1264,17 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &943737318 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4461555506210085505, guid: 5754797e852e043ddb548c8a196b1b4a, type: 3}
+  m_PrefabInstance: {fileID: 4314236288651483567}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1075212305
 GameObject:
   m_ObjectHideFlags: 0
@@ -1621,6 +1646,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1760054009 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9194192382476382783, guid: 5754797e852e043ddb548c8a196b1b4a, type: 3}
+  m_PrefabInstance: {fileID: 4314236288651483567}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1901914472
 GameObject:
   m_ObjectHideFlags: 0
@@ -1863,6 +1899,26 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 607689487}
+    - target: {fileID: 8453131836141307993, guid: 2e6de9101245b409e92823cd4236c08f, type: 3}
+      propertyPath: experienceReward
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 8453131836141307993, guid: 2e6de9101245b409e92823cd4236c08f, type: 3}
+      propertyPath: grantsExperienceOnDeath
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9120635151144956574, guid: 2e6de9101245b409e92823cd4236c08f, type: 3}
+      propertyPath: levelText
+      value: 
+      objectReference: {fileID: 1760054009}
+    - target: {fileID: 9120635151144956574, guid: 2e6de9101245b409e92823cd4236c08f, type: 3}
+      propertyPath: experienceFill
+      value: 
+      objectReference: {fileID: 943737318}
+    - target: {fileID: 9120635151144956574, guid: 2e6de9101245b409e92823cd4236c08f, type: 3}
+      propertyPath: experienceText
+      value: 
+      objectReference: {fileID: 755280556}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

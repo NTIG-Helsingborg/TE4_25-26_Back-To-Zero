@@ -4,33 +4,44 @@ using TMPro;
 
 public class ExperienceManager : MonoBehaviour
 {
+    public static ExperienceManager Instance { get; private set; }
+
     [Header("Experience")]
     [SerializeField] AnimationCurve experienceCurve;
 
-    int currentLevel, totalExperience;
-    int previousLevelsExperience, nextLevelsExperience;
+    int currentLevel;
+    int totalExperience;
+    int previousLevelsExperience;
+    int nextLevelsExperience;
 
     [Header("Interface")]
     [SerializeField] TextMeshProUGUI levelText;
     [SerializeField] TextMeshProUGUI experienceText;
     [SerializeField] Image experienceFill;
 
-
-    void start()
+    void Awake()
     {
-        UpdateLevel();
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogWarning("Multiple ExperienceManager instances detected. Using the most recent one.");
+        }
+
+        Instance = this;
     }
 
-    void Update()
+    void Start()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            AddExperience(5);
-        }
+        UpdateLevel();
+        UpdateInterface();
     }
 
     public void AddExperience(int amount)
     {
+        if (amount <= 0)
+        {
+            return;
+        }
+
         totalExperience += amount;
         CheckForLevelUp();
         UpdateInterface();
@@ -38,7 +49,7 @@ public class ExperienceManager : MonoBehaviour
 
     void CheckForLevelUp()
     {
-        if (totalExperience >= nextLevelsExperience)
+        while (totalExperience >= nextLevelsExperience)
         {
             currentLevel++;
             UpdateLevel();
@@ -51,6 +62,11 @@ public class ExperienceManager : MonoBehaviour
     {
         previousLevelsExperience = (int)experienceCurve.Evaluate(currentLevel);
         nextLevelsExperience = (int)experienceCurve.Evaluate(currentLevel + 1);
+
+        if (nextLevelsExperience <= previousLevelsExperience)
+        {
+            nextLevelsExperience = previousLevelsExperience + 1;
+        }
     }
 
     void UpdateInterface()
@@ -58,8 +74,13 @@ public class ExperienceManager : MonoBehaviour
         int start = totalExperience - previousLevelsExperience;
         int end = nextLevelsExperience - previousLevelsExperience;
 
+        if (start < 0)
+        {
+            start = 0;
+        }
+
         levelText.text = currentLevel.ToString();
         experienceText.text = start + " exp / " + end + " exp";
-        experienceFill.fillAmount = (float)start / (float)end;
+        experienceFill.fillAmount = end > 0 ? (float)start / end : 0f;
     }
 }

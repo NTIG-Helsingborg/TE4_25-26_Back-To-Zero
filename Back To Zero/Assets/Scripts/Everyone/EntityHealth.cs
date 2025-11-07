@@ -9,6 +9,10 @@ public class Health : MonoBehaviour
     public bool isInvincible = false;
     public Image healthBar;
 
+    [Header("Experience Reward")]
+    [SerializeField] private bool grantsExperienceOnDeath = false;
+    [SerializeField] private int experienceReward = 10;
+
     [Header("Harvest Feedback")]
     [SerializeField] private bool enableHarvestFeedback = true;
 
@@ -97,7 +101,30 @@ public class Health : MonoBehaviour
             return;
         }
 
+        GrantExperience();
+
         Destroy(gameObject);
+    }
+
+    private void GrantExperience()
+    {
+        if (!grantsExperienceOnDeath)
+        {
+            return;
+        }
+
+        if (experienceReward <= 0)
+        {
+            return;
+        }
+
+        if (ExperienceManager.Instance == null)
+        {
+            Debug.LogWarning($"No ExperienceManager instance found when trying to grant experience from {gameObject.name}");
+            return;
+        }
+
+        ExperienceManager.Instance.AddExperience(experienceReward);
     }
 
     private void RefreshHealthBarFill()
