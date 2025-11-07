@@ -86,11 +86,13 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
     {
         if (thisItemSelected)
         {
-            inventoryManager.UseItem(itemName);
-            this.quantity -= 1;
-            quantityText.text = this.quantity.ToString();
-            if(this.quantity <= 0)
-                  EmptySlot();
+            bool usable = inventoryManager.UseItem(itemName);
+            if(usable){
+                this.quantity -= 1;
+                quantityText.text = this.quantity.ToString();
+                if(this.quantity <= 0)
+                     EmptySlot();
+            }
         }
         else
         {

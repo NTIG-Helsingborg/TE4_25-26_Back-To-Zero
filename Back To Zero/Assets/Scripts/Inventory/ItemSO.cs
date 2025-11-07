@@ -7,27 +7,19 @@ public class ItemSO : ScriptableObject
     public StatToChange statToChange = new StatToChange();
     public int amountToChangeStat;
 
-    public void UseItem()
+    public bool UseItem()
     {
         if(statToChange == StatToChange.Health){
-            GameObject player = GameObject.Find("Player");
-            if (player != null)
-            {
-                Health health = player.GetComponent<Health>();
-                if (health != null)
-                {
-                    health.Heal(amountToChangeStat);
-                }
-                else
-                {
-                    Debug.LogError("ItemSO: Player doesn't have a Health component!");
-                }
+            Health health = GameObject.Find("Player").GetComponent<Health>();
+            if (health != null && health.IsFullHealth()){
+                return false;
             }
-            else
-            {
-                Debug.LogError("ItemSO: Couldn't find GameObject named 'Player'!");
+            else if (health != null){
+                health.Heal(amountToChangeStat);
+                return true;
             }
         }
+        return false;
     }
 
     public enum StatToChange

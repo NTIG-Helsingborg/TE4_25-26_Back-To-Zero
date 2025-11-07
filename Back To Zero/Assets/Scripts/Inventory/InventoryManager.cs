@@ -63,16 +63,17 @@ public class InventoryManager : MonoBehaviour
         Time.timeScale = menuActivated ? 0f : 1f;
     }
 
-    public void UseItem(string itemName)
+    public bool UseItem(string itemName)
     {
         for(int i = 0; i < itemSOs.Length; i++)
         {
             if(itemSOs[i].itemName == itemName)
             {
-                itemSOs[i].UseItem();
-                break;
+                bool usable = itemSOs[i].UseItem();
+                return usable;
             }
         }
+        return false;
     }
 
     public int AddItem(string itemName, Sprite itemIcon, int quantity, string itemDescription)

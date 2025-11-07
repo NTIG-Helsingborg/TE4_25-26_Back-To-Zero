@@ -40,6 +40,11 @@ public class Health : MonoBehaviour
         healthBar.fillAmount = Mathf.Clamp(((float)currentHealth / (float)maxHealth), 0, 1);
     }
 
+    public bool IsFullHealth()
+    {
+        return currentHealth >= maxHealth;
+    }
+
     private void Die()
     {
         Debug.Log(gameObject.name + " died");
