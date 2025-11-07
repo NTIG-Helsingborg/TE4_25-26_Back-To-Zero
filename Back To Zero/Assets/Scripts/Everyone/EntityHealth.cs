@@ -74,25 +74,15 @@ public class Health : MonoBehaviour
         {
             currentHealth = maxHealth;
         }
-
         RefreshHealthBarFill();
         EvaluateHarvestability();
     }
 
-    public int GetMaxHealth()
-    {
-        return maxHealth;
-    }
-
-    public int GetCurrentHealth()
-    {
-        return currentHealth;
-    }
-
-    public void InstantKill()
-    {
-        Die();
-    }
+    // Unified API combining both branches
+    public int GetMaxHealth() => maxHealth;
+    public int GetCurrentHealth() => currentHealth;
+    public bool IsFullHealth() => currentHealth >= maxHealth;
+    public void InstantKill() => Die();
 
     private void RefreshHealthBarFill()
     {
