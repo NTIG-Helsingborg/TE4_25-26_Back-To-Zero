@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,13 +14,38 @@ public class HarvestAbility : Ability
     
     [Header("Visual Effects")]
     public Color harvestColor = new Color(1f, 0.2f, 0.2f, 0.5f);
+
+    [Header("Harvest Feedback")]
+    [SerializeField] private bool enableHarvestFeedback = true;
+    [SerializeField] [Range(0.05f, 1f)] private float harvestShakeDuration = 0.12f;
+    [SerializeField] [Range(0f, 50f)] private float harvestShakeIntensity = 6f;
+    [SerializeField] [Range(0.05f, 1f)] private float harvestHealthThreshold = 0.4f;
+
+    public static event Action HarvestSettingsChanged;
+    public static bool IsHarvestFeedbackEnabled { get; private set; } = true;
+    public static float GlobalHarvestShakeDuration { get; private set; } = 0.12f;
+    public static float GlobalHarvestShakeIntensity { get; private set; } = 6f;
+    public static float GlobalHarvestHealthThreshold { get; private set; } = 0.4f;
     
     private GameObject playerObject;
     private Health playerHealth;
     
+    private void OnEnable()
+    {
+        ApplyHarvestFeedbackSettings();
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        ApplyHarvestFeedbackSettings();
+    }
+#endif
+
     public override void Activate()
     {
         Debug.Log("Harvest activated!");
+        ApplyHarvestFeedbackSettings();
         
         playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject == null)
@@ -153,6 +179,15 @@ public class HarvestAbility : Ability
                     script.enabled = !freeze;
             }
         }
+    }
+
+    private void ApplyHarvestFeedbackSettings()
+    {
+        IsHarvestFeedbackEnabled = enableHarvestFeedback;
+        GlobalHarvestShakeDuration = Mathf.Max(0.05f, harvestShakeDuration);
+        GlobalHarvestShakeIntensity = Mathf.Max(0f, harvestShakeIntensity);
+        GlobalHarvestHealthThreshold = Mathf.Clamp(harvestHealthThreshold, 0.01f, 1f);
+        HarvestSettingsChanged?.Invoke();
     }
 }
 

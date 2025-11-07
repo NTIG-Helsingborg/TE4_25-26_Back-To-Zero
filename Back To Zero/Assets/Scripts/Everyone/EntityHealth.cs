@@ -1,18 +1,42 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Health : MonoBehaviour
 {
-
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private int currentHealth;
     public bool isInvincible = false;
     public Image healthBar;
-    // Start is called before the first execution of Update after the MonoBehaviour is created
-    void Start()
+
+    [Header("Harvest Feedback")]
+    [SerializeField] private bool enableHarvestFeedback = true;
+
+    private RectTransform healthBarRect;
+    private Vector3 healthBarOriginalLocalPosition;
+    private Coroutine harvestShakeCoroutine;
+    private bool isHarvestable;
+
+    private void OnEnable()
+    {
+        CacheHealthBarRect();
+        HarvestAbility.HarvestSettingsChanged += OnHarvestSettingsChanged;
+        healthBarOriginalLocalPosition = healthBarRect != null ? healthBarRect.localPosition : Vector3.zero;
+        EvaluateHarvestability();
+    }
+
+    private void OnDisable()
+    {
+        HarvestAbility.HarvestSettingsChanged -= OnHarvestSettingsChanged;
+        StopHarvestShake();
+    }
+
+    private void Start()
     {
         currentHealth = maxHealth;
+        EvaluateHarvestability();
     }
+
     public void SpendHealth(int amount)
     {
         if (amount <= 0) return;
@@ -20,10 +44,8 @@ public class Health : MonoBehaviour
         // ignore isInvincible on purpose
         currentHealth -= amount;
 
-        if (healthBar != null)
-        {
-            healthBar.fillAmount = Mathf.Clamp(((float)currentHealth / (float)maxHealth), 0, 1);
-        }
+        RefreshHealthBarFill();
+        EvaluateHarvestability();
 
         if (currentHealth <= 0)
         {
@@ -31,17 +53,13 @@ public class Health : MonoBehaviour
         }
     }
 
-
     public void TakeDamage(int damage)
     {
-        
         if (!isInvincible)
         {
             currentHealth -= damage;
-            if (healthBar != null)
-            {
-                healthBar.fillAmount = Mathf.Clamp(((float)currentHealth / (float)maxHealth), 0, 1);
-            }
+            RefreshHealthBarFill();
+            EvaluateHarvestability();
         }
         if (currentHealth <= 0)
         {
@@ -56,22 +74,13 @@ public class Health : MonoBehaviour
         {
             currentHealth = maxHealth;
         }
-        
-        if (healthBar != null)
-        {
-            healthBar.fillAmount = Mathf.Clamp(((float)currentHealth / (float)maxHealth), 0, 1);
-        }
+
+        RefreshHealthBarFill();
+        EvaluateHarvestability();
     }
 
-    public int GetMaxHealth()
-    {
-        return maxHealth;
-    }
-
-    public int GetCurrentHealth()
-    {
-        return currentHealth;
-    }
+    public int GetMaxHealth() => maxHealth;
+    public int GetCurrentHealth() => currentHealth;
 
     public void InstantKill()
     {
@@ -80,13 +89,118 @@ public class Health : MonoBehaviour
 
     private void Die()
     {
+        StopHarvestShake();
         Debug.Log(gameObject.name + " died");
-        
+
         if (gameObject.CompareTag("Player"))
         {
             return;
         }
-        
+
         Destroy(gameObject);
     }
+
+    private void RefreshHealthBarFill()
+    {
+        if (healthBar != null)
+        {
+            healthBar.fillAmount = Mathf.Clamp01((float)currentHealth / Mathf.Max(1, maxHealth));
+        }
+    }
+
+    private void EvaluateHarvestability()
+    {
+        if (!enableHarvestFeedback || healthBarRect == null)
+        {
+            if (isHarvestable)
+            {
+                isHarvestable = false;
+                StopHarvestShake();
+            }
+            return;
+        }
+
+        bool harvestFeedbackEnabled = HarvestAbility.IsHarvestFeedbackEnabled && HarvestAbility.GlobalHarvestShakeIntensity > 0f;
+        float healthRatio = maxHealth > 0 ? (float)currentHealth / maxHealth : 0f;
+        bool shouldShake = harvestFeedbackEnabled && !isInvincible && currentHealth > 0 && healthRatio <= HarvestAbility.GlobalHarvestHealthThreshold;
+
+        if (shouldShake == isHarvestable)
+        {
+            return;
+        }
+
+        isHarvestable = shouldShake;
+
+        if (isHarvestable)
+        {
+            StartHarvestShake();
+        }
+        else
+        {
+            StopHarvestShake();
+        }
+    }
+
+    private void StartHarvestShake()
+    {
+        if (healthBarRect == null || harvestShakeCoroutine != null)
+        {
+            return;
+        }
+
+        harvestShakeCoroutine = StartCoroutine(HarvestShakeRoutine());
+    }
+
+    private IEnumerator HarvestShakeRoutine()
+    {
+        if (healthBarRect == null)
+            yield break;
+
+        while (isHarvestable)
+        {
+            float time = Time.unscaledTime;
+            float cycleDuration = Mathf.Max(0.05f, HarvestAbility.GlobalHarvestShakeDuration);
+            float cyclePhase = Mathf.PingPong(time, cycleDuration) / cycleDuration;
+            float damper = Mathf.Lerp(0.6f, 1f, cyclePhase);
+            float intensity = HarvestAbility.GlobalHarvestShakeIntensity;
+            Vector2 offset = Random.insideUnitCircle * intensity * damper;
+            healthBarRect.localPosition = healthBarOriginalLocalPosition + (Vector3)offset;
+            yield return null;
+        }
+
+        StopHarvestShake();
+    }
+
+    private void StopHarvestShake()
+    {
+        if (harvestShakeCoroutine != null)
+        {
+            StopCoroutine(harvestShakeCoroutine);
+            harvestShakeCoroutine = null;
+        }
+
+        if (healthBarRect != null)
+        {
+            healthBarRect.localPosition = healthBarOriginalLocalPosition;
+        }
+    }
+
+    private void CacheHealthBarRect()
+    {
+        if (healthBar != null)
+        {
+            healthBarRect = healthBar.rectTransform;
+        }
+    }
+
+    private void OnHarvestSettingsChanged()
+    {
+        CacheHealthBarRect();
+        if (healthBarRect != null)
+        {
+            healthBarOriginalLocalPosition = healthBarRect.localPosition;
+        }
+        EvaluateHarvestability();
+    }
 }
+

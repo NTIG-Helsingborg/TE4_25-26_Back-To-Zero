@@ -22,3 +22,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   harvestColor: {r: 1, g: 0.2, b: 0.2, a: 0.5}
+  enableHarvestFeedback: 1
+  harvestShakeDuration: 0.12
+  harvestShakeIntensity: 0.05
+  harvestHealthThreshold: 0.4
