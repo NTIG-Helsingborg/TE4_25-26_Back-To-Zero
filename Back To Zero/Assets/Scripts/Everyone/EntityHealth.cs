@@ -196,6 +196,16 @@ public class Health : MonoBehaviour
 
     private void Die()
     {
+        LootBag lootBag = GetComponent<LootBag>();
+        if (lootBag != null)
+        {
+            lootBag.InstantiateLoot(transform.position);
+        }
+        else
+        {
+            Debug.Log(gameObject.name + " died but has no LootBag component.");
+        }
+
         StopHarvestShake();
         Debug.Log(gameObject.name + " died");
         

@@ -4,8 +4,12 @@ using UnityEngine;
 public class ItemSO : ScriptableObject
 {
     public string itemName;
+    public Sprite itemSprite;
+    public string itemDescription;
     public StatToChange statToChange = new StatToChange();
     public int amountToChangeStat;
+    public int dropChance;  
+    
 
     public bool UseItem()
     {

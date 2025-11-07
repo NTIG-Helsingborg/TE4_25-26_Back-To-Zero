@@ -10,12 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 11c5a18b63a853a43a37b85f30a0f9f4, type: 3}
-  m_Name: Healthpot
+  m_Name: Coin
   m_EditorClassIdentifier: 
-  itemName: Healthpot
+  itemName: Coin
   itemSprite: {fileID: 0}
-  itemDescription: A mighty delicious looking potion of health. Looks to been created
-    by a pretty average mage.  Rstores 50:hp.
-  statToChange: 1
-  amountToChangeStat: 50
-  dropChance: 40
+  itemDescription: A valueble piece of metal.
+  statToChange: 0
+  amountToChangeStat: 0
+  dropChance: 100
