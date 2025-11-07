@@ -2063,6 +2063,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: HealthPot
       objectReference: {fileID: 0}
+    - target: {fileID: 5625447674965435653, guid: cb39a7f0e428c45e3832e59298b732c1, type: 3}
+      propertyPath: itemName
+      value: Healthpot
+      objectReference: {fileID: 0}
     - target: {fileID: 6500567832283977882, guid: cb39a7f0e428c45e3832e59298b732c1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 8
