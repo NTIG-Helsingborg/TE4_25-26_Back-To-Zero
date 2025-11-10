@@ -15,6 +15,6 @@ MonoBehaviour:
   itemName: Coin
   itemSprite: {fileID: 0}
   itemDescription: A valueble piece of metal.
-  statToChange: 0
-  amountToChangeStat: 0
+  statToChange: 5
+  amountToChangeStat: 1
   dropChance: 100

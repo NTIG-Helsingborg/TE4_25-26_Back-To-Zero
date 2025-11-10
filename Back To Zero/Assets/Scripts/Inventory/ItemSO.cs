@@ -32,6 +32,7 @@ public class ItemSO : ScriptableObject
         Health,
         Power,
         Agility,
-        Intelligence
+        Intelligence,
+        Coin
     };
 }
