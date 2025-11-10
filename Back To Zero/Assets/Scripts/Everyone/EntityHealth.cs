@@ -78,21 +78,138 @@ public class Health : MonoBehaviour
         {
             currentHealth = maxHealth;
         }
-
         RefreshHealthBarFill();
         EvaluateHarvestability();
     }
 
+    // Unified API combining both branches
     public int GetMaxHealth() => maxHealth;
     public int GetCurrentHealth() => currentHealth;
+    public bool IsFullHealth() => currentHealth >= maxHealth;
+    public void InstantKill() => Die();
 
-    public void InstantKill()
+    private void RefreshHealthBarFill()
     {
-        Die();
+        if (healthBar != null)
+        {
+            healthBar.fillAmount = Mathf.Clamp((float)currentHealth / maxHealth, 0f, 1f);
+        }
+    }
+
+    private void EvaluateHarvestability()
+    {
+        if (!enableHarvestFeedback || maxHealth <= 0)
+        {
+            SetHarvestable(false);
+            return;
+        }
+
+        float threshold = HarvestAbility.CurrentHarvestThresholdFraction;
+        if (threshold <= 0f)
+        {
+            SetHarvestable(false);
+            return;
+        }
+
+        bool shouldHarvest = (float)currentHealth / maxHealth <= threshold;
+        SetHarvestable(shouldHarvest);
+    }
+
+    private void SetHarvestable(bool value)
+    {
+        if (isHarvestable == value)
+            return;
+
+        isHarvestable = value;
+
+        if (isHarvestable)
+        {
+            StartHarvestShake();
+        }
+        else
+        {
+            StopHarvestShake();
+        }
+    }
+
+    private void StartHarvestShake()
+    {
+        CacheHealthBarRect();
+        if (healthBarRect == null)
+            return;
+
+        if (harvestShakeCoroutine != null)
+        {
+            StopCoroutine(harvestShakeCoroutine);
+        }
+
+        harvestShakeCoroutine = StartCoroutine(HarvestShakeRoutine());
+    }
+
+    private IEnumerator HarvestShakeRoutine()
+    {
+        if (healthBarRect == null)
+            yield break;
+
+        while (isHarvestable)
+        {
+            float time = Time.unscaledTime;
+            float cycleDuration = Mathf.Max(0.05f, HarvestAbility.GlobalHarvestShakeDuration);
+            float cyclePhase = Mathf.PingPong(time, cycleDuration) / cycleDuration;
+            float damper = Mathf.Lerp(0.6f, 1f, cyclePhase);
+            float intensity = HarvestAbility.GlobalHarvestShakeIntensity;
+            Vector2 offset = Random.insideUnitCircle * intensity * damper;
+            healthBarRect.localPosition = healthBarOriginalLocalPosition + (Vector3)offset;
+            yield return null;
+        }
+
+        StopHarvestShake();
+    }
+
+    private void StopHarvestShake()
+    {
+        if (harvestShakeCoroutine != null)
+        {
+            StopCoroutine(harvestShakeCoroutine);
+            harvestShakeCoroutine = null;
+        }
+
+        if (healthBarRect != null)
+        {
+            healthBarRect.localPosition = healthBarOriginalLocalPosition;
+        }
+    }
+
+    private void CacheHealthBarRect()
+    {
+        if (healthBar != null)
+        {
+            healthBarRect = healthBar.rectTransform;
+        }
+    }
+
+    private void OnHarvestSettingsChanged()
+    {
+        CacheHealthBarRect();
+        if (healthBarRect != null)
+        {
+            healthBarOriginalLocalPosition = healthBarRect.localPosition;
+        }
+        EvaluateHarvestability();
     }
 
     private void Die()
     {
+        LootBag lootBag = GetComponent<LootBag>();
+        if (lootBag != null)
+        {
+            lootBag.InstantiateLoot(transform.position);
+        }
+        else
+        {
+            Debug.Log(gameObject.name + " died but has no LootBag component.");
+        }
+
         StopHarvestShake();
         Debug.Log(gameObject.name + " died");
 
