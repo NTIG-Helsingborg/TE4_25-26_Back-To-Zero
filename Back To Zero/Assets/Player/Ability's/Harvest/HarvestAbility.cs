@@ -9,8 +9,10 @@ public class HarvestAbility : Ability
     public static event System.Action HarvestSettingsChanged;
 
     public static float GlobalHarvestActivationPercentage { get; private set; } = 20f;
+    public static bool IsHarvestFeedbackEnabled { get; private set; } = true;
     public static float GlobalHarvestShakeDuration { get; private set; } = 0.35f;
     public static float GlobalHarvestShakeIntensity { get; private set; } = 18f;
+    public static float GlobalHarvestHealthThreshold { get; private set; } = 0.4f;
 
     public static float CurrentHarvestThresholdFraction => Mathf.Clamp01(GlobalHarvestActivationPercentage / 100f);
 
@@ -23,45 +25,35 @@ public class HarvestAbility : Ability
     public LayerMask harvestLayers = ~0;
     
     [Header("Harvest Feedback")]
+    [SerializeField] private bool enableHarvestFeedback = true;
     [Tooltip("How long one shake cycle lasts while an enemy is harvestable.")]
-    public float harvestShakeDuration = 0.35f;
+    [SerializeField] [Range(0.05f, 1f)] private float harvestShakeDuration = 0.35f;
     [Tooltip("How far the health bar is displaced per shake when harvestable.")]
-    public float harvestShakeIntensity = 18f;
+    [SerializeField] [Range(0f, 50f)] private float harvestShakeIntensity = 18f;
+    [SerializeField] [Range(0.05f, 1f)] private float harvestHealthThreshold = 0.4f;
     
     [Header("Visual Effects")]
     public Color harvestColor = new Color(1f, 0.2f, 0.2f, 0.5f);
-
-    [Header("Harvest Feedback")]
-    [SerializeField] private bool enableHarvestFeedback = true;
-    [SerializeField] [Range(0.05f, 1f)] private float harvestShakeDuration = 0.12f;
-    [SerializeField] [Range(0f, 50f)] private float harvestShakeIntensity = 6f;
-    [SerializeField] [Range(0.05f, 1f)] private float harvestHealthThreshold = 0.4f;
-
-    public static event Action HarvestSettingsChanged;
-    public static bool IsHarvestFeedbackEnabled { get; private set; } = true;
-    public static float GlobalHarvestShakeDuration { get; private set; } = 0.12f;
-    public static float GlobalHarvestShakeIntensity { get; private set; } = 6f;
-    public static float GlobalHarvestHealthThreshold { get; private set; } = 0.4f;
     
     private GameObject playerObject;
     private Health playerHealth;
     
     private void OnEnable()
     {
-        ApplyHarvestFeedbackSettings();
+        SyncGlobalSettings();
     }
 
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        ApplyHarvestFeedbackSettings();
+        SyncGlobalSettings();
     }
 #endif
 
     public override void Activate()
     {
         Debug.Log("Harvest activated!");
-        ApplyHarvestFeedbackSettings();
+        SyncGlobalSettings();
         
         playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject == null)
@@ -76,8 +68,6 @@ public class HarvestAbility : Ability
             Debug.LogError("Player Health not found!");
             return;
         }
-        
-        SyncGlobalSettings();
         
         MonoBehaviour monoBehaviour = playerObject.GetComponent<MonoBehaviour>();
         if (monoBehaviour != null)
@@ -154,22 +144,12 @@ public class HarvestAbility : Ability
     private void SyncGlobalSettings()
     {
         GlobalHarvestActivationPercentage = Mathf.Clamp(harvestActivationPercentage, 0f, 100f);
+        IsHarvestFeedbackEnabled = enableHarvestFeedback;
         GlobalHarvestShakeDuration = Mathf.Max(0.05f, harvestShakeDuration);
         GlobalHarvestShakeIntensity = Mathf.Max(0f, harvestShakeIntensity);
+        GlobalHarvestHealthThreshold = Mathf.Clamp(harvestHealthThreshold, 0.01f, 1f);
         HarvestSettingsChanged?.Invoke();
     }
-
-    private void OnEnable()
-    {
-        SyncGlobalSettings();
-    }
-
-#if UNITY_EDITOR
-    private void OnValidate()
-    {
-        SyncGlobalSettings();
-    }
-#endif
     
     private void StartHarvestVisuals(List<GameObject> entities)
     {
@@ -227,15 +207,6 @@ public class HarvestAbility : Ability
                     script.enabled = !freeze;
             }
         }
-    }
-
-    private void ApplyHarvestFeedbackSettings()
-    {
-        IsHarvestFeedbackEnabled = enableHarvestFeedback;
-        GlobalHarvestShakeDuration = Mathf.Max(0.05f, harvestShakeDuration);
-        GlobalHarvestShakeIntensity = Mathf.Max(0f, harvestShakeIntensity);
-        GlobalHarvestHealthThreshold = Mathf.Clamp(harvestHealthThreshold, 0.01f, 1f);
-        HarvestSettingsChanged?.Invoke();
     }
 }
 

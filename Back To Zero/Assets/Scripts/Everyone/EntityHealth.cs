@@ -37,7 +37,12 @@ public class Health : MonoBehaviour
 
     private void Start()
     {
-        currentHealth = maxHealth;
+        // Only set to max health if currentHealth hasn't been set (is 0)
+        if (currentHealth <= 0)
+        {
+            currentHealth = maxHealth;
+        }
+        RefreshHealthBarFill();
         EvaluateHarvestability();
     }
 
@@ -242,109 +247,6 @@ public class Health : MonoBehaviour
         }
 
         ExperienceManager.Instance.AddExperience(experienceReward);
-    }
-
-    private void RefreshHealthBarFill()
-    {
-        if (healthBar != null)
-        {
-            healthBar.fillAmount = Mathf.Clamp01((float)currentHealth / Mathf.Max(1, maxHealth));
-        }
-    }
-
-    private void EvaluateHarvestability()
-    {
-        if (!enableHarvestFeedback || healthBarRect == null)
-        {
-            if (isHarvestable)
-            {
-                isHarvestable = false;
-                StopHarvestShake();
-            }
-            return;
-        }
-
-        bool harvestFeedbackEnabled = HarvestAbility.IsHarvestFeedbackEnabled && HarvestAbility.GlobalHarvestShakeIntensity > 0f;
-        float healthRatio = maxHealth > 0 ? (float)currentHealth / maxHealth : 0f;
-        bool shouldShake = harvestFeedbackEnabled && !isInvincible && currentHealth > 0 && healthRatio <= HarvestAbility.GlobalHarvestHealthThreshold;
-
-        if (shouldShake == isHarvestable)
-        {
-            return;
-        }
-
-        isHarvestable = shouldShake;
-
-        if (isHarvestable)
-        {
-            StartHarvestShake();
-        }
-        else
-        {
-            StopHarvestShake();
-        }
-    }
-
-    private void StartHarvestShake()
-    {
-        if (healthBarRect == null || harvestShakeCoroutine != null)
-        {
-            return;
-        }
-
-        harvestShakeCoroutine = StartCoroutine(HarvestShakeRoutine());
-    }
-
-    private IEnumerator HarvestShakeRoutine()
-    {
-        if (healthBarRect == null)
-            yield break;
-
-        while (isHarvestable)
-        {
-            float time = Time.unscaledTime;
-            float cycleDuration = Mathf.Max(0.05f, HarvestAbility.GlobalHarvestShakeDuration);
-            float cyclePhase = Mathf.PingPong(time, cycleDuration) / cycleDuration;
-            float damper = Mathf.Lerp(0.6f, 1f, cyclePhase);
-            float intensity = HarvestAbility.GlobalHarvestShakeIntensity;
-            Vector2 offset = Random.insideUnitCircle * intensity * damper;
-            healthBarRect.localPosition = healthBarOriginalLocalPosition + (Vector3)offset;
-            yield return null;
-        }
-
-        StopHarvestShake();
-    }
-
-    private void StopHarvestShake()
-    {
-        if (harvestShakeCoroutine != null)
-        {
-            StopCoroutine(harvestShakeCoroutine);
-            harvestShakeCoroutine = null;
-        }
-
-        if (healthBarRect != null)
-        {
-            healthBarRect.localPosition = healthBarOriginalLocalPosition;
-        }
-    }
-
-    private void CacheHealthBarRect()
-    {
-        if (healthBar != null)
-        {
-            healthBarRect = healthBar.rectTransform;
-        }
-    }
-
-    private void OnHarvestSettingsChanged()
-    {
-        CacheHealthBarRect();
-        if (healthBarRect != null)
-        {
-            healthBarOriginalLocalPosition = healthBarRect.localPosition;
-        }
-        EvaluateHarvestability();
     }
 }
 
