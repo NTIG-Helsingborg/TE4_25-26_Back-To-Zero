@@ -60,6 +60,12 @@ public class EntityDamage : MonoBehaviour
     [Tooltip("Default health bar color")]
     public Color normalHealthColor = Color.red;
 
+    private Dictionary<GameObject, float> lastDamageTime = new Dictionary<GameObject, float>();
+
+    [Header("Continuous Damage")]
+    public bool isContinuousDamage = false;
+    public float continuousDamageInterval = 0.5f;
+
     private void OnCollisionEnter2D(Collision2D other)
     {
         Health targetHealth = other.gameObject.GetComponent<Health>();
@@ -151,6 +157,195 @@ public class EntityDamage : MonoBehaviour
             {
                 Debug.Log($"[{gameObject.name}] {other.gameObject.name} is invincible, no damage dealt");
             }
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        Health targetHealth = other.gameObject.GetComponent<Health>();
+
+        if (targetHealth != null && !targetHealth.isInvincible)
+        {
+            targetHealth.TakeDamage(damage);
+            Debug.Log($"[{gameObject.name}] Dealt {damage} damage to {other.gameObject.name}");
+
+            if (enableStatusEffects)
+            {
+                Debug.Log($"[{gameObject.name}] Status effects enabled, checking for EntityStatusEffect on {other.gameObject.name}");
+                
+                EntityStatusEffect targetStatus = other.gameObject.GetComponent<EntityStatusEffect>();
+                if (targetStatus != null)
+                {
+                    Debug.Log($"[{gameObject.name}] Found EntityStatusEffect on {other.gameObject.name}, initializing with maxStatus: {maxStatus}");
+                    targetStatus.Initialize(maxStatus);
+
+                    var effectSettings = new System.Collections.Generic.Dictionary<StatusEffectType, EffectSettings>();
+                    
+                    foreach (var effect in statusEffects)
+                    {
+                        if (effect.effectType != StatusEffectType.None)
+                        {
+                            var settings = new EffectSettings();
+                            
+                            switch (effect.effectType)
+                            {
+                                case StatusEffectType.Poison:
+                                    settings.tickDamage = poisonTickDamage;
+                                    settings.tickInterval = poisonTickInterval;
+                                    settings.tickDuration = poisonTickDuration;
+                                    settings.color = poisonColor;
+                                    break;
+                                case StatusEffectType.Burn:
+                                    settings.ignitionDamage = burnIgnitionDamage;
+                                    settings.color = burnColor;
+                                    break;
+                                case StatusEffectType.Frost:
+                                    settings.slowAmount = frostSlowAmount;
+                                    settings.slowDuration = frostSlowDuration;
+                                    settings.color = frostColor;
+                                    break;
+                            }
+                            
+                            effectSettings[effect.effectType] = settings;
+                        }
+                    }
+                    
+                    targetStatus.SetEffectSettings(effectSettings, normalHealthColor);
+
+                    if (statusEffects != null && statusEffects.Length > 0)
+                    {
+                        Debug.Log($"[{gameObject.name}] Applying {statusEffects.Length} status effects");
+                        foreach (var effect in statusEffects)
+                        {
+                            if (effect.effectType != StatusEffectType.None)
+                            {
+                                Debug.Log($"[{gameObject.name}] Applying {effect.effectType} with amount: {effect.amountPerHit}");
+                                targetStatus.ApplyEffect(effect.effectType, effect.amountPerHit);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void OnCollisionStay2D(Collision2D other)
+    {
+        if (!isContinuousDamage) return;
+
+        Health targetHealth = other.gameObject.GetComponent<Health>();
+
+        if (targetHealth != null && !targetHealth.isInvincible)
+        {
+            // Check if enough time has passed for tick damage
+            if (!lastDamageTime.ContainsKey(other.gameObject))
+            {
+                lastDamageTime[other.gameObject] = 0f;
+            }
+
+            if (Time.time - lastDamageTime[other.gameObject] >= continuousDamageInterval)
+            {
+                targetHealth.TakeDamage(damage);
+                lastDamageTime[other.gameObject] = Time.time;
+                Debug.Log($"[{gameObject.name}] Continuous damage: {damage} to {other.gameObject.name}");
+
+                if (enableStatusEffects)
+                {
+                    // Apply status effects (copy from OnCollisionEnter2D)
+                    EntityStatusEffect targetStatus = other.gameObject.GetComponent<EntityStatusEffect>();
+                    // ... rest of your status effect code
+                }
+            }
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D other)
+    {
+        if (lastDamageTime.ContainsKey(other.gameObject))
+        {
+            lastDamageTime.Remove(other.gameObject);
+        }
+    }
+
+    // Add this method for trigger-based continuous damage
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (!isContinuousDamage) return;
+
+        Health targetHealth = other.gameObject.GetComponent<Health>();
+
+        if (targetHealth != null && !targetHealth.isInvincible)
+        {
+            // Check if enough time has passed for tick damage
+            if (!lastDamageTime.ContainsKey(other.gameObject))
+            {
+                lastDamageTime[other.gameObject] = 0f;
+            }
+
+            if (Time.time - lastDamageTime[other.gameObject] >= continuousDamageInterval)
+            {
+                targetHealth.TakeDamage(damage);
+                lastDamageTime[other.gameObject] = Time.time;
+                Debug.Log($"[{gameObject.name}] Continuous damage: {damage} to {other.gameObject.name}");
+
+                if (enableStatusEffects)
+                {
+                    EntityStatusEffect targetStatus = other.gameObject.GetComponent<EntityStatusEffect>();
+                    if (targetStatus != null)
+                    {
+                        targetStatus.Initialize(maxStatus);
+
+                        var effectSettings = new System.Collections.Generic.Dictionary<StatusEffectType, EffectSettings>();
+                        
+                        foreach (var effect in statusEffects)
+                        {
+                            if (effect.effectType != StatusEffectType.None)
+                            {
+                                var settings = new EffectSettings();
+                                
+                                switch (effect.effectType)
+                                {
+                                    case StatusEffectType.Poison:
+                                        settings.tickDamage = poisonTickDamage;
+                                        settings.tickInterval = poisonTickInterval;
+                                        settings.tickDuration = poisonTickDuration;
+                                        settings.color = poisonColor;
+                                        break;
+                                    case StatusEffectType.Burn:
+                                        settings.ignitionDamage = burnIgnitionDamage;
+                                        settings.color = burnColor;
+                                        break;
+                                    case StatusEffectType.Frost:
+                                        settings.slowAmount = frostSlowAmount;
+                                        settings.slowDuration = frostSlowDuration;
+                                        settings.color = frostColor;
+                                        break;
+                                }
+                                
+                                effectSettings[effect.effectType] = settings;
+                            }
+                        }
+                        
+                        targetStatus.SetEffectSettings(effectSettings, normalHealthColor);
+
+                        foreach (var effect in statusEffects)
+                        {
+                            if (effect.effectType != StatusEffectType.None)
+                            {
+                                targetStatus.ApplyEffect(effect.effectType, effect.amountPerHit);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (lastDamageTime.ContainsKey(other.gameObject))
+        {
+            lastDamageTime.Remove(other.gameObject);
         }
     }
 }
