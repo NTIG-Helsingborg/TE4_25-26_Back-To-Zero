@@ -23,6 +23,9 @@ public class InventoryManager : MonoBehaviour
             inventoryAction.action.Enable();
             inventoryAction.action.performed += OnInventory;
         }
+        
+        // Subscribe to shop events to close inventory when shop opens
+        Merchant.OnShopStateChanged += OnShopStateChanged;
     }
 
     void OnDisable()
@@ -32,6 +35,18 @@ public class InventoryManager : MonoBehaviour
             
             inventoryAction.action.performed -= OnInventory;
             inventoryAction.action.Disable();
+        }
+        
+        // Unsubscribe from shop events
+        Merchant.OnShopStateChanged -= OnShopStateChanged;
+    }
+
+    private void OnShopStateChanged(ShopManager shop, bool isOpen)
+    {
+        // Close inventory when shop opens
+        if (isOpen && menuActivated)
+        {
+            CloseInventory();
         }
     }
 
@@ -56,18 +71,47 @@ public class InventoryManager : MonoBehaviour
 
     private void OnInventory(InputAction.CallbackContext context)
     {
+        // Don't allow opening inventory if shop is open
+        if (Merchant.currentShopKeeper != null)
+        {
+            return;
+        }
+        
         menuActivated = !menuActivated;
         InventoryMenu.SetActive(menuActivated);
         
-        // Pause/unpause time
-        Time.timeScale = menuActivated ? 0f : 1f;
+       
+    }
+
+    private void CloseInventory()
+    {
+        menuActivated = false;
+        InventoryMenu.SetActive(false);
+        // Don't change timeScale here - let the shop manage it
     }
 
     public bool UseItem(string itemName)
     {
-        for(int i = 0; i < itemSOs.Length; i++)
+        // Before using an item, ensure the player actually has at least one in their inventory slots.
+        int totalCount = 0;
+        if (itemSlot != null)
         {
-            if(itemSOs[i].itemName == itemName)
+            for (int s = 0; s < itemSlot.Length; s++)
+            {
+                if (itemSlot[s] != null && itemSlot[s].itemName == itemName)
+                    totalCount += itemSlot[s].quantity;
+            }
+        }
+
+        if (totalCount <= 0)
+        {
+            Debug.Log($"InventoryManager: Tried to use '{itemName}' but none are present (totalCount={totalCount}).");
+            return false;
+        }
+
+        for (int i = 0; i < itemSOs.Length; i++)
+        {
+            if (itemSOs[i].itemName == itemName)
             {
                 bool usable = itemSOs[i].UseItem();
                 return usable;
@@ -110,6 +154,92 @@ public class InventoryManager : MonoBehaviour
             itemSlot[i].selectedShader.SetActive(false);
             itemSlot[i].thisItemSelected = false;
         }
+    }
+
+    // Get total count of a specific item by name across all inventory slots
+    public int GetItemCount(string itemName)
+    {
+        int totalCount = 0;
+        if (itemSlot != null)
+        {
+            for (int i = 0; i < itemSlot.Length; i++)
+            {
+                if (itemSlot[i] != null && itemSlot[i].itemName == itemName)
+                {
+                    totalCount += itemSlot[i].quantity;
+                }
+            }
+        }
+        return totalCount;
+    }
+
+    // Check if there's space available for a specific item (either empty slot or existing stack with room)
+    public bool HasInventorySpace(string itemName)
+    {
+        if (itemSlot == null || itemSlot.Length == 0)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < itemSlot.Length; i++)
+        {
+            if (itemSlot[i] != null)
+            {
+                // Check for empty slot
+                if (itemSlot[i].quantity == 0)
+                {
+                    return true;
+                }
+                
+                // Check for existing stack that's not full
+                if (itemSlot[i].itemName == itemName && !itemSlot[i].isFull)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // Remove a specific quantity of an item from inventory (returns true if successful)
+    public bool RemoveItem(string itemName, int quantityToRemove)
+    {
+        if (itemSlot == null || quantityToRemove <= 0) return false;
+
+        // First check if we have enough
+        int totalAvailable = GetItemCount(itemName);
+        if (totalAvailable < quantityToRemove)
+        {
+            Debug.Log($"InventoryManager: Cannot remove {quantityToRemove} of '{itemName}', only have {totalAvailable}.");
+            return false;
+        }
+
+        // Remove items from slots
+        int remainingToRemove = quantityToRemove;
+        for (int i = 0; i < itemSlot.Length && remainingToRemove > 0; i++)
+        {
+            if (itemSlot[i] != null && itemSlot[i].itemName == itemName)
+            {
+                int amountInSlot = itemSlot[i].quantity;
+                if (amountInSlot <= remainingToRemove)
+                {
+                    // Empty this slot completely
+                    remainingToRemove -= amountInSlot;
+                    itemSlot[i].EmptySlot();
+                }
+                else
+                {
+                    // Partially reduce this slot
+                    itemSlot[i].quantity -= remainingToRemove;
+                    itemSlot[i].UpdateQuantityDisplay();
+                    remainingToRemove = 0;
+                }
+            }
+        }
+
+        Debug.Log($"InventoryManager: Removed {quantityToRemove} of '{itemName}'.");
+        return true;
     }
 
 }

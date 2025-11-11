@@ -106,11 +106,31 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
     }
 
     public void EmptySlot(){
+        // Clear visuals
         quantityText.enabled = false;
         itemImage.enabled = false;
         ItemDescriptionNameText.text = "";
         ItemDescriptionText.text = "";
         itemDescriptionImage.sprite = null;
+
+        // Clear internal data to avoid stale values (prevents selecting/using an empty slot)
+        itemName = string.Empty;
+        itemSprite = null;
+        itemDescription = string.Empty;
+        quantity = 0;
+        isFull = false;
+        thisItemSelected = false;
+        selectedShader.SetActive(false);
+    }
+
+    // Update the quantity display text
+    public void UpdateQuantityDisplay()
+    {
+        if (quantityText != null)
+        {
+            quantityText.text = quantity.ToString();
+            quantityText.enabled = quantity > 0;
+        }
     }
 
 
