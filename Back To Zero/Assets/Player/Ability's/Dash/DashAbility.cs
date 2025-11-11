@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 [CreateAssetMenu]
 public class DashAbility : Ability
@@ -13,6 +14,8 @@ public class DashAbility : Ability
     private TrailRenderer trailRenderer;
     private Rigidbody2D playerRigidbody;
     private Health playerHealth;
+    private Collider2D[] playerColliders;
+    private readonly List<Collider2D> disabledPlayerColliders = new();
     
     public override void Activate()
     {
@@ -31,23 +34,19 @@ public class DashAbility : Ability
         
         if (playerObject != null)
         {
-            // Get any MonoBehaviour component to run the coroutine
-            MonoBehaviour monoBehaviour = playerObject.GetComponent<MonoBehaviour>();
-            if (monoBehaviour != null)
+            playerColliders = playerObject.GetComponentsInChildren<Collider2D>();
+
+            // Get a MonoBehaviour component to run the coroutine (prefer PlayerMove)
+            MonoBehaviour runner = playerMove != null ? playerMove : playerObject.GetComponent<MonoBehaviour>();
+            if (runner != null)
             {
-                monoBehaviour.StartCoroutine(PerformDash());
+                runner.StartCoroutine(PerformDash());
             }
         }
     }
     
     private IEnumerator PerformDash()
     {
-        // Make player invincible during dash
-        if (playerHealth != null)
-        {
-            playerHealth.isInvincible = true;
-        }
-        
         // Get dash direction from player input
         Vector2 dashDirection = Vector2.zero;
         
@@ -75,37 +74,74 @@ public class DashAbility : Ability
         
         dashDirection.Normalize();
         
-        // Apply dash force
-        if (playerRigidbody != null)
+        SetPlayerCollidersEnabled(false);
+
+        try
         {
-            playerRigidbody.linearVelocity = dashDirection * dashingPower;
+            if (playerHealth != null)
+            {
+                playerHealth.isInvincible = true;
+            }
+
+            if (trailRenderer != null)
+            {
+                trailRenderer.emitting = true;
+            }
+
+            if (playerRigidbody != null)
+            {
+                playerRigidbody.linearVelocity = dashDirection * dashingPower;
+            }
+
+            // Wait for dash duration
+            yield return new WaitForSeconds(dashingTime);
         }
-        
-        // Enable trail effect
-        if (trailRenderer != null)
+        finally
         {
-            trailRenderer.emitting = true;
+            if (playerRigidbody != null)
+            {
+                playerRigidbody.linearVelocity = Vector2.zero;
+            }
+
+            if (trailRenderer != null)
+            {
+                trailRenderer.emitting = false;
+            }
+
+            if (playerHealth != null)
+            {
+                playerHealth.isInvincible = false;
+            }
+
+            SetPlayerCollidersEnabled(true);
         }
-        
-        // Wait for dash duration
-        yield return new WaitForSeconds(dashingTime);
-        
-        // Disable trail effect
-        if (trailRenderer != null)
+    }
+
+    private void SetPlayerCollidersEnabled(bool enabled)
+    {
+        if (playerColliders == null) return;
+
+        if (!enabled)
         {
-            trailRenderer.emitting = false;
+            disabledPlayerColliders.Clear();
+            foreach (var col in playerColliders)
+            {
+                if (col == null || col.isTrigger || !col.enabled) continue;
+                col.enabled = false;
+                disabledPlayerColliders.Add(col);
+            }
         }
-        
-        // Remove invincibility after dash ends
-        if (playerHealth != null)
+        else
         {
-            playerHealth.isInvincible = false;
-        }
-        
-        // Stop movement
-        if (playerRigidbody != null)
-        {
-            playerRigidbody.linearVelocity = Vector2.zero;
+            if (disabledPlayerColliders.Count == 0) return;
+            foreach (var col in disabledPlayerColliders)
+            {
+                if (col != null)
+                {
+                    col.enabled = true;
+                }
+            }
+            disabledPlayerColliders.Clear();
         }
     }
 }
