@@ -70,10 +70,18 @@ public class Merchant : MonoBehaviour
     private void OpenShop()
     {
         if (shopRoot == null) return;
+        
+        // Close inventory if it's open
+        InventoryManager inventoryManager = GameObject.Find("Player")?.GetComponent<InventoryManager>();
+        if (inventoryManager != null)
+        {
+            // This will trigger before we set shopOpen, so inventory will close
+            OnShopStateChanged?.Invoke(shopManager, true);
+        }
+        
         shopRoot.SetActive(true);
         shopOpen = true;
         Time.timeScale = 0f;
-        OnShopStateChanged?.Invoke(shopManager, true);
         currentShopKeeper = this;
         
         if (shopManager != null)

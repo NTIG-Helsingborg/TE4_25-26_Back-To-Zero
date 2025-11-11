@@ -23,6 +23,9 @@ public class InventoryManager : MonoBehaviour
             inventoryAction.action.Enable();
             inventoryAction.action.performed += OnInventory;
         }
+        
+        // Subscribe to shop events to close inventory when shop opens
+        Merchant.OnShopStateChanged += OnShopStateChanged;
     }
 
     void OnDisable()
@@ -32,6 +35,18 @@ public class InventoryManager : MonoBehaviour
             
             inventoryAction.action.performed -= OnInventory;
             inventoryAction.action.Disable();
+        }
+        
+        // Unsubscribe from shop events
+        Merchant.OnShopStateChanged -= OnShopStateChanged;
+    }
+
+    private void OnShopStateChanged(ShopManager shop, bool isOpen)
+    {
+        // Close inventory when shop opens
+        if (isOpen && menuActivated)
+        {
+            CloseInventory();
         }
     }
 
@@ -56,11 +71,23 @@ public class InventoryManager : MonoBehaviour
 
     private void OnInventory(InputAction.CallbackContext context)
     {
+        // Don't allow opening inventory if shop is open
+        if (Merchant.currentShopKeeper != null)
+        {
+            return;
+        }
+        
         menuActivated = !menuActivated;
         InventoryMenu.SetActive(menuActivated);
         
-        // Pause/unpause time
-        Time.timeScale = menuActivated ? 0f : 1f;
+       
+    }
+
+    private void CloseInventory()
+    {
+        menuActivated = false;
+        InventoryMenu.SetActive(false);
+        // Don't change timeScale here - let the shop manage it
     }
 
     public bool UseItem(string itemName)

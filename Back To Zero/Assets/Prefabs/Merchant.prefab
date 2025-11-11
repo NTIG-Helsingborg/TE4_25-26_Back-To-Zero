@@ -181,7 +181,7 @@ MonoBehaviour:
   playerTransform: {fileID: 0}
   shopItems:
   - itemSO: {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
-    price: 5
+    price: 1
   shopArtifacts:
   - itemSO: {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
     price: 50
