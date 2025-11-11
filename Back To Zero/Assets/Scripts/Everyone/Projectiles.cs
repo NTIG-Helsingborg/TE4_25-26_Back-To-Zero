@@ -7,9 +7,17 @@ public class Projectiles : MonoBehaviour
     private float maxDistance;
     private GameObject owner;
 
+    [Header("Explosion (optional)")]
+    [SerializeField] private bool explodeOnImpact = false;
+    [SerializeField] private float explosionRadius = 0f;
+    [SerializeField] private bool includeOwnerInExplosion = false;
+    [SerializeField] private LayerMask explosionLayers = ~0;        // who can be damaged in AoE
+    [SerializeField] private GameObject explosionVfx = null;
+
     private Vector3 startPos;
     private Rigidbody2D rb;
     private Collider2D col;
+    private bool destroyed;
 
     private void Awake()
     {
@@ -17,13 +25,31 @@ public class Projectiles : MonoBehaviour
         col = GetComponent<Collider2D>();
         if (rb) rb.gravityScale = 0f;
     }
-
     public void Initialize(float damage, float speed, float range, GameObject owner)
+    {
+        Initialize(damage, speed, range, owner, false, 0f, false, ~0, null);
+    }
+    public void Initialize(
+        float damage,
+        float speed,
+        float range,
+        GameObject owner,
+        bool explodeOnImpact,
+        float explosionRadius = 0f,
+        bool includeOwnerInExplosion = false,
+        int explosionLayerMask = ~0,
+        GameObject explosionVfx = null)
     {
         this.damage = Mathf.RoundToInt(damage); 
         this.speed = speed;
         this.maxDistance = range;
         this.owner = owner;
+
+        this.explodeOnImpact = explodeOnImpact;
+        this.explosionRadius = explosionRadius;
+        this.includeOwnerInExplosion = includeOwnerInExplosion;
+        this.explosionLayers = explosionLayerMask;
+        if (explosionVfx != null) this.explosionVfx = explosionVfx;
 
         startPos = transform.position;
 
@@ -40,19 +66,33 @@ public class Projectiles : MonoBehaviour
     {
         if (!rb) transform.position += transform.right * (speed * Time.deltaTime);
         if (Vector3.Distance(startPos, transform.position) >= maxDistance)
-            Destroy(gameObject);
+        DestroySelf();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (IsOwner(other)) return;
-        TryDamage(other.gameObject);
+        HandleImpact(other);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (IsOwner(collision.collider)) return;
-        TryDamage(collision.collider.gameObject);
+        HandleImpact(collision.collider);
+    }
+    private void HandleImpact(Collider2D hit)
+    {
+        if (destroyed) return;
+
+        if (explodeOnImpact && explosionRadius > 0f)
+        {
+            DoExplosion();
+        }
+        else
+        {
+            TryDamage(hit.gameObject);
+            DestroySelf();
+        }
     }
 
     private bool IsOwner(Collider2D hit)
@@ -70,6 +110,39 @@ public class Projectiles : MonoBehaviour
             health.TakeDamage(damage);
             // Debug.Log($"Projectile dealt {damage} to {target.name}");
         }
+    }
+    
+    private void DoExplosion()
+    {
+        if (explosionVfx) Instantiate(explosionVfx, transform.position, Quaternion.identity);
+
+        var hits = Physics2D.OverlapCircleAll(transform.position, explosionRadius, explosionLayers);
+        foreach (var h in hits)
+        {
+            if (!includeOwnerInExplosion && IsOwner(h)) continue;
+
+            var health = h.GetComponent<Health>();
+            if (health != null && !health.isInvincible)
+            {
+                health.TakeDamage(damage);
+            }
+        }
+
+        DestroySelf();
+    }
+
+    private void DestroySelf()
+    {
+        if (destroyed) return;
+        destroyed = true;
         Destroy(gameObject);
+    }
+    private void OnDrawGizmos()
+    {
+        if (explodeOnImpact && explosionRadius > 0f)
+        {
+            Gizmos.color = new Color(1f, 0f, 0f, 0.35f);
+            Gizmos.DrawWireSphere(transform.position, explosionRadius);
+        }
     }
 }
