@@ -4,18 +4,14 @@ using UnityEngine;
 
 public class ShopManager : MonoBehaviour
 {
-    [SerializeField] private List<ShopItems> shopItems;
+    
 
     [SerializeField] private Shop[] shopSlots;
 
     [SerializeField] private InventoryManager inventoryManager;
 
-    private void Start()
-    {
-        PopulateShopItems();
-    }
 
-    public void PopulateShopItems()
+    public void PopulateShopItems(List<ShopItems> shopItems)
     {
         for (int i = 0; i < shopItems.Count && i < shopSlots.Length; i++)
         {
