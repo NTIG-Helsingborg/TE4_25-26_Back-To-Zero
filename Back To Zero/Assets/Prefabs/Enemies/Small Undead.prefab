@@ -195,7 +195,7 @@ GameObject:
   - component: {fileID: 4628417882265487975}
   - component: {fileID: 3384872359488846709}
   m_Layer: 0
-  m_Name: Small Undead 1
+  m_Name: Small Undead
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
