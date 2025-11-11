@@ -66,13 +66,11 @@ public class MeleeHitbox : MonoBehaviour
         {
             health.TakeDamage(damage);
         }
-
-        var rb = go.GetComponent<Rigidbody2D>();
-        if (rb != null)
+        var kb = other.GetComponent<KnockbackReceiver>();
+        if (kb != null)
         {
-            Vector2 dir = ((Vector2)rb.worldCenterOfMass - (Vector2)transform.position).normalized;
-            if (dir.sqrMagnitude < 0.001f) dir = (Vector2)transform.right;
-            rb.AddForce(dir * knockback, ForceMode2D.Impulse);
+            Vector2 dir = (other.transform.position - (owner != null ? owner.transform.position : transform.position)).normalized;
+            kb.ApplyKnockback(dir, knockback, 0.15f);
         }
     }
 }

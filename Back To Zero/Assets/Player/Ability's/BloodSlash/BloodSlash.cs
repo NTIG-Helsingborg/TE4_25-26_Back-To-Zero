@@ -38,7 +38,7 @@ public class BloodSlash : Ability
         }
 
         // Spawn unparented so scale isn't inherited from SpellTransform
-        var go = Object.Instantiate(slashPrefab, firePoint.position, firePoint.rotation);
+        var go = Object.Instantiate(slashPrefab, firePoint.position, firePoint.rotation, player.transform);
 
         var hitbox = go.GetComponent<MeleeHitbox>();
         if (hitbox != null)

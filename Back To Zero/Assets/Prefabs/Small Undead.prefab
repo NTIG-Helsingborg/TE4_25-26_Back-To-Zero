@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 3130104666088847791}
   - component: {fileID: 3766288606180320288}
   - component: {fileID: 8453131836141307993}
+  - component: {fileID: 3040195052172939640}
   m_Layer: 0
   m_Name: Small Undead
   m_TagString: Untagged
@@ -284,6 +285,21 @@ MonoBehaviour:
   currentHealth: 0
   isInvincible: 0
   healthBar: {fileID: 4632695191735877443}
+  enableHarvestFeedback: 1
+--- !u!114 &3040195052172939640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1275082337609965979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bfbff9436fde064b80791ee45ff8876, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  resistance: 1
+  defaultDuration: 0.15
 --- !u!1 &5476134379506366217
 GameObject:
   m_ObjectHideFlags: 0
