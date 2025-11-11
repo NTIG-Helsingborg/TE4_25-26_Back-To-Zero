@@ -20,6 +20,7 @@ public class ExperienceManager : MonoBehaviour
     [SerializeField] Image experienceFill;
 
     [Header("Level Up UI")]
+    [SerializeField] GameObject levelUpCanvas;
     [SerializeField] GameObject levelUpMenu;
     [SerializeField] GameObject[] rewardPanels;
 
@@ -27,6 +28,7 @@ public class ExperienceManager : MonoBehaviour
 
     int pendingLevelUps;
     bool levelUpMenuOpen;
+    int lastDisplayedLevel = -1;
 
     void Awake()
     {
@@ -41,6 +43,7 @@ public class ExperienceManager : MonoBehaviour
     void Start()
     {
         UpdateLevel();
+        lastDisplayedLevel = currentLevel;
         UpdateInterface();
         ConfigureLevelUpMenu();
         HideLevelUpMenu();
@@ -100,6 +103,12 @@ public class ExperienceManager : MonoBehaviour
         levelText.text = currentLevel.ToString();
         experienceText.text = start + " exp / " + end + " exp";
         experienceFill.fillAmount = end > 0 ? (float)start / end : 0f;
+
+        if (lastDisplayedLevel != currentLevel)
+        {
+            lastDisplayedLevel = currentLevel;
+            ShowLevelUpCanvas();
+        }
     }
 
     void ConfigureLevelUpMenu()
@@ -151,6 +160,8 @@ public class ExperienceManager : MonoBehaviour
             return;
         }
 
+        ShowLevelUpCanvas();
+
         if (levelUpMenu != null)
         {
             levelUpMenu.SetActive(true);
@@ -181,8 +192,21 @@ public class ExperienceManager : MonoBehaviour
         Debug.Log($"Reward {rewardIndex + 1} selected. (Reward effect not yet implemented.)");
     }
 
+    void ShowLevelUpCanvas()
+    {
+        if (levelUpCanvas != null)
+        {
+            levelUpCanvas.SetActive(true);
+        }
+    }
+
     void HideLevelUpMenu()
     {
+        if (levelUpCanvas != null)
+        {
+            levelUpCanvas.SetActive(false);
+        }
+
         if (levelUpMenu != null)
         {
             levelUpMenu.SetActive(false);

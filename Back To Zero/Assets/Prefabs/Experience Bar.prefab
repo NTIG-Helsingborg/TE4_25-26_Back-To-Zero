@@ -490,6 +490,12 @@ MonoBehaviour:
   levelText: {fileID: 9194192382476382783}
   experienceText: {fileID: 7522221991542851822}
   experienceFill: {fileID: 4461555506210085505}
+  levelUpCanvas: {fileID: 0}
+  levelUpMenu: {fileID: 0}
+  rewardPanels:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!114 &3193075130652216842
 MonoBehaviour:
   m_ObjectHideFlags: 0
