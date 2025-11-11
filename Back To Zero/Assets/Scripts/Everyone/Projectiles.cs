@@ -13,11 +13,13 @@ public class Projectiles : MonoBehaviour
     [SerializeField] private bool includeOwnerInExplosion = false;
     [SerializeField] private LayerMask explosionLayers = ~0;        // who can be damaged in AoE
     [SerializeField] private GameObject explosionVfx = null;
-
+    [SerializeField] private bool autoScaleExplosionVfx = true;
+    [SerializeField] private float autoDestroyDelay = 0.5f;
     private Vector3 startPos;
     private Rigidbody2D rb;
     private Collider2D col;
     private bool destroyed;
+
 
     private void Awake()
     {
@@ -111,10 +113,15 @@ public class Projectiles : MonoBehaviour
             // Debug.Log($"Projectile dealt {damage} to {target.name}");
         }
     }
-    
+
     private void DoExplosion()
     {
-        if (explosionVfx) Instantiate(explosionVfx, transform.position, Quaternion.identity);
+        if (explosionVfx)
+        {
+            var vfx = Instantiate(explosionVfx, transform.position, Quaternion.identity);
+            if (autoScaleExplosionVfx) ScaleToRadius(vfx.transform, explosionRadius);
+            Destroy(vfx, autoDestroyDelay);
+        }
 
         var hits = Physics2D.OverlapCircleAll(transform.position, explosionRadius, explosionLayers);
         foreach (var h in hits)
@@ -130,7 +137,19 @@ public class Projectiles : MonoBehaviour
 
         DestroySelf();
     }
+    private void ScaleToRadius(Transform root, float radius)
+    {
+        if (radius <= 0f || root == null) return;
+        var sr = root.GetComponentInChildren<SpriteRenderer>();
+        if (sr == null || sr.sprite == null) return;
 
+        float spriteDiameter = sr.sprite.bounds.size.x;          // in world units at scale (1,1,1)
+        if (spriteDiameter <= 0f) return;
+
+        float targetDiameter = radius * 2f;
+        float scale = targetDiameter / spriteDiameter;
+        root.localScale = new Vector3(scale, scale, 1f);
+    }
     private void DestroySelf()
     {
         if (destroyed) return;

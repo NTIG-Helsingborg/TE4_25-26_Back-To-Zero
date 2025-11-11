@@ -175,3 +175,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 632e7b3699d718f41ab77389607024ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  explodeOnImpact: 0
+  explosionRadius: 0
+  includeOwnerInExplosion: 0
+  explosionLayers:
+    serializedVersion: 2
+    m_Bits: 1
+  explosionVfx: {fileID: 7737874149003893034, guid: 44f9ec1d5f02e6c42aab9b32edc9a4e5, type: 3}
