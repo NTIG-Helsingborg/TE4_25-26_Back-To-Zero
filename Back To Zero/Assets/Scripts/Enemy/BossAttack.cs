@@ -18,6 +18,15 @@ public class BossAttack : MonoBehaviour
     public float aoeRadius = 3f;
     public float jumpAttackCooldown = 10f;
     
+    [Header("Circular Spray Attack Settings")]
+    public GameObject projectilePrefab;
+    public int projectileCount = 16; // Number of projectiles in the circle
+    public float projectileSpeed = 5f;
+    public float projectileRange = 10f;
+    public float projectileDamage = 10f;
+    public float timeBetweenProjectiles = 0.1f; // Delay between each projectile
+    public float circularSprayAttackCooldown = 12f;
+    
     [Header("Attack Pattern")]
     public bool alternateAttacks = false; // Changed to false for random attacks
     public float globalCooldown = 2f; // New: cooldown between any attacks
@@ -41,6 +50,13 @@ public class BossAttack : MonoBehaviour
     private enum JumpState { Idle, JumpingUp, Hanging, FallingDown, Landing }
     private JumpState currentJumpState = JumpState.Idle;
     private bool damageTriggered = false;
+    private Collider2D bossCollider;
+    
+    // Circular spray attack variables
+    private bool isCircularSprayAttacking = false;
+    private int currentProjectileIndex = 0;
+    private float projectileTimer = 0f;
+    private float circularSprayCooldownTimer = 0f;
     
     // Attack pattern
     private bool lastAttackWasBeam = false;
@@ -53,6 +69,7 @@ public class BossAttack : MonoBehaviour
     void Start()
     {
         originalScale = transform.localScale;
+        bossCollider = GetComponent<Collider2D>();
         
         if (playerTransform == null)
         {
@@ -86,6 +103,16 @@ public class BossAttack : MonoBehaviour
             jumpCooldownTimer -= Time.deltaTime;
         }
         
+        // Handle circular spray attack
+        if (isCircularSprayAttacking)
+        {
+            HandleCircularSprayAttack();
+        }
+        else
+        {
+            circularSprayCooldownTimer -= Time.deltaTime;
+        }
+        
         // New: Handle global cooldown and try to start attacks
         if (!isAttacking)
         {
@@ -111,6 +138,11 @@ public class BossAttack : MonoBehaviour
             else if (lastAttackType == 1 && jumpCooldownTimer <= 0f)
             {
                 StartJumpAttack();
+                lastAttackType = 2;
+            }
+            else if (lastAttackType == 2 && circularSprayCooldownTimer <= 0f)
+            {
+                StartCircularSprayAttack();
                 lastAttackType = 0;
             }
         }
@@ -121,6 +153,7 @@ public class BossAttack : MonoBehaviour
             
             if (beamCooldownTimer <= 0f) availableAttacks.Add(0); // Beam
             if (jumpCooldownTimer <= 0f) availableAttacks.Add(1); // Jump
+            if (circularSprayCooldownTimer <= 0f) availableAttacks.Add(2); // Circular Spray
             
             if (availableAttacks.Count > 0)
             {
@@ -133,6 +166,10 @@ public class BossAttack : MonoBehaviour
                 else if (randomAttack == 1)
                 {
                     StartJumpAttack();
+                }
+                else if (randomAttack == 2)
+                {
+                    StartCircularSprayAttack();
                 }
             }
         }
@@ -229,6 +266,9 @@ public class BossAttack : MonoBehaviour
         
         targetPosition = playerTransform.position;
         
+        // Disable collider at the start of jump
+        if (bossCollider != null) bossCollider.enabled = false;
+        
         Debug.Log("Boss starting jump attack!");
     }
 
@@ -298,6 +338,9 @@ public class BossAttack : MonoBehaviour
             currentJumpState = JumpState.Landing;
             jumpTimer = 0f;
             damageTriggered = false;
+            
+            // Re-enable collider when boss lands
+            if (bossCollider != null) bossCollider.enabled = true;
         }
     }
 
@@ -353,6 +396,85 @@ public class BossAttack : MonoBehaviour
             Destroy(activeAOE, 0.3f);
         }
         Debug.Log("Boss landed! AOE damage triggered!");
+    }
+    
+    #endregion
+
+    #region Circular Spray Attack
+    
+    void StartCircularSprayAttack()
+    {
+        if (projectilePrefab == null)
+        {
+            Debug.LogWarning("Projectile prefab not assigned for circular spray attack!");
+            return;
+        }
+        
+        isCircularSprayAttacking = true;
+        isAttacking = true;
+        currentProjectileIndex = 0;
+        projectileTimer = 0f;
+        circularSprayCooldownTimer = circularSprayAttackCooldown;
+        
+        Debug.Log("Boss starting circular spray attack!");
+    }
+
+    void HandleCircularSprayAttack()
+    {
+        projectileTimer += Time.deltaTime;
+        
+        if (projectileTimer >= timeBetweenProjectiles)
+        {
+            FireProjectile();
+            projectileTimer = 0f;
+            currentProjectileIndex++;
+            
+            if (currentProjectileIndex >= projectileCount)
+            {
+                EndCircularSprayAttack();
+            }
+        }
+    }
+
+    void FireProjectile()
+    {
+        // Calculate angle for this projectile
+        float angle = (360f / projectileCount) * currentProjectileIndex;
+        
+        // Convert angle to radians and calculate direction
+        float radians = angle * Mathf.Deg2Rad;
+        Vector3 direction = new Vector3(Mathf.Cos(radians), Mathf.Sin(radians), 0f);
+        
+        // Calculate spawn position at the edge of the boss (radius of 1 for a 2x2 boss)
+        float bossRadius = 1f; // Half of width/height (2/2 = 1)
+        Vector3 spawnOffset = direction * bossRadius;
+        Vector3 spawnPosition = transform.position + spawnOffset;
+        
+        // Create rotation for the projectile
+        Quaternion rotation = Quaternion.Euler(0, 0, angle);
+        
+        // Spawn projectile at the edge of the boss
+        GameObject projectile = Instantiate(projectilePrefab, spawnPosition, rotation);
+        
+        // Initialize the projectile
+        Projectiles projectileScript = projectile.GetComponent<Projectiles>();
+        if (projectileScript != null)
+        {
+            projectileScript.Initialize(projectileDamage, projectileSpeed, projectileRange, gameObject);
+        }
+        else
+        {
+            Debug.LogWarning("Projectile prefab is missing Projectiles component!");
+        }
+    }
+
+    void EndCircularSprayAttack()
+    {
+        isCircularSprayAttacking = false;
+        isAttacking = false;
+        globalCooldownTimer = globalCooldown;
+        
+        Debug.Log("Circular spray attack ended!");
     }
     
     #endregion

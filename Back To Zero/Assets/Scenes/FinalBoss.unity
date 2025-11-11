@@ -660,7 +660,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_Sprite: {fileID: 7482667652216324306, guid: 742c6ff9f188840b5aaf3d1dc6790a52, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -1460,7 +1460,7 @@ MonoBehaviour:
   beamOffset: 0.5
   rotationSpeed: 45
   beamAttackDuration: 5
-  beamAttackCooldown: 8
+  beamAttackCooldown: 10
   aoePrefab: {fileID: 734172712520635070, guid: c00ec6e703a2d1e41b523ab308ca6163, type: 3}
   jumpHeight: 2
   jumpDuration: 1
@@ -1468,6 +1468,13 @@ MonoBehaviour:
   hangTime: 0.3
   aoeRadius: 5
   jumpAttackCooldown: 10
+  projectilePrefab: {fileID: 330472763279746868, guid: bec3996fb8c4e324493fcc4d9e63a8d9, type: 3}
+  projectileCount: 16
+  projectileSpeed: 5
+  projectileRange: 10
+  projectileDamage: 10
+  timeBetweenProjectiles: 0.1
+  circularSprayAttackCooldown: 10
   alternateAttacks: 0
   globalCooldown: 3
   playerTransform: {fileID: 607689487}
