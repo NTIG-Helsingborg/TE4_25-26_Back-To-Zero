@@ -19,6 +19,15 @@ public class ExperienceManager : MonoBehaviour
     [SerializeField] TextMeshProUGUI experienceText;
     [SerializeField] Image experienceFill;
 
+    [Header("Level Up UI")]
+    [SerializeField] GameObject levelUpMenu;
+    [SerializeField] GameObject[] rewardPanels;
+
+    Button[] rewardButtons;
+
+    int pendingLevelUps;
+    bool levelUpMenuOpen;
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -33,6 +42,8 @@ public class ExperienceManager : MonoBehaviour
     {
         UpdateLevel();
         UpdateInterface();
+        ConfigureLevelUpMenu();
+        HideLevelUpMenu();
     }
 
     public void AddExperience(int amount)
@@ -49,12 +60,19 @@ public class ExperienceManager : MonoBehaviour
 
     void CheckForLevelUp()
     {
+        bool leveledUp = false;
+
         while (totalExperience >= nextLevelsExperience)
         {
             currentLevel++;
+            pendingLevelUps++;
             UpdateLevel();
+            leveledUp = true;
+        }
 
-            // Start level up sequence... Possibly vfx?
+        if (leveledUp)
+        {
+            TryOpenLevelUpMenu();
         }
     }
 
@@ -82,5 +100,94 @@ public class ExperienceManager : MonoBehaviour
         levelText.text = currentLevel.ToString();
         experienceText.text = start + " exp / " + end + " exp";
         experienceFill.fillAmount = end > 0 ? (float)start / end : 0f;
+    }
+
+    void ConfigureLevelUpMenu()
+    {
+        if (rewardPanels == null || rewardPanels.Length == 0)
+        {
+            return;
+        }
+
+        if (rewardButtons == null || rewardButtons.Length != rewardPanels.Length)
+        {
+            rewardButtons = new Button[rewardPanels.Length];
+        }
+
+        for (int i = 0; i < rewardPanels.Length; i++)
+        {
+            int index = i;
+            GameObject panel = rewardPanels[i];
+
+            if (panel == null)
+            {
+                rewardButtons[i] = null;
+                continue;
+            }
+
+            Button button = panel.GetComponent<Button>();
+
+            if (button == null)
+            {
+                button = panel.GetComponentInChildren<Button>(true);
+            }
+
+            if (button == null)
+            {
+                rewardButtons[i] = null;
+                Debug.LogWarning($"Reward panel at index {i} does not contain a Button component.");
+                continue;
+            }
+
+            rewardButtons[i] = button;
+            button.onClick.AddListener(() => HandleRewardSelection(index));
+        }
+    }
+
+    void TryOpenLevelUpMenu()
+    {
+        if (pendingLevelUps <= 0 || levelUpMenuOpen)
+        {
+            return;
+        }
+
+        if (levelUpMenu != null)
+        {
+            levelUpMenu.SetActive(true);
+        }
+
+        levelUpMenuOpen = true;
+    }
+
+    void HandleRewardSelection(int rewardIndex)
+    {
+        if (!levelUpMenuOpen)
+        {
+            return;
+        }
+
+        GrantReward(rewardIndex);
+        pendingLevelUps = Mathf.Max(0, pendingLevelUps - 1);
+        HideLevelUpMenu();
+
+        if (pendingLevelUps > 0)
+        {
+            TryOpenLevelUpMenu();
+        }
+    }
+
+    void GrantReward(int rewardIndex)
+    {
+        Debug.Log($"Reward {rewardIndex + 1} selected. (Reward effect not yet implemented.)");
+    }
+
+    void HideLevelUpMenu()
+    {
+        if (levelUpMenu != null)
+        {
+            levelUpMenu.SetActive(false);
+        }
+
+        levelUpMenuOpen = false;
     }
 }
