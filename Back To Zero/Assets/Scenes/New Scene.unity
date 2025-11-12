@@ -887,6 +887,34 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2439822120892402117, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
+      propertyPath: healthBar
+      value: 
+      objectReference: {fileID: 1546145748}
+    - target: {fileID: 4091552342643153719, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
+      propertyPath: TopPanel
+      value: 
+      objectReference: {fileID: 1890815093}
+    - target: {fileID: 4091552342643153719, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
+      propertyPath: InventoryMenu
+      value: 
+      objectReference: {fileID: 1556046606}
+    - target: {fileID: 4091552342643153719, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
+      propertyPath: artifactSlotsParent
+      value: 
+      objectReference: {fileID: 44566562049875409}
+    - target: {fileID: 4091552342643153719, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
+      propertyPath: InventoryMenuAbility
+      value: 
+      objectReference: {fileID: 7397812}
+    - target: {fileID: 4091552342643153719, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
+      propertyPath: InventoryMenuEquipment
+      value: 
+      objectReference: {fileID: 386273317}
+    - target: {fileID: 6376028237981229856, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
+      propertyPath: deathTxt
+      value: 
+      objectReference: {fileID: 5528245800342324162}
     - target: {fileID: 2261580099307110445, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: healingItemName
       value: Healthpot
@@ -911,6 +939,10 @@ PrefabInstance:
       propertyPath: InventoryMenuEquipment
       value: 
       objectReference: {fileID: 386273317}
+    - target: {fileID: 5631687449377463173, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: m_Name
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 6576621383432750835, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -951,38 +983,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2439822120892402117, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
-      propertyPath: healthBar
-      value: 
-      objectReference: {fileID: 1546145748}
-    - target: {fileID: 4091552342643153719, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
-      propertyPath: TopPanel
-      value: 
-      objectReference: {fileID: 1890815093}
-    - target: {fileID: 4091552342643153719, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
-      propertyPath: InventoryMenu
-      value: 
-      objectReference: {fileID: 1556046606}
-    - target: {fileID: 4091552342643153719, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
-      propertyPath: artifactSlotsParent
-      value: 
-      objectReference: {fileID: 44566562049875409}
-    - target: {fileID: 4091552342643153719, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
-      propertyPath: InventoryMenuAbility
-      value: 
-      objectReference: {fileID: 7397812}
-    - target: {fileID: 4091552342643153719, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
-      propertyPath: InventoryMenuEquipment
-      value: 
-      objectReference: {fileID: 386273317}
-    - target: {fileID: 6376028237981229856, guid: 89ec274debd29894e8e1571e2c6ca69a, type: 3}
-      propertyPath: deathTxt
-      value: 
-      objectReference: {fileID: 5528245800342324162}
-    - target: {fileID: 5631687449377463173, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: m_Name
-      value: Player
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1009,6 +1009,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6576621383432750835, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
   m_PrefabInstance: {fileID: 1557236045}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1785672152 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+  m_PrefabInstance: {fileID: 1557236045}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d452f15ad1d8b34dbec32c461d710c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1890815093 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5125565608082485176, guid: 68bf1fca8f257614584360edd1816c64, type: 3}
@@ -1295,7 +1306,7 @@ PrefabInstance:
     - target: {fileID: 5946194111060844539, guid: 3541f33b7255e1f4b9744efce40ed9bb, type: 3}
       propertyPath: inventoryManager
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1785672152}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
