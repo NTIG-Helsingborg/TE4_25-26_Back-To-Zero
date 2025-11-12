@@ -552,7 +552,7 @@ MonoBehaviour:
     price: 20
   shopArtifacts:
   - itemSO: {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
-    price: 70
+    price: 68
   shopAbilities: []
   toggleKey: 101
 --- !u!61 &932498445
