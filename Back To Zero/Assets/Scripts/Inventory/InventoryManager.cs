@@ -69,7 +69,7 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    private void OnInventory(InputAction.CallbackContext context)
+    public void OnInventory(InputAction.CallbackContext context)
     {
         // Don't allow opening inventory if shop is open
         if (Merchant.currentShopKeeper != null)

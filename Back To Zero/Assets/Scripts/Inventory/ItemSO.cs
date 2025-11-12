@@ -13,16 +13,31 @@ public class ItemSO : ScriptableObject
 
     public bool UseItem()
     {
-        if(statToChange == StatToChange.Health){
-            Health health = GameObject.Find("Player").GetComponent<Health>();
-            if (health != null && health.IsFullHealth()){
+        if (statToChange == StatToChange.Health)
+        {
+            GameObject player = GameObject.Find("Player");
+            if (player == null)
+            {
                 return false;
             }
-            else if (health != null){
-                health.Heal(amountToChangeStat);
-                return true;
+
+            Health health = player.GetComponent<Health>();
+            if (health == null || health.IsFullHealth())
+            {
+                return false;
             }
+
+            Healing healing = player.GetComponent<Healing>();
+            if (healing != null)
+            {
+                return healing.TryStartHeal(this);
+            }
+
+            // Fallback if no Healing component is available.
+            health.Heal(amountToChangeStat);
+            return true;
         }
+
         return false;
     }
 
