@@ -6,6 +6,7 @@ public class Item : MonoBehaviour
     [SerializeField] private Sprite itemIcon;
     [SerializeField] private int quantity;
     [TextArea][SerializeField] private string itemDescription;
+    [SerializeField] private int isArtifact; // 0 = no, 1 = yes
 
     private InventoryManager inventoryManager;
     
@@ -32,8 +33,8 @@ public class Item : MonoBehaviour
             
             if (inventoryManager != null)
             {
-                // Add item to inventory
-                int leftOverItems = inventoryManager.AddItem(itemName, itemIcon, quantity, itemDescription);
+                // Add item to inventory with artifact flag
+                int leftOverItems = inventoryManager.AddItem(itemName, itemIcon, quantity, itemDescription, isArtifact);
                 if(leftOverItems <= 0)
                     Destroy(gameObject);
                 else

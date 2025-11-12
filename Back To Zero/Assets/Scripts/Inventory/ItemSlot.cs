@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 
-public class ItemSlot : MonoBehaviour, IPointerClickHandler
+public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler
 {
     //Item Data//
     public string itemName;
@@ -33,10 +33,37 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
     public bool thisItemSelected;
 
     private InventoryManager inventoryManager;
+    
+    [SerializeField] private ShopInfo itemInfoPopup; // Reference to the hover popup
 
     private void Start()
     {
         inventoryManager = GameObject.Find("Player").GetComponent<InventoryManager>();
+        
+        // Auto-find itemInfoPopup if not assigned
+        if (itemInfoPopup == null)
+        {
+            itemInfoPopup = FindObjectOfType<ShopInfo>();
+            if (itemInfoPopup == null)
+            {
+                Debug.LogWarning($"ItemSlot '{gameObject.name}': No ShopInfo component found in scene! Hover functionality will not work.");
+            }
+            else
+            {
+                Debug.Log($"ItemSlot '{gameObject.name}': Auto-assigned ShopInfo component.");
+            }
+        }
+        
+        // Validate that we have an Image component for raycasting
+        Image img = GetComponent<Image>();
+        if (img == null)
+        {
+            Debug.LogWarning($"ItemSlot '{gameObject.name}': No Image component found! Add an Image component for hover detection.");
+        }
+        else if (!img.raycastTarget)
+        {
+            Debug.LogWarning($"ItemSlot '{gameObject.name}': Image raycastTarget is disabled! Enable it for hover detection.");
+        }
     }
 
 
@@ -137,6 +164,34 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
     public void OnRightClick()
     {
         // Implement right-click functionality here
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        Debug.Log($"ItemSlot '{gameObject.name}': Pointer entered. Item: '{itemName}', Popup: {(itemInfoPopup != null ? "Found" : "NULL")}");
+        
+        if (itemInfoPopup != null && !string.IsNullOrEmpty(itemName))
+        {
+            itemInfoPopup.ShowItemInfo(itemName, itemDescription);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        Debug.Log($"ItemSlot '{gameObject.name}': Pointer exited.");
+        
+        if (itemInfoPopup != null)
+        {
+            itemInfoPopup.HideItemInfo();
+        }
+    }
+
+    public void OnPointerMove(PointerEventData eventData)
+    {
+        if (itemInfoPopup != null && !string.IsNullOrEmpty(itemName))
+        {
+            itemInfoPopup.FollowMouse();
+        }
     }
 
 }
