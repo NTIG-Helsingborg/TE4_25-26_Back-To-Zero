@@ -1,50 +1,51 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Abilities/Blood Knife")]
-public class BloodKnife : Ability
+[CreateAssetMenu(menuName = "Abilities/Blood Explosion")]
+
+public class BloodExplosion : Ability
 {
-    [Header("Blood Knife Settings")]
+    [Header("Blood Explosion Settings")]
     public float damage;
-    public float range; 
+    public float radius;
+    public float range;
     public float speed;
     public float HpCost;
     public bool IsAbility = true;
 
     [Header("References")]
-    public GameObject BloodKnifePrefab;
-
+    public GameObject BloodExplosionPrefab;
     [SerializeField] private string firePointChildName = "SpellTransform";
-    public override void Activate()
+
+     public override void Activate()
     {
         var player = GameObject.FindGameObjectWithTag("Player");
         if (player == null)
         {
-            Debug.LogError("[BloodKnife] No Player tagged 'Player' in scene.");
+            Debug.LogError("[BloodExplosion] No Player tagged 'Player' in scene.");
             return;
         }
 
         var firePoint = FindChildByName(player.transform, firePointChildName);
         if (firePoint == null)
         {
-            Debug.LogError($"[BloodKnife] Could not find child '{firePointChildName}' under Player hierarchy.");
+            Debug.LogError($"[BloodExplosion] Could not find child '{firePointChildName}' under Player hierarchy.");
             return;
         }
 
-        if (BloodKnifePrefab == null)
+        if (BloodExplosionPrefab == null)
         {
-            Debug.LogError("[BloodKnife] No projectile prefab assigned.");
+            Debug.LogError("[BloodExplosion] No projectile prefab assigned.");
             return;
         }
 
-        // var ph = player.GetComponent<Health>();
-        // if (ph && HpCost > 0 && ph.GetCurrentHealth() < Mathf.RoundToInt(HpCost)) return;
+         // var ph = player.GetComponent<Health>();
 
-        var go = Object.Instantiate(BloodKnifePrefab, firePoint.position, firePoint.rotation);
+        var go = Object.Instantiate(BloodExplosionPrefab, firePoint.position, firePoint.rotation);
 
         var proj = go.GetComponent<Projectiles>();
         if (proj != null)
         {
-            proj.Initialize(damage, speed, range, player);
+            proj.Initialize(damage, speed, range, player, true, radius, true);
         }
         else
         {
@@ -59,9 +60,9 @@ public class BloodKnife : Ability
         {
             playerHealth.SpendHealth(Mathf.RoundToInt(HpCost));
         }
-    }
 
-    private static Transform FindChildByName(Transform root, string name)
+    }
+     private static Transform FindChildByName(Transform root, string name)
     {
         foreach (var t in root.GetComponentsInChildren<Transform>(true))
             if (t.name == name) return t;

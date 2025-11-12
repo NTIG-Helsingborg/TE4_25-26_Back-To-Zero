@@ -9,15 +9,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cf1f409ab8f4c144da05c62f71c52d43, type: 3}
-  m_Name: BloodKnife
+  m_Script: {fileID: 11500000, guid: 2499eb3d4ac2ca744b0026689d5184d5, type: 3}
+  m_Name: BloodSpear
   m_EditorClassIdentifier: 
   name: 
-  cooldownTime: 0
+  cooldownTime: 0.2
   activeTime: 0
   damage: 10
-  range: 10
-  speed: 18
-  HpCost: 5
-  BloodKnifePrefab: {fileID: 3137868050130833703, guid: aba6c88923875fa499c13ae470d1028a, type: 3}
+  knockbackForce: 3
+  lifetime: 0.15
+  HpCost: 3
+  spearPrefab: {fileID: 4273991108398286714, guid: dedb542aae611554087794499c513700, type: 3}
   firePointChildName: SpellTransform
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 1
