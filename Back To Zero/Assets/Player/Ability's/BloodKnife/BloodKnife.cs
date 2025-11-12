@@ -6,8 +6,9 @@ public class BloodKnife : Ability
     [Header("Blood Knife Settings")]
     public float damage;
     public float range; 
-    public float speed;   
+    public float speed;
     public float HpCost;
+    public bool IsAbility = true;
 
     [Header("References")]
     public GameObject BloodKnifePrefab;

@@ -10,6 +10,7 @@ public class BloodExplosion : Ability
     public float range;
     public float speed;
     public float HpCost;
+    public bool IsAbility = true;
 
     [Header("References")]
     public GameObject BloodExplosionPrefab;
