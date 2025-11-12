@@ -161,7 +161,7 @@ MonoBehaviour:
     file_cachedStartup: {fileID: 0}
     data_cachedStartup: 
     cacheStartup: 0
-  showNavGraphs: 1
+  showNavGraphs: 0
   showUnwalkableNodes: 1
   debugMode: 0
   debugFloor: 0
@@ -1968,7 +1968,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1430569861877342912, guid: 5754797e852e043ddb548c8a196b1b4a, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 331.29413
+      value: 269
       objectReference: {fileID: 0}
     - target: {fileID: 1430569861877342912, guid: 5754797e852e043ddb548c8a196b1b4a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -2065,7 +2065,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8185610490035550342, guid: 4cf52470352a74bf3b195505735fa866, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 420
+      value: 357.70584
       objectReference: {fileID: 0}
     - target: {fileID: 8185610490035550342, guid: 4cf52470352a74bf3b195505735fa866, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
