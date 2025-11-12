@@ -66,6 +66,7 @@ GameObject:
   - component: {fileID: 8807523812355955747}
   - component: {fileID: 7404539395882553980}
   - component: {fileID: 3351440291523874951}
+  - component: {fileID: 2261580099307110445}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -459,11 +460,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inventoryAction: {fileID: 1277660861749813583, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
-  InventoryMenu: {fileID: 0}
+  InventoryMenu: {fileID: 5631687449377463173}
   itemSOs:
   - {fileID: 11400000, guid: 346716a69a6dff84cbfbd8f3faf9e29b, type: 2}
   - {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
   slotsParent: {fileID: 0}
+--- !u!114 &2261580099307110445
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5631687449377463173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 155dc5b4d0fe34c6f8692fde48e00fd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healAction: {fileID: -8473864806744115226, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  inventoryManager: {fileID: 3351440291523874951}
+  healingItemName: Potion
+  healingItemDefinition: {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
+  consumeItemOnHeal: 1
+  fallbackHealAmount: 30
+  healWindupDuration: 1.35
+  postHealRecovery: 0.2
+  healingSlowMultiplier: 0.3
 --- !u!1 &8811310924032871480
 GameObject:
   m_ObjectHideFlags: 0
