@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -5.71, y: 4.27, z: 0.04347459}
-  m_LocalScale: {x: 0.6, y: 0.2, z: 1}
+  m_LocalScale: {x: 1, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -163,8 +163,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arcDegrees: -120
   startAngleOffset: 60
-  lifetime: 0.15
-  radius: 1
+  lifetime: 1
+  radius: 1.5
 --- !u!96 &-8118718368761050862
 TrailRenderer:
   serializedVersion: 3

@@ -2538,6 +2538,10 @@ PrefabInstance:
       propertyPath: grantsExperienceOnDeath
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2261580099307110445, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: healingItemName
+      value: Healthpot
+      objectReference: {fileID: 0}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: InventoryMenu
       value: 

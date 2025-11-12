@@ -17,7 +17,7 @@ MonoBehaviour:
   activeTime: 0
   damage: 10
   knockbackForce: 3
-  lifetime: 0.15
+  lifetime: 1
   HpCost: 3
   IsAbility: 1
   slashPrefab: {fileID: 9040097098050866608, guid: a090cbda3bc275341a39faf62c279367, type: 3}
