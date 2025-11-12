@@ -5,13 +5,20 @@ public class InventoryManager : MonoBehaviour
 {
     [SerializeField] private InputActionReference inventoryAction;
     [SerializeField] private GameObject InventoryMenu;
+    [SerializeField] private GameObject InventoryMenuEquipment;
+    [SerializeField] private GameObject InventoryMenuAbility;
+    [SerializeField] private GameObject TopPanel;
     private ItemSlot[] itemSlot;
+    private ItemSlot[] artifactSlot;
 
     public ItemSO[] itemSOs;
     
     [Header("Slots Setup")]
     [Tooltip("Parent transform that contains all ItemSlot components as children.")]
     [SerializeField] private Transform slotsParent;
+    
+    [Tooltip("Parent transform for artifact inventory slots.")]
+    [SerializeField] private Transform artifactSlotsParent;
     
     private bool menuActivated = false;
 
@@ -67,6 +74,13 @@ public class InventoryManager : MonoBehaviour
                 Debug.Log($"InventoryManager: Found {itemSlot.Length} slots in InventoryMenu.");
             }
         }
+        
+        // Auto-populate artifact slots
+        if (artifactSlotsParent != null)
+        {
+            artifactSlot = artifactSlotsParent.GetComponentsInChildren<ItemSlot>(true);
+            Debug.Log($"InventoryManager: Found {artifactSlot.Length} artifact slots in '{artifactSlotsParent.name}'.");
+        }
     }
 
     private void OnInventory(InputAction.CallbackContext context)
@@ -78,15 +92,40 @@ public class InventoryManager : MonoBehaviour
         }
         
         menuActivated = !menuActivated;
-        InventoryMenu.SetActive(menuActivated);
         
-       
+        // When closing, close ALL panels
+        if (!menuActivated)
+        {
+            InventoryMenu.SetActive(false);
+            if (InventoryMenuEquipment != null) InventoryMenuEquipment.SetActive(false);
+            if (InventoryMenuAbility != null) InventoryMenuAbility.SetActive(false);
+        }
+        else
+        {
+            // When opening, only open main menu
+            InventoryMenu.SetActive(true);
+        }
+        
+        if (TopPanel != null)
+        {
+            TopPanel.SetActive(menuActivated);
+        }
+        
+        // Pause/unpause time
+        Time.timeScale = menuActivated ? 0f : 1f;
     }
 
     private void CloseInventory()
     {
         menuActivated = false;
         InventoryMenu.SetActive(false);
+        InventoryMenuEquipment.SetActive(false);
+        InventoryMenuAbility.SetActive(false);
+        
+        if (TopPanel != null)
+        {
+            TopPanel.SetActive(false);
+        }
         // Don't change timeScale here - let the shop manage it
     }
 
@@ -122,28 +161,52 @@ public class InventoryManager : MonoBehaviour
 
     public int AddItem(string itemName, Sprite itemIcon, int quantity, string itemDescription)
     {
+        return AddItem(itemName, itemIcon, quantity, itemDescription, 0);
+    }
+    
+    public int AddItem(string itemName, Sprite itemIcon, int quantity, string itemDescription, int isArtifactOverride)
+    {
         Debug.Log("item name: " + itemName + " quantity: " + quantity);
         
-        if (itemSlot == null || itemSlot.Length == 0)
+        // Check if this item is an artifact - use override if provided, otherwise check ItemSO
+        bool isArtifact = isArtifactOverride == 1;
+        
+        if (!isArtifact)
         {
-            Debug.LogError("InventoryManager: No item slots found! Make sure slotsParent or InventoryMenu has ItemSlot components.");
+            for (int j = 0; j < itemSOs.Length; j++)
+            {
+                if (itemSOs[j].itemName == itemName && itemSOs[j].isArtifact == 1)
+                {
+                    isArtifact = true;
+                    break;
+                }
+            }
+        }
+        
+        // Choose the appropriate slot array
+        ItemSlot[] targetSlots = isArtifact ? artifactSlot : itemSlot;
+        string slotType = isArtifact ? "artifact" : "item";
+        
+        if (targetSlots == null || targetSlots.Length == 0)
+        {
+            Debug.LogError($"InventoryManager: No {slotType} slots found! Make sure slotsParent or artifactSlotsParent is assigned.");
             return quantity;
         }
         
-        for (int i = 0; i < itemSlot.Length; i++)
+        for (int i = 0; i < targetSlots.Length; i++)
         {
-           if (itemSlot[i] != null && (itemSlot[i].isFull == false && itemSlot[i].itemName == itemName || itemSlot[i].quantity == 0))
+           if (targetSlots[i] != null && (targetSlots[i].isFull == false && targetSlots[i].itemName == itemName || targetSlots[i].quantity == 0))
            {
-               int leftOverItems = itemSlot[i].AddItem(itemName, itemIcon, quantity, itemDescription);
-               Debug.Log($"Added {itemName} to slot {i}");
+               int leftOverItems = targetSlots[i].AddItem(itemName, itemIcon, quantity, itemDescription);
+               Debug.Log($"Added {itemName} to {slotType} slot {i}");
                if (leftOverItems > 0)
-                   leftOverItems = AddItem(itemName, itemIcon, leftOverItems, itemDescription);
+                   leftOverItems = AddItem(itemName, itemIcon, leftOverItems, itemDescription, isArtifactOverride);
 
                 return leftOverItems;
            }
         }
         
-        Debug.Log("All inventory slots are full!");
+        Debug.Log($"All {slotType} inventory slots are full!");
         return quantity; // Return remaining items if inventory is full
     }
 

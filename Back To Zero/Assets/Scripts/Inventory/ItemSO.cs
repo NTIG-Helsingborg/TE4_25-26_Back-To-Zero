@@ -9,6 +9,7 @@ public class ItemSO : ScriptableObject
     public StatToChange statToChange = StatToChange.None;
     public int amountToChangeStat;
     public int dropChance;  
+    public int isArtifact; // 0 = no, 1 = yes
     
 
     public bool UseItem()
