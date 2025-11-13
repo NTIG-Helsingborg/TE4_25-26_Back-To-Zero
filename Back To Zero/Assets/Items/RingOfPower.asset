@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11c5a18b63a853a43a37b85f30a0f9f4, type: 3}
   m_Name: RingOfPower
   m_EditorClassIdentifier: 
-  itemName: 
-  itemSprite: {fileID: 0}
+  itemName: ring of power
+  itemSprite: {fileID: 7482667652216324306, guid: 742c6ff9f188840b5aaf3d1dc6790a52, type: 3}
   itemDescription: 
-  statToChange: 0
-  amountToChangeStat: 0
-  dropChance: 0
-  itemType: 0
+  statToChange: 1
+  amountToChangeStat: 100
+  dropChance: 100
+  isArtifact: 1

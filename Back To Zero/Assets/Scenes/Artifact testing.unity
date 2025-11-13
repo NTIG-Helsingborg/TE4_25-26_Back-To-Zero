@@ -1954,6 +1954,7 @@ GameObject:
   - component: {fileID: 1996570846}
   - component: {fileID: 1996570845}
   - component: {fileID: 1996570857}
+  - component: {fileID: 1996570858}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1994,6 +1995,7 @@ MonoBehaviour:
   itemSOs:
   - {fileID: 11400000, guid: 346716a69a6dff84cbfbd8f3faf9e29b, type: 2}
   - {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
+  - {fileID: 11400000, guid: fa1ebb8a9a70a6942a73e775ca006531, type: 2}
   slotsParent: {fileID: 0}
 --- !u!114 &1996570846
 MonoBehaviour:
@@ -2373,6 +2375,23 @@ MonoBehaviour:
   levelText: {fileID: 728550054}
   experienceText: {fileID: 728550053}
   experienceFill: {fileID: 0}
+--- !u!114 &1996570858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1996570843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b195da379e5fbbf45a717a1f70a50db6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseMoveSpeed: 5
+  baseMaxHealth: 100
+  baseDamageMultiplier: 1
+  baseAttackSpeed: 1
+  baseDefenseMultiplier: 1
 --- !u!1 &2038565451
 GameObject:
   m_ObjectHideFlags: 0
@@ -2426,7 +2445,7 @@ MonoBehaviour:
     file_cachedStartup: {fileID: 0}
     data_cachedStartup: 
     cacheStartup: 0
-  showNavGraphs: 1
+  showNavGraphs: 0
   showUnwalkableNodes: 1
   debugMode: 0
   debugFloor: 0
