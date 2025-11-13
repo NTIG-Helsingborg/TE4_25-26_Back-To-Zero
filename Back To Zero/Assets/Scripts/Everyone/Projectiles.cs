@@ -67,8 +67,16 @@ public class Projectiles : MonoBehaviour
         var health = target.GetComponent<Health>();
         if (health != null && !health.isInvincible)
         {
-            health.TakeDamage(damage);
-            // Debug.Log($"Projectile dealt {damage} to {target.name}");
+            int finalDamage = damage;
+            if (owner != null)
+            {
+                var ps = owner.GetComponent<PlayerStats>();
+                if (ps != null)
+                    finalDamage = ps.ApplyDamageMultiplier(damage);
+            }
+
+            health.TakeDamage(finalDamage);
+            // Debug.Log($"Projectile dealt {finalDamage} (base {damage}) to {target.name}");
         }
         Destroy(gameObject);
     }

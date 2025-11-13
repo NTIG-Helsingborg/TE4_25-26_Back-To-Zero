@@ -72,7 +72,15 @@ public class Health : MonoBehaviour
 
         if (!isInvincible)
         {
-            currentHealth -= damage;
+            int incoming = damage;
+
+            // If this Health is on the Player, apply defense multiplier
+            if (TryGetComponent<PlayerStats>(out var stats))
+            {
+                incoming = stats.ApplyDefenseMultiplier(damage);
+            }
+
+            currentHealth -= incoming;
             RefreshHealthBarFill();
             EvaluateHarvestability();
         }

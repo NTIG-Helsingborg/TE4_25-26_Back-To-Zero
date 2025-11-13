@@ -1,9 +1,7 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
-/// <summary>
-/// Manages all player stats that can be buffed by artifacts
-/// </summary>
 public class PlayerStats : MonoBehaviour
 {
     [Header("Base Stats")]
@@ -13,7 +11,7 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float baseAttackSpeed = 1f;
     [SerializeField] private float baseDefenseMultiplier = 1f;
 
-    // Current stat modifiers (accumulated from artifacts)
+    // Current stat modifiers
     private float moveSpeedBonus = 0f;
     private int maxHealthBonus = 0;
     private float damageMultiplierBonus = 0f;
@@ -168,6 +166,46 @@ public class PlayerStats : MonoBehaviour
     {
         float defenseReduction = 1f - (GetDefenseMultiplier() - 1f);
         return Mathf.RoundToInt(incomingDamage * Mathf.Max(0.1f, defenseReduction));
+    }
+
+    /// <summary>
+    /// Rebuild all bonuses from the current artifacts in inventory
+    /// </summary>
+    public void RecalculateFromArtifacts(IEnumerable<ItemSO> items)
+    {
+        // Reset bonuses
+        moveSpeedBonus = 0f;
+        maxHealthBonus = 0;
+        damageMultiplierBonus = 0f;
+        attackSpeedBonus = 0f;
+        defenseMultiplierBonus = 0f;
+
+        if (items != null)
+        {
+            foreach (var item in items)
+            {
+                if (item == null || item.isArtifact != 1) continue;
+
+                switch (item.statToChange)
+                {
+                    case ItemSO.StatToChange.Power:
+                        // +1% damage per point
+                        damageMultiplierBonus += item.amountToChangeStat * 0.01f;
+                        break;
+                    case ItemSO.StatToChange.Agility:
+                        // example: +0.1 move speed per point
+                        moveSpeedBonus += item.amountToChangeStat * 0.1f;
+                        break;
+                    case ItemSO.StatToChange.Health:
+                        maxHealthBonus += item.amountToChangeStat;
+                        break;
+                    // Intelligence and Coin removed
+                }
+            }
+        }
+
+        ApplyStatsToPlayer();
+        OnStatsChanged?.Invoke();
     }
 }
 

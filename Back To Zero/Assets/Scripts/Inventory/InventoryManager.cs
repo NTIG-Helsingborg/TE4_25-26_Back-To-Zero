@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -14,6 +15,8 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private Transform slotsParent;
     
     private bool menuActivated = false;
+
+    private PlayerStats playerStats;
 
     void OnEnable()
     {
@@ -52,6 +55,15 @@ public class InventoryManager : MonoBehaviour
                 Debug.Log($"InventoryManager: Found {itemSlot.Length} slots in InventoryMenu.");
             }
         }
+
+        playerStats = GetComponent<PlayerStats>();
+        Debug.Log("InventoryManager: PlayerStats found: " + (playerStats != null));
+    }
+
+    private void Start()
+    {
+        // Apply passives if inventory pre-populated
+        RecalculatePlayerStatsFromInventory();
     }
 
     private void OnInventory(InputAction.CallbackContext context)
@@ -70,6 +82,10 @@ public class InventoryManager : MonoBehaviour
             if(itemSOs[i].itemName == itemName)
             {
                 bool usable = itemSOs[i].UseItem();
+                
+                // Inventory may have changed (consumables). Recalc passives anyway.
+                RecalculatePlayerStatsFromInventory();
+
                 return usable;
             }
         }
@@ -95,7 +111,10 @@ public class InventoryManager : MonoBehaviour
                if (leftOverItems > 0)
                    leftOverItems = AddItem(itemName, itemIcon, leftOverItems, itemDescription);
 
-                return leftOverItems;
+               // Recalc passives after inventory actually changed
+               RecalculatePlayerStatsFromInventory();
+
+               return leftOverItems;
            }
         }
         
@@ -112,4 +131,45 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    // Build a list of artifacts currently in slots and push to PlayerStats
+    private void RecalculatePlayerStatsFromInventory()
+    {
+        if (playerStats == null)
+            return;
+
+        var artifacts = new List<ItemSO>();
+        if (itemSlot != null && itemSOs != null)
+        {
+            for (int i = 0; i < itemSlot.Length; i++)
+            {
+                var slot = itemSlot[i];
+                if (slot == null || slot.quantity <= 0 || string.IsNullOrEmpty(slot.itemName))
+                    continue;
+
+                // Find matching ItemSO by name
+                ItemSO def = null;
+                for (int j = 0; j < itemSOs.Length; j++)
+                {
+                    if (itemSOs[j] != null && itemSOs[j].itemName == slot.itemName)
+                    {
+                        def = itemSOs[j];
+                        break;
+                    }
+                }
+
+                if (def == null)
+                    continue;
+
+                if (def.isArtifact == 1)
+                {
+                    // If artifacts can stack, count quantity; otherwise, one is enough
+                    int count = Mathf.Max(1, slot.quantity);
+                    for (int c = 0; c < count; c++)
+                        artifacts.Add(def);
+                }
+            }
+        }
+
+        playerStats.RecalculateFromArtifacts(artifacts);
+    }
 }

@@ -12,11 +12,18 @@ public class ItemSO : ScriptableObject
     
     [Header("Item Type")]
     [Tooltip("Consumable items are used once. Artifacts provide permanent buffs.")]
-    public ItemType itemType = ItemType.Consumable;
-
+    public int isArtifact = 0; // 0 = Consumable, 1 = Artifact
     public bool UseItem()
     {
-        GameObject player = GameObject.Find("Player");
+        Debug.Log($"ItemSO.UseItem called: {itemName}, isArtifact={isArtifact}, stat={statToChange}, amount={amountToChangeStat}");
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+        {
+            // Fallback to name lookup if tag isn’t set
+            player = GameObject.Find("Player");
+        }
+
         if (player == null)
         {
             Debug.LogError("ItemSO.UseItem: Could not find Player object!");
@@ -24,7 +31,7 @@ public class ItemSO : ScriptableObject
         }
 
         // Handle consumable items
-        if (itemType == ItemType.Consumable)
+        if (isArtifact == 0)
         {
             if(statToChange == StatToChange.Health)
             {
@@ -46,50 +53,12 @@ public class ItemSO : ScriptableObject
             return false;
         }
         
-        // Handle artifacts (permanent stat buffs)
-        if (itemType == ItemType.Artifact)
+        // Handle artifacts (permanent stat buffs if 'used' explicitly)
+        if (isArtifact == 1)
         {
-            PlayerStats playerStats = player.GetComponent<PlayerStats>();
-            if (playerStats == null)
-            {
-                Debug.LogError("ItemSO.UseItem: Player needs PlayerStats component for artifacts!");
-                return false;
-            }
-
-            try
-            {
-                switch (statToChange)
-                {
-                    case StatToChange.Power:
-                        playerStats.AddStatBonus(StatType.DamageMultiplier, amountToChangeStat * 0.01f);
-                        Debug.Log($"Power increased! +{amountToChangeStat}% damage");
-                        return true;
-                        
-                    case StatToChange.Agility:
-                        playerStats.AddStatBonus(StatType.MoveSpeed, amountToChangeStat * 0.1f);
-                        Debug.Log($"Agility increased! +{amountToChangeStat * 0.1f} move speed");
-                        return true;
-                        
-                    case StatToChange.Intelligence:
-                        playerStats.AddStatBonus(StatType.AttackSpeed, amountToChangeStat * 0.01f);
-                        Debug.Log($"Intelligence increased! +{amountToChangeStat}% attack speed");
-                        return true;
-                        
-                    case StatToChange.Health:
-                        playerStats.AddStatBonus(StatType.MaxHealth, amountToChangeStat);
-                        Debug.Log($"Max health increased! +{amountToChangeStat} HP");
-                        return true;
-                        
-                    default:
-                        Debug.LogWarning($"Artifact stat type {statToChange} not implemented");
-                        return false;
-                }
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Error applying artifact: {e.Message}\n{e.StackTrace}");
-                return false;
-            }
+            // Artifacts are passive. Stats are applied by InventoryManager scanning slots
+            Debug.Log($"ItemSO.UseItem: '{itemName}' is an artifact and applies passively while in inventory. No direct use.");
+            return false; // Return false so UI doesn’t consume/remove it
         }
         
         return false;
@@ -100,9 +69,7 @@ public class ItemSO : ScriptableObject
         None,
         Health,
         Power,
-        Agility,
-        Intelligence,
-        Coin
+        Agility
     }
     
     public enum ItemType
