@@ -10,6 +10,7 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private GameObject TopPanel;
     private ItemSlot[] itemSlot;
     private ItemSlot[] artifactSlot;
+    private ItemSlot[] abilitySlot;
 
     public ItemSO[] itemSOs;
     
@@ -19,6 +20,9 @@ public class InventoryManager : MonoBehaviour
     
     [Tooltip("Parent transform for artifact inventory slots.")]
     [SerializeField] private Transform artifactSlotsParent;
+    
+    [Tooltip("Parent transform for ability inventory slots.")]
+    [SerializeField] private Transform abilitySlotsParent;
     
     private bool menuActivated = false;
 
@@ -80,6 +84,13 @@ public class InventoryManager : MonoBehaviour
         {
             artifactSlot = artifactSlotsParent.GetComponentsInChildren<ItemSlot>(true);
             Debug.Log($"InventoryManager: Found {artifactSlot.Length} artifact slots in '{artifactSlotsParent.name}'.");
+        }
+        
+        // Auto-populate ability slots
+        if (abilitySlotsParent != null)
+        {
+            abilitySlot = abilitySlotsParent.GetComponentsInChildren<ItemSlot>(true);
+            Debug.Log($"InventoryManager: Found {abilitySlot.Length} ability slots in '{abilitySlotsParent.name}'.");
         }
     }
 
@@ -168,28 +179,57 @@ public class InventoryManager : MonoBehaviour
     {
         Debug.Log("item name: " + itemName + " quantity: " + quantity);
         
-        // Check if this item is an artifact - use override if provided, otherwise check ItemSO
+        // Check if this item is an artifact or ability - use override if provided, otherwise check ItemSO
         bool isArtifact = isArtifactOverride == 1;
+        bool isAbility = isArtifactOverride == 2; // 2 = ability override
         
-        if (!isArtifact)
+        if (!isArtifact && !isAbility)
         {
             for (int j = 0; j < itemSOs.Length; j++)
             {
-                if (itemSOs[j].itemName == itemName && itemSOs[j].isArtifact == 1)
+                if (itemSOs[j].itemName == itemName)
                 {
-                    isArtifact = true;
-                    break;
+                    if (itemSOs[j].isArtifact == 1)
+                    {
+                        isArtifact = true;
+                        break;
+                    }
+                    if (itemSOs[j].isAbility == 1)
+                    {
+                        isAbility = true;
+                        break;
+                    }
                 }
             }
         }
         
-        // Choose the appropriate slot array
-        ItemSlot[] targetSlots = isArtifact ? artifactSlot : itemSlot;
-        string slotType = isArtifact ? "artifact" : "item";
+        // Choose the appropriate slot array - abilities have priority over artifacts
+        ItemSlot[] targetSlots;
+        string slotType;
+        int typeOverride; // For recursive calls
+        
+        if (isAbility)
+        {
+            targetSlots = abilitySlot;
+            slotType = "ability";
+            typeOverride = 2;
+        }
+        else if (isArtifact)
+        {
+            targetSlots = artifactSlot;
+            slotType = "artifact";
+            typeOverride = 1;
+        }
+        else
+        {
+            targetSlots = itemSlot;
+            slotType = "item";
+            typeOverride = 0;
+        }
         
         if (targetSlots == null || targetSlots.Length == 0)
         {
-            Debug.LogError($"InventoryManager: No {slotType} slots found! Make sure slotsParent or artifactSlotsParent is assigned.");
+            Debug.LogError($"InventoryManager: No {slotType} slots found! Make sure slotsParent, artifactSlotsParent, or abilitySlotsParent is assigned.");
             return quantity;
         }
         
@@ -200,7 +240,7 @@ public class InventoryManager : MonoBehaviour
                int leftOverItems = targetSlots[i].AddItem(itemName, itemIcon, quantity, itemDescription);
                Debug.Log($"Added {itemName} to {slotType} slot {i}");
                if (leftOverItems > 0)
-                   leftOverItems = AddItem(itemName, itemIcon, leftOverItems, itemDescription, isArtifactOverride);
+                   leftOverItems = AddItem(itemName, itemIcon, leftOverItems, itemDescription, typeOverride);
 
                 return leftOverItems;
            }
@@ -211,11 +251,31 @@ public class InventoryManager : MonoBehaviour
     }
 
     public void DeselectAllSlots(){
-
+        if (itemSlot == null) return;
         for (int i = 0; i < itemSlot.Length; i++)
         {
-            itemSlot[i].selectedShader.SetActive(false);
-            itemSlot[i].thisItemSelected = false;
+            if (itemSlot[i] != null)
+                itemSlot[i].DeselectVisuals();
+        }
+    }
+
+    public void DeselectAllArtifactSlots(){
+        if (artifactSlot == null) return;
+        
+        for (int i = 0; i < artifactSlot.Length; i++)
+        {
+            if (artifactSlot[i] != null)
+                artifactSlot[i].DeselectVisuals();
+        }
+    }
+
+    public void DeselectAllAbilitySlots(){
+        if (abilitySlot == null) return;
+        
+        for (int i = 0; i < abilitySlot.Length; i++)
+        {
+            if (abilitySlot[i] != null)
+                abilitySlot[i].DeselectVisuals();
         }
     }
 

@@ -10,6 +10,7 @@ public class ItemSO : ScriptableObject
     public int amountToChangeStat;
     public int dropChance;  
     public int isArtifact; // 0 = no, 1 = yes
+    public int isAbility; // 0 = no, 1 = yes
     
 
     public bool UseItem()

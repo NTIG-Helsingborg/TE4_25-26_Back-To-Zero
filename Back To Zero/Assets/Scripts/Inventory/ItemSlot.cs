@@ -16,6 +16,10 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
     [SerializeField]
     private int maxNumberOfItems;
 
+    
+    [SerializeField] private GameObject[] swapPanels; 
+    
+
 
     //Item Slot//
     [SerializeField] 
@@ -31,6 +35,9 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
     public GameObject selectedShader;
     public bool thisItemSelected;
+
+    [SerializeField] 
+    private SlotType slotType = SlotType.Regular; // Type of slot (regular, artifact, or ability)
 
     private InventoryManager inventoryManager;
     
@@ -120,15 +127,45 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
                 if(this.quantity <= 0)
                      EmptySlot();
             }
+            
+            
         }
         else
         {
-            inventoryManager.DeselectAllSlots();
-            selectedShader.SetActive(true);
+            // Deselect all slots of the same type
+            switch (slotType)
+            {
+                case SlotType.Regular:
+                    inventoryManager.DeselectAllSlots();
+                    break;
+                case SlotType.Artifact:
+                    inventoryManager.DeselectAllArtifactSlots();
+                    break;
+                case SlotType.Ability:
+                    inventoryManager.DeselectAllAbilitySlots();
+                    break;
+            }
+            
+            if (selectedShader != null || (swapPanels != null && swapPanels.Length > 0))
+            {
+                if (selectedShader != null) selectedShader.SetActive(true);
+                ActivateSwapPanels(true);
+            }
             thisItemSelected = true;
-            ItemDescriptionNameText.text = itemName;
-            ItemDescriptionText.text = itemDescription;
-            itemDescriptionImage.sprite = itemSprite;
+            
+            if (ItemDescriptionNameText != null)
+            {
+                ItemDescriptionNameText.text = itemName;
+            }
+            if (ItemDescriptionText != null)
+            {
+                ItemDescriptionText.text = itemDescription;
+            }
+            if (itemDescriptionImage != null)
+            {
+                itemDescriptionImage.sprite = itemSprite;
+            }
+           
         }
     }
 
@@ -147,7 +184,8 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         quantity = 0;
         isFull = false;
         thisItemSelected = false;
-        selectedShader.SetActive(false);
+    if (selectedShader != null) selectedShader.SetActive(false);
+    ActivateSwapPanels(false);
     }
 
     // Update the quantity display text
@@ -194,4 +232,30 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         }
     }
 
+    // Helper to activate/deactivate all configured swap panels.
+    private void ActivateSwapPanels(bool active)
+    {
+        if (swapPanels == null) return;
+        for (int i = 0; i < swapPanels.Length; i++)
+        {
+            if (swapPanels[i] != null)
+                swapPanels[i].SetActive(active);
+        }
+    }
+
+    // Public deselect method used by external managers to clear selection visuals.
+    public void DeselectVisuals()
+    {
+        thisItemSelected = false;
+        if (selectedShader != null) selectedShader.SetActive(false);
+        ActivateSwapPanels(false);
+    }
+
+}
+
+public enum SlotType
+{
+    Regular,
+    Artifact,
+    Ability
 }

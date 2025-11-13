@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf1f409ab8f4c144da05c62f71c52d43, type: 3}
   m_Name: BloodKnife
   m_EditorClassIdentifier: 
-  name: 
+  name: Bloodknife
   cooldownTime: 0
   activeTime: 0
   damage: 10
   range: 10
   speed: 18
   HpCost: 5
+  IsAbility: 1
   BloodKnifePrefab: {fileID: 3137868050130833703, guid: aba6c88923875fa499c13ae470d1028a, type: 3}
   firePointChildName: SpellTransform
