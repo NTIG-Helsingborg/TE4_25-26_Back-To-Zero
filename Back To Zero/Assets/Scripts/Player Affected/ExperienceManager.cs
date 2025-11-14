@@ -168,6 +168,9 @@ public class ExperienceManager : MonoBehaviour
         }
 
         levelUpMenuOpen = true;
+        
+        // Pause the game when level up menu opens
+        Time.timeScale = 0f;
     }
 
     void HandleRewardSelection(int rewardIndex)
@@ -213,5 +216,11 @@ public class ExperienceManager : MonoBehaviour
         }
 
         levelUpMenuOpen = false;
+        
+        // Unpause the game when level up menu closes (only if no more pending level ups)
+        if (pendingLevelUps <= 0)
+        {
+            Time.timeScale = 1f;
+        }
     }
 }

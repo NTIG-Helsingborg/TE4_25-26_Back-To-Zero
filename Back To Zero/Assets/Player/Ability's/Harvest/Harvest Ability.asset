@@ -13,20 +13,17 @@ MonoBehaviour:
   m_Name: Harvest Ability
   m_EditorClassIdentifier: 
   name: Harvest
-  cooldownTime: 5
+  cooldownTime: 0
   activeTime: 0.3
-  harvestRange: 3
+  harvestRange: 4
   healPercentage: 0.5
   harvestActivationPercentage: 40
   harvestDuration: 1
-  harvestDuration: 2.5
   harvestLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  harvestShakeDuration: 0.35
-  harvestShakeIntensity: 0.05
-  harvestColor: {r: 1, g: 0.2, b: 0.2, a: 0.5}
   enableHarvestFeedback: 1
   harvestShakeDuration: 0.12
   harvestShakeIntensity: 0.05
   harvestHealthThreshold: 0.4
+  harvestColor: {r: 1, g: 0.2, b: 0.2, a: 0.5}

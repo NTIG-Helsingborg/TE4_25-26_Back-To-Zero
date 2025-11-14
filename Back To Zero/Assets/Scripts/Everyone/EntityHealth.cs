@@ -223,6 +223,12 @@ public class Health : MonoBehaviour
             return;
         }
 
+        // Notify WaveManager that an enemy died
+        if (WaveManager.Instance != null)
+        {
+            WaveManager.Instance.OnEnemyKilled();
+        }
+
         GrantExperience();
 
         Destroy(gameObject);

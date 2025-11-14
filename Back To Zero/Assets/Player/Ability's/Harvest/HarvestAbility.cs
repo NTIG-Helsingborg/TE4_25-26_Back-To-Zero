@@ -89,6 +89,10 @@ public class HarvestAbility : Ability
         List<GameObject> harvestedEntities = new List<GameObject>();
         int totalHealAmount = 0;
 
+        // Calculate heal amount based on player's max health, not enemy's
+        int playerMaxHealth = playerHealth.GetMaxHealth();
+        int healAmountPerEnemy = Mathf.RoundToInt(playerMaxHealth * healPercentage);
+
         float thresholdFraction = CurrentHarvestThresholdFraction;
         
         foreach (Collider2D collider in nearbyEntities)
@@ -107,8 +111,7 @@ public class HarvestAbility : Ability
                 if (currentFraction > thresholdFraction)
                     continue;
 
-                int healAmount = Mathf.RoundToInt(maxHealth * healPercentage);
-                totalHealAmount += healAmount;
+                totalHealAmount += healAmountPerEnemy;
                 harvestedEntities.Add(collider.gameObject);
             }
         }
