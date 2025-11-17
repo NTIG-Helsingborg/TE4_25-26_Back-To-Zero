@@ -24,6 +24,16 @@ public class InventoryManager : MonoBehaviour
     [Tooltip("Parent transform for ability inventory slots.")]
     [SerializeField] private Transform abilitySlotsParent;
     
+    [Header("Active Slots")]
+    [Tooltip("The active slots where equipped abilities are placed.")]
+    [SerializeField] private ActiveSlot[] activeSlots;
+    
+    [Tooltip("The active equipment slots where equipped artifacts/equipment are placed.")]
+    [SerializeField] private ActiveEquipmentSlot[] activeEquipmentSlots;
+    
+    private ItemSlot selectedAbilitySlot = null; // Track which ability slot is selected
+    private ItemSlot selectedArtifactSlot = null; // Track which artifact slot is selected
+    
     private bool menuActivated = false;
 
     void OnEnable()
@@ -235,7 +245,8 @@ public class InventoryManager : MonoBehaviour
         
         for (int i = 0; i < targetSlots.Length; i++)
         {
-           if (targetSlots[i] != null && (targetSlots[i].isFull == false && targetSlots[i].itemName == itemName || targetSlots[i].quantity == 0))
+                       if (targetSlots[i] != null && !targetSlots[i].isFull && 
+               (targetSlots[i].quantity == 0 || string.IsNullOrEmpty(targetSlots[i].itemName) || targetSlots[i].itemName == itemName))
            {
                int leftOverItems = targetSlots[i].AddItem(itemName, itemIcon, quantity, itemDescription);
                Debug.Log($"Added {itemName} to {slotType} slot {i}");
@@ -363,6 +374,162 @@ public class InventoryManager : MonoBehaviour
 
         Debug.Log($"InventoryManager: Removed {quantityToRemove} of '{itemName}'.");
         return true;
+    }
+
+    // Set which ability slot is currently selected
+    public void SetSelectedAbilitySlot(ItemSlot slot)
+    {
+        selectedAbilitySlot = slot;
+        Debug.Log($"InventoryManager: Selected ability slot with item '{slot?.itemName}'.");
+    }
+
+    // Get the currently selected ability slot
+    public ItemSlot GetSelectedAbilitySlot()
+    {
+        return selectedAbilitySlot;
+    }
+
+    // Set which artifact slot is currently selected
+    public void SetSelectedArtifactSlot(ItemSlot slot)
+    {
+        selectedArtifactSlot = slot;
+        Debug.Log($"InventoryManager: Selected artifact slot with item '{slot?.itemName}'.");
+    }
+
+    // Get the currently selected artifact slot
+    public ItemSlot GetSelectedArtifactSlot()
+    {
+        return selectedArtifactSlot;
+    }
+
+    // Transfer an item from the selected ability slot to a specific active slot
+    public void TransferToActiveSlot(ActiveSlot targetSlot)
+    {
+        if (targetSlot == null)
+        {
+            Debug.LogWarning("InventoryManager: Target active slot is null!");
+            return;
+        }
+
+        if (selectedAbilitySlot == null || string.IsNullOrEmpty(selectedAbilitySlot.itemName))
+        {
+            Debug.Log("InventoryManager: No ability slot selected or it's empty.");
+            return;
+        }
+
+        // Clear the target active slot first
+        targetSlot.EmptySlot();
+
+        // Transfer the item to the active slot (transfer 1 item)
+        int leftover = targetSlot.AddItem(selectedAbilitySlot.itemName, selectedAbilitySlot.itemSprite, 1, selectedAbilitySlot.itemDescription);
+
+        if (leftover == 0)
+        {
+            // Successfully transferred, reduce quantity in source slot
+            selectedAbilitySlot.quantity -= 1;
+            if (selectedAbilitySlot.quantity <= 0)
+            {
+                selectedAbilitySlot.EmptySlot();
+            }
+            else
+            {
+                selectedAbilitySlot.UpdateQuantityDisplay();
+            }
+            Debug.Log($"InventoryManager: Transferred '{selectedAbilitySlot.itemName}' to active slot.");
+            
+            // Deselect the ability slot after successful transfer
+            selectedAbilitySlot.DeselectVisuals();
+            selectedAbilitySlot = null;
+        }
+    }
+
+    // Return an item from an active slot back to the ability inventory
+    public void ReturnActiveSlotToInventory(ActiveSlot activeSlot)
+    {
+        if (activeSlot == null || string.IsNullOrEmpty(activeSlot.itemName) || activeSlot.quantity <= 0)
+        {
+            Debug.Log("InventoryManager: Active slot is empty, nothing to return.");
+            return;
+        }
+
+        // Add the item back to ability inventory
+        int leftover = AddItem(activeSlot.itemName, activeSlot.itemSprite, activeSlot.quantity, activeSlot.itemDescription, 2);
+        
+        if (leftover == 0)
+        {
+            // Successfully returned to inventory, empty the active slot
+            Debug.Log($"InventoryManager: Returned '{activeSlot.itemName}' from active slot to inventory.");
+            activeSlot.EmptySlot();
+        }
+        else
+        {
+            Debug.LogWarning($"InventoryManager: Could not return all of '{activeSlot.itemName}' to inventory. {leftover} items remain in active slot.");
+        }
+    }
+
+    // Transfer an item from the selected artifact slot to a specific active equipment slot
+    public void TransferToActiveEquipmentSlot(ActiveEquipmentSlot targetSlot)
+    {
+        if (targetSlot == null)
+        {
+            Debug.LogWarning("InventoryManager: Target active equipment slot is null!");
+            return;
+        }
+
+        if (selectedArtifactSlot == null || string.IsNullOrEmpty(selectedArtifactSlot.itemName))
+        {
+            Debug.Log("InventoryManager: No artifact slot selected or it's empty.");
+            return;
+        }
+
+        // Clear the target active equipment slot first
+        targetSlot.EmptySlot();
+
+        // Transfer the item to the active equipment slot (transfer 1 item)
+        int leftover = targetSlot.AddItem(selectedArtifactSlot.itemName, selectedArtifactSlot.itemSprite, 1, selectedArtifactSlot.itemDescription);
+
+        if (leftover == 0)
+        {
+            // Successfully transferred, reduce quantity in source slot
+            selectedArtifactSlot.quantity -= 1;
+            if (selectedArtifactSlot.quantity <= 0)
+            {
+                selectedArtifactSlot.EmptySlot();
+            }
+            else
+            {
+                selectedArtifactSlot.UpdateQuantityDisplay();
+            }
+            Debug.Log($"InventoryManager: Transferred '{selectedArtifactSlot.itemName}' to active equipment slot.");
+            
+            // Deselect the artifact slot after successful transfer
+            selectedArtifactSlot.DeselectVisuals();
+            selectedArtifactSlot = null;
+        }
+    }
+
+    // Return an item from an active equipment slot back to the artifact inventory
+    public void ReturnActiveEquipmentSlotToInventory(ActiveEquipmentSlot activeSlot)
+    {
+        if (activeSlot == null || string.IsNullOrEmpty(activeSlot.itemName) || activeSlot.quantity <= 0)
+        {
+            Debug.Log("InventoryManager: Active equipment slot is empty, nothing to return.");
+            return;
+        }
+
+        // Add the item back to artifact inventory
+        int leftover = AddItem(activeSlot.itemName, activeSlot.itemSprite, activeSlot.quantity, activeSlot.itemDescription, 1);
+        
+        if (leftover == 0)
+        {
+            // Successfully returned to inventory, empty the active equipment slot
+            Debug.Log($"InventoryManager: Returned '{activeSlot.itemName}' from active equipment slot to inventory.");
+            activeSlot.EmptySlot();
+        }
+        else
+        {
+            Debug.LogWarning($"InventoryManager: Could not return all of '{activeSlot.itemName}' to inventory. {leftover} items remain in active equipment slot.");
+        }
     }
 
 }

@@ -120,12 +120,21 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
     {
         if (thisItemSelected)
         {
-            bool usable = inventoryManager.UseItem(itemName);
-            if(usable){
-                this.quantity -= 1;
-                quantityText.text = this.quantity.ToString();
-                if(this.quantity <= 0)
-                     EmptySlot();
+            // If this is an ability slot, the item stays selected for transfer to active slot
+            if (slotType == SlotType.Ability && !string.IsNullOrEmpty(itemName))
+            {
+                // Keep it selected, do nothing - user needs to click an active slot
+                Debug.Log($"Ability slot '{itemName}' selected. Click an active slot to equip it.");
+            }
+            else
+            {
+                bool usable = inventoryManager.UseItem(itemName);
+                if(usable){
+                    this.quantity -= 1;
+                    quantityText.text = this.quantity.ToString();
+                    if(this.quantity <= 0)
+                         EmptySlot();
+                }
             }
             
             
@@ -152,6 +161,17 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
                 ActivateSwapPanels(true);
             }
             thisItemSelected = true;
+            
+            // If this is an ability slot, register it as selected in the manager
+            if (slotType == SlotType.Ability && !string.IsNullOrEmpty(itemName))
+            {
+                inventoryManager.SetSelectedAbilitySlot(this);
+            }
+            // If this is an artifact slot, register it as selected in the manager
+            else if (slotType == SlotType.Artifact && !string.IsNullOrEmpty(itemName))
+            {
+                inventoryManager.SetSelectedArtifactSlot(this);
+            }
             
             if (ItemDescriptionNameText != null)
             {
@@ -208,7 +228,8 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
     {
         Debug.Log($"ItemSlot '{gameObject.name}': Pointer entered. Item: '{itemName}', Popup: {(itemInfoPopup != null ? "Found" : "NULL")}");
         
-        if (itemInfoPopup != null && !string.IsNullOrEmpty(itemName))
+        // Only show popup if slot has an item (not empty)
+        if (itemInfoPopup != null && !string.IsNullOrEmpty(itemName) && quantity > 0)
         {
             itemInfoPopup.ShowItemInfo(itemName, itemDescription);
         }
@@ -226,7 +247,8 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
     public void OnPointerMove(PointerEventData eventData)
     {
-        if (itemInfoPopup != null && !string.IsNullOrEmpty(itemName))
+        // Only update popup position if slot has an item
+        if (itemInfoPopup != null && !string.IsNullOrEmpty(itemName) && quantity > 0)
         {
             itemInfoPopup.FollowMouse();
         }

@@ -3,10 +3,8 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-// ActiveSlot represents an equipped/active item slot (e.g. currently wielded or quick-access item).
-// It is lighter than ItemSlot: no hover, selection shader, or swap panels.
-// If you need those features, consider reusing ItemSlot or refactoring shared logic.
-public class ActiveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler, IPointerClickHandler
+// ActiveEquipmentSlot represents an equipped artifact/equipment slot.
+public class ActiveEquipmentSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler, IPointerClickHandler
 {
     // Data
     public string itemName;
@@ -35,11 +33,11 @@ public class ActiveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             itemInfoPopup = FindObjectOfType<ShopInfo>();
             if (itemInfoPopup == null)
             {
-                Debug.LogWarning($"ActiveSlot '{gameObject.name}': No ShopInfo component found in scene! Hover functionality will not work.");
+                Debug.LogWarning($"ActiveEquipmentSlot '{gameObject.name}': No ShopInfo component found in scene! Hover functionality will not work.");
             }
             else
             {
-                Debug.Log($"ActiveSlot '{gameObject.name}': Auto-assigned ShopInfo component.");
+                Debug.Log($"ActiveEquipmentSlot '{gameObject.name}': Auto-assigned ShopInfo component.");
             }
         }
         
@@ -47,16 +45,16 @@ public class ActiveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         Image img = GetComponent<Image>();
         if (img == null)
         {
-            Debug.LogWarning($"ActiveSlot '{gameObject.name}': No Image component found! Add an Image component for hover detection.");
+            Debug.LogWarning($"ActiveEquipmentSlot '{gameObject.name}': No Image component found! Add an Image component for hover detection.");
         }
         else if (!img.raycastTarget)
         {
-            Debug.LogWarning($"ActiveSlot '{gameObject.name}': Image raycastTarget is disabled! Enable it for hover detection.");
+            Debug.LogWarning($"ActiveEquipmentSlot '{gameObject.name}': Image raycastTarget is disabled! Enable it for hover detection.");
         }
     }
 
     /// <summary>
-    /// Adds an item to this active slot. Returns leftover quantity if over max.
+    /// Adds an item to this active equipment slot. Returns leftover quantity if over max.
     /// </summary>
     public int AddItem(string itemName, Sprite itemIcon, int quantity, string itemDescription)
     {
@@ -128,7 +126,7 @@ public class ActiveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log($"ActiveSlot '{gameObject.name}': Pointer entered. Item: '{itemName}', Popup: {(itemInfoPopup != null ? "Found" : "NULL")}");
+        Debug.Log($"ActiveEquipmentSlot '{gameObject.name}': Pointer entered. Item: '{itemName}', Popup: {(itemInfoPopup != null ? "Found" : "NULL")}");
         
         if (itemInfoPopup != null && !string.IsNullOrEmpty(itemName))
         {
@@ -138,7 +136,7 @@ public class ActiveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        Debug.Log($"ActiveSlot '{gameObject.name}': Pointer exited.");
+        Debug.Log($"ActiveEquipmentSlot '{gameObject.name}': Pointer exited.");
         
         if (itemInfoPopup != null)
         {
@@ -158,25 +156,21 @@ public class ActiveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            // When clicked, try to receive item from selected ability slot
+            // When clicked, try to receive item from selected artifact slot
             if (inventoryManager != null)
             {
-                inventoryManager.TransferToActiveSlot(this);
+                inventoryManager.TransferToActiveEquipmentSlot(this);
             }
         }
         else if (eventData.button == PointerEventData.InputButton.Right)
         {
-            // Right-click: return item to inventory
+            // Right-click: return item to artifact inventory
             if (inventoryManager != null && !string.IsNullOrEmpty(itemName) && quantity > 0)
             {
-                inventoryManager.ReturnActiveSlotToInventory(this);
+                inventoryManager.ReturnActiveEquipmentSlotToInventory(this);
             }
         }
     }
 
     
-
-
-
-
 }
