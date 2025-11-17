@@ -42,16 +42,28 @@ public class RewardPanelDisplay : MonoBehaviour
             return;
         }
 
+        Debug.Log($"RewardPanelDisplay ({gameObject.name}): Displaying reward '{reward.rewardName}'. NameText: {(nameText != null ? "OK" : "NULL")}, DescriptionText: {(descriptionText != null ? "OK" : "NULL")}");
+
         // Set name
         if (nameText != null)
         {
             nameText.text = reward.rewardName;
+            Debug.Log($"RewardPanelDisplay: Set name text to '{reward.rewardName}'");
+        }
+        else
+        {
+            Debug.LogWarning($"RewardPanelDisplay ({gameObject.name}): Name Text is not assigned! Please assign it in the inspector.");
         }
 
         // Set description
         if (descriptionText != null)
         {
             descriptionText.text = reward.description;
+            Debug.Log($"RewardPanelDisplay: Set description text to '{reward.description}'");
+        }
+        else
+        {
+            Debug.LogWarning($"RewardPanelDisplay ({gameObject.name}): Description Text is not assigned! Please assign it in the inspector.");
         }
 
         // Set stat changes

@@ -232,6 +232,11 @@ public class ExperienceManager : MonoBehaviour
                 if (rewardPanelDisplays[i] == null)
                 {
                     rewardPanelDisplays[i] = panel.AddComponent<RewardPanelDisplay>();
+                    Debug.Log($"ExperienceManager: Added RewardPanelDisplay component to {panel.name}");
+                }
+                else
+                {
+                    Debug.Log($"ExperienceManager: Found existing RewardPanelDisplay on {panel.name}");
                 }
             }
 
@@ -312,17 +317,28 @@ public class ExperienceManager : MonoBehaviour
         }
 
         currentRewards = rewards.ToArray();
+        Debug.Log($"ExperienceManager: Generated {currentRewards.Length} rewards. First reward: {(currentRewards.Length > 0 ? currentRewards[0].rewardName : "none")}");
 
         // Display rewards on panels
         if (rewardPanelDisplays != null && rewardPanels != null)
         {
+            Debug.Log($"ExperienceManager: Attempting to display rewards on {rewardPanelDisplays.Length} panels");
             for (int i = 0; i < rewardPanels.Length && i < currentRewards.Length; i++)
             {
                 if (rewardPanelDisplays[i] != null && currentRewards[i] != null)
                 {
+                    Debug.Log($"ExperienceManager: Displaying reward {i}: {currentRewards[i].rewardName} on panel {rewardPanels[i].name}");
                     rewardPanelDisplays[i].DisplayReward(currentRewards[i]);
                 }
+                else
+                {
+                    Debug.LogWarning($"ExperienceManager: Cannot display reward {i} - PanelDisplay: {(rewardPanelDisplays[i] != null ? "OK" : "NULL")}, Reward: {(currentRewards[i] != null ? currentRewards[i].rewardName : "NULL")}");
+                }
             }
+        }
+        else
+        {
+            Debug.LogWarning($"ExperienceManager: Cannot display rewards - rewardPanelDisplays: {(rewardPanelDisplays != null ? "OK" : "NULL")}, rewardPanels: {(rewardPanels != null ? "OK" : "NULL")}");
         }
     }
 

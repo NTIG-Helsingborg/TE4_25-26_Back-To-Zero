@@ -895,7 +895,7 @@ MonoBehaviour:
   descriptionText: {fileID: 39944129380614387}
   statChangesText: {fileID: 0}
   rarityText: {fileID: 4332003005686148585}
-  backgroundImage: {fileID: 8064493682433980539}
+  backgroundImage: {fileID: 0}
   iconImage: {fileID: 3856192564952407059}
 --- !u!1 &3395912290659360328
 GameObject:
@@ -1772,7 +1772,7 @@ MonoBehaviour:
   descriptionText: {fileID: 3400201331385452966}
   statChangesText: {fileID: 0}
   rarityText: {fileID: 4332003005686148585}
-  backgroundImage: {fileID: 2814648069633743712}
+  backgroundImage: {fileID: 0}
   iconImage: {fileID: 1151018347894521342}
 --- !u!1 &6257316482186731303
 GameObject:
@@ -2319,7 +2319,7 @@ MonoBehaviour:
   descriptionText: {fileID: 5756293277548311110}
   statChangesText: {fileID: 0}
   rarityText: {fileID: 4332003005686148585}
-  backgroundImage: {fileID: 3753748984254249073}
+  backgroundImage: {fileID: 0}
   iconImage: {fileID: 32628574967117137}
 --- !u!1 &8007049354887476905
 GameObject:
