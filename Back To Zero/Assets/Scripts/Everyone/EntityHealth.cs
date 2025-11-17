@@ -302,9 +302,11 @@ public class Health : MonoBehaviour
         }
 
         // Safety: Check if ExperienceManager instance exists and is valid
-        if (ExperienceManager.Instance == null)
+        ExperienceManager expManager = ExperienceManager.Instance;
+        
+        // Fallback: find the Player and get its ExperienceManager if Instance is null
+        if (expManager == null)
         {
-            // Fallback: find the Player and get its ExperienceManager
             GameObject player = GameObject.FindGameObjectWithTag("Player");
             if (player != null)
             {
@@ -314,18 +316,18 @@ public class Health : MonoBehaviour
         
         if (expManager == null)
         {
-            Debug.LogWarning($"No ExperienceManager found on Player when trying to grant {experienceReward} XP from {gameObject.name}");
+            Debug.LogWarning($"No ExperienceManager found when trying to grant {experienceReward} XP from {gameObject.name}");
             return;
         }
 
         // Additional safety: Verify the instance is still active
-        if (ExperienceManager.Instance.gameObject == null || !ExperienceManager.Instance.gameObject.activeInHierarchy)
+        if (expManager.gameObject == null || !expManager.gameObject.activeInHierarchy)
         {
             Debug.LogWarning($"ExperienceManager instance is not active when trying to grant experience from {gameObject.name}");
             return;
         }
 
-        ExperienceManager.Instance.AddExperience(experienceReward);
+        expManager.AddExperience(experienceReward);
     }
 }
 

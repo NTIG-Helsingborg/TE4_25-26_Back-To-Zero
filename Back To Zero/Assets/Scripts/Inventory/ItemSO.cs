@@ -8,30 +8,28 @@ public class ItemSO : ScriptableObject
     public string itemDescription;
     public StatToChange statToChange = StatToChange.None;
     public int amountToChangeStat;
-    public int dropChance;  
-    public int isArtifact; // 0 = no, 1 = yes
-    public int dropChance;
     
     [Header("Item Type")]
     [Tooltip("Consumable items are used once. Artifacts provide permanent buffs.")]
     public int isArtifact = 0; // 0 = Consumable, 1 = Artifact
+    public int dropChance;
     public bool UseItem()
     {
         if (statToChange == StatToChange.Health)
         {
-            GameObject player = GameObject.Find("Player");
-            if (player == null)
+            GameObject playerObj = GameObject.Find("Player");
+            if (playerObj == null)
             {
                 return false;
             }
 
-            Health health = player.GetComponent<Health>();
+            Health health = playerObj.GetComponent<Health>();
             if (health == null || health.IsFullHealth())
             {
                 return false;
             }
 
-            Healing healing = player.GetComponent<Healing>();
+            Healing healing = playerObj.GetComponent<Healing>();
             if (healing != null)
             {
                 return healing.TryStartHeal(this);
@@ -47,7 +45,7 @@ public class ItemSO : ScriptableObject
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player == null)
         {
-            // Fallback to name lookup if tag isn’t set
+            // Fallback to name lookup if tag isn't set
             player = GameObject.Find("Player");
         }
 

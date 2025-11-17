@@ -320,4 +320,51 @@ public class InventoryManager : MonoBehaviour
         Debug.Log($"InventoryManager: Removed {quantityToRemove} of '{itemName}'.");
         return true;
     }
+
+    // Get the total count of a specific item in inventory
+    public int GetItemCount(string itemName)
+    {
+        int totalCount = 0;
+        if (itemSlot != null)
+        {
+            for (int i = 0; i < itemSlot.Length; i++)
+            {
+                if (itemSlot[i] != null && itemSlot[i].itemName == itemName)
+                {
+                    totalCount += itemSlot[i].quantity;
+                }
+            }
+        }
+        return totalCount;
+    }
+
+    // Check if there's space in the inventory for a new item
+    // If itemName is provided, checks if the item can stack in existing slots or if there's an empty slot
+    public bool HasInventorySpace(string itemName = null)
+    {
+        if (itemSlot == null || itemSlot.Length == 0)
+            return false;
+
+        // If itemName is provided, check if we can stack it in an existing slot
+        if (!string.IsNullOrEmpty(itemName))
+        {
+            for (int i = 0; i < itemSlot.Length; i++)
+            {
+                if (itemSlot[i] != null && itemSlot[i].itemName == itemName && !itemSlot[i].isFull)
+                {
+                    return true; // Can stack in existing slot
+                }
+            }
+        }
+
+        // Check for any empty slot
+        for (int i = 0; i < itemSlot.Length; i++)
+        {
+            if (itemSlot[i] != null && (itemSlot[i].quantity == 0 || string.IsNullOrEmpty(itemSlot[i].itemName)))
+            {
+                return true; // Found an empty slot
+            }
+        }
+        return false;
+    }
 }
