@@ -208,5 +208,16 @@ public class HarvestAbility : Ability
             }
         }
     }
+
+    private void OnSuccessfulHarvest(Health victim)
+    {
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player)
+        {
+            var handler = player.GetComponent<PlayerHandler>();
+            if (handler) handler.AddHarvestCharge();
+        }
+        // ...existing heal logic...
+    }
 }
 

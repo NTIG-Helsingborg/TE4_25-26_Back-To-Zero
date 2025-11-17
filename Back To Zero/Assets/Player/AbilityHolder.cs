@@ -20,7 +20,10 @@ public class AbilityHolder : MonoBehaviour
         switch (state){
             case AbilityState.ready:
                 if (Input.GetKeyDown(key)){
-                    TriggerAbility();
+                    if (ability != null && ability.CanActivate())
+                    {
+                        TriggerAbility();
+                    }
                 }
             break;
             case AbilityState.active:
