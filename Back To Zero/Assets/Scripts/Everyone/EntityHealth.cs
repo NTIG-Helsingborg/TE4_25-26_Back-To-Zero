@@ -64,9 +64,23 @@ public class Health : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        // Prevent taking damage if already dead
+        if (currentHealth == int.MinValue)
+        {
+            return;
+        }
+
         if (!isInvincible)
         {
-            currentHealth -= damage;
+            int incoming = damage;
+
+            // If this Health is on the Player, apply defense multiplier
+            if (TryGetComponent<PlayerStats>(out var stats))
+            {
+                incoming = stats.ApplyDefenseMultiplier(damage);
+            }
+
+            currentHealth -= incoming;
             RefreshHealthBarFill();
             EvaluateHarvestability();
         }
@@ -92,6 +106,20 @@ public class Health : MonoBehaviour
     public int GetCurrentHealth() => currentHealth;
     public bool IsFullHealth() => currentHealth >= maxHealth;
     public void InstantKill() => Die();
+    
+    public void SetMaxHealth(int newMaxHealth)
+    {
+        if (newMaxHealth > 0)
+        {
+            maxHealth = newMaxHealth;
+            // Ensure current health doesn't exceed new max
+            if (currentHealth > maxHealth)
+            {
+                currentHealth = maxHealth;
+            }
+            RefreshHealthBarFill();
+        }
+    }
 
     private void RefreshHealthBarFill()
     {
@@ -205,21 +233,22 @@ public class Health : MonoBehaviour
 
     private void Die()
     {
-        LootBag lootBag = GetComponent<LootBag>();
-        if (lootBag != null)
+        // Prevent multiple death calls
+        if (currentHealth <= 0 && currentHealth != int.MinValue)
         {
-            lootBag.InstantiateLoot(transform.position);
+            currentHealth = int.MinValue; // Mark as dead
         }
-        else
+        else if (currentHealth == int.MinValue)
         {
-            Debug.Log(gameObject.name + " died but has no LootBag component.");
+            return; // Already dead, prevent double execution
         }
 
         StopHarvestShake();
-        Debug.Log(gameObject.name + " died");
 
+        // Handle player death differently
         if (gameObject.CompareTag("Player"))
         {
+            Debug.Log("Player died");
             return;
         }
 
@@ -230,7 +259,33 @@ public class Health : MonoBehaviour
         }
 
         GrantExperience();
+        Debug.Log(gameObject.name + " died");
 
+        // Try to drop loot
+        try
+        {
+            LootBag lootBag = GetComponent<LootBag>();
+            if (lootBag != null)
+            {
+                lootBag.InstantiateLoot(transform.position);
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error dropping loot from {gameObject.name}: {e.Message}");
+        }
+
+        // Grant experience
+        try
+        {
+            GrantExperience();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error granting experience from {gameObject.name}: {e.Message}");
+        }
+
+        // Destroy the object
         Destroy(gameObject);
     }
 
@@ -249,7 +304,17 @@ public class Health : MonoBehaviour
         // Safety: Check if ExperienceManager instance exists and is valid
         if (ExperienceManager.Instance == null)
         {
-            Debug.LogWarning($"No ExperienceManager instance found when trying to grant experience from {gameObject.name}");
+            // Fallback: find the Player and get its ExperienceManager
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                expManager = player.GetComponent<ExperienceManager>();
+            }
+        }
+        
+        if (expManager == null)
+        {
+            Debug.LogWarning($"No ExperienceManager found on Player when trying to grant {experienceReward} XP from {gameObject.name}");
             return;
         }
 

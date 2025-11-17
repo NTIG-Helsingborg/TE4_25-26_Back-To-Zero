@@ -139,6 +139,8 @@ MonoBehaviour:
   currentHealth: 1
   isInvincible: 0
   healthBar: {fileID: 0}
+  grantsExperienceOnDeath: 0
+  experienceReward: 10
   enableHarvestFeedback: 0
 --- !u!61 &594365266968991645
 BoxCollider2D:
@@ -228,5 +230,6 @@ MonoBehaviour:
   droppedItemPrefab: {fileID: 2412890604946423907, guid: e8f0a8d530a7ce94aab606f74fd65ddf, type: 3}
   lootlist:
   - {fileID: 11400000, guid: 346716a69a6dff84cbfbd8f3faf9e29b, type: 2}
+  - {fileID: 11400000, guid: fa1ebb8a9a70a6942a73e775ca006531, type: 2}
   - {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
   numberOfItemsToDrop: 3

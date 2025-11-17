@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -21,6 +22,8 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private Transform artifactSlotsParent;
     
     private bool menuActivated = false;
+
+    private PlayerStats playerStats;
 
     void OnEnable()
     {
@@ -81,6 +84,15 @@ public class InventoryManager : MonoBehaviour
             artifactSlot = artifactSlotsParent.GetComponentsInChildren<ItemSlot>(true);
             Debug.Log($"InventoryManager: Found {artifactSlot.Length} artifact slots in '{artifactSlotsParent.name}'.");
         }
+
+        playerStats = GetComponent<PlayerStats>();
+        Debug.Log("InventoryManager: PlayerStats found: " + (playerStats != null));
+    }
+
+    private void Start()
+    {
+        // Apply passives if inventory pre-populated
+        RecalculatePlayerStatsFromInventory();
     }
 
     public void OnInventory(InputAction.CallbackContext context)
@@ -153,6 +165,10 @@ public class InventoryManager : MonoBehaviour
             if (itemSOs[i].itemName == itemName)
             {
                 bool usable = itemSOs[i].UseItem();
+                
+                // Inventory may have changed (consumables). Recalc passives anyway.
+                RecalculatePlayerStatsFromInventory();
+
                 return usable;
             }
         }
@@ -202,7 +218,10 @@ public class InventoryManager : MonoBehaviour
                if (leftOverItems > 0)
                    leftOverItems = AddItem(itemName, itemIcon, leftOverItems, itemDescription, isArtifactOverride);
 
-                return leftOverItems;
+               // Recalc passives after inventory actually changed
+               RecalculatePlayerStatsFromInventory();
+
+               return leftOverItems;
            }
         }
         
@@ -219,50 +238,47 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    // Get total count of a specific item by name across all inventory slots
-    public int GetItemCount(string itemName)
+    // Build a list of artifacts currently in slots and push to PlayerStats
+    private void RecalculatePlayerStatsFromInventory()
     {
-        int totalCount = 0;
-        if (itemSlot != null)
+        if (playerStats == null)
+            return;
+
+        var artifacts = new List<ItemSO>();
+        if (itemSlot != null && itemSOs != null)
         {
             for (int i = 0; i < itemSlot.Length; i++)
             {
-                if (itemSlot[i] != null && itemSlot[i].itemName == itemName)
-                {
-                    totalCount += itemSlot[i].quantity;
-                }
-            }
-        }
-        return totalCount;
-    }
+                var slot = itemSlot[i];
+                if (slot == null || slot.quantity <= 0 || string.IsNullOrEmpty(slot.itemName))
+                    continue;
 
-    // Check if there's space available for a specific item (either empty slot or existing stack with room)
-    public bool HasInventorySpace(string itemName)
-    {
-        if (itemSlot == null || itemSlot.Length == 0)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < itemSlot.Length; i++)
-        {
-            if (itemSlot[i] != null)
-            {
-                // Check for empty slot
-                if (itemSlot[i].quantity == 0)
+                // Find matching ItemSO by name
+                ItemSO def = null;
+                for (int j = 0; j < itemSOs.Length; j++)
                 {
-                    return true;
+                    if (itemSOs[j] != null && itemSOs[j].itemName == slot.itemName)
+                    {
+                        def = itemSOs[j];
+                        break;
+                    }
                 }
-                
-                // Check for existing stack that's not full
-                if (itemSlot[i].itemName == itemName && !itemSlot[i].isFull)
+
+                if (def == null)
+                    continue;
+
+                if (def.isArtifact == 1)
                 {
-                    return true;
+                    // If artifacts can stack, count quantity; otherwise, one is enough
+                    int count = Mathf.Max(1, slot.quantity);
+                    for (int c = 0; c < count; c++)
+                        artifacts.Add(def);
                 }
             }
         }
 
-        return false;
+        // Push artifacts to playerStats
+        playerStats.RecalculateFromArtifacts(artifacts);
     }
 
     // Remove a specific quantity of an item from inventory (returns true if successful)
@@ -304,5 +320,4 @@ public class InventoryManager : MonoBehaviour
         Debug.Log($"InventoryManager: Removed {quantityToRemove} of '{itemName}'.");
         return true;
     }
-
 }

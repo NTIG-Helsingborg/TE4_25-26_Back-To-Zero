@@ -72,8 +72,13 @@ public class EntityDamage : MonoBehaviour
 
         if (targetHealth != null && !targetHealth.isInvincible)
         {
-            targetHealth.TakeDamage(damage);
-            Debug.Log($"[{gameObject.name}] Dealt {damage} damage to {other.gameObject.name}");
+            int finalDamage = damage;
+            var attackerStats = GetComponent<PlayerStats>();
+            if (attackerStats != null)
+                finalDamage = attackerStats.ApplyDamageMultiplier(damage);
+
+            targetHealth.TakeDamage(finalDamage);
+            Debug.Log($"[{gameObject.name}] Dealt {finalDamage} damage (base {damage}) to {other.gameObject.name}");
 
             if (enableStatusEffects)
             {
@@ -166,8 +171,13 @@ public class EntityDamage : MonoBehaviour
 
         if (targetHealth != null && !targetHealth.isInvincible)
         {
-            targetHealth.TakeDamage(damage);
-            Debug.Log($"[{gameObject.name}] Dealt {damage} damage to {other.gameObject.name}");
+            int finalDamage = damage;
+            var attackerStats = GetComponent<PlayerStats>();
+            if (attackerStats != null)
+                finalDamage = attackerStats.ApplyDamageMultiplier(damage);
+
+            targetHealth.TakeDamage(finalDamage);
+            Debug.Log($"[{gameObject.name}] Dealt {finalDamage} damage (base {damage}) to {other.gameObject.name}");
 
             if (enableStatusEffects)
             {
@@ -245,9 +255,14 @@ public class EntityDamage : MonoBehaviour
 
             if (Time.time - lastDamageTime[other.gameObject] >= continuousDamageInterval)
             {
-                targetHealth.TakeDamage(damage);
+                int finalDamage = damage;
+                var attackerStats = GetComponent<PlayerStats>();
+                if (attackerStats != null)
+                    finalDamage = attackerStats.ApplyDamageMultiplier(damage);
+
+                targetHealth.TakeDamage(finalDamage);
                 lastDamageTime[other.gameObject] = Time.time;
-                Debug.Log($"[{gameObject.name}] Continuous damage: {damage} to {other.gameObject.name}");
+                Debug.Log($"[{gameObject.name}] Continuous damage: {finalDamage} (base {damage}) to {other.gameObject.name}");
 
                 if (enableStatusEffects)
                 {
@@ -284,9 +299,14 @@ public class EntityDamage : MonoBehaviour
 
             if (Time.time - lastDamageTime[other.gameObject] >= continuousDamageInterval)
             {
-                targetHealth.TakeDamage(damage);
+                int finalDamage = damage;
+                var attackerStats = GetComponent<PlayerStats>();
+                if (attackerStats != null)
+                    finalDamage = attackerStats.ApplyDamageMultiplier(damage);
+
+                targetHealth.TakeDamage(finalDamage);
                 lastDamageTime[other.gameObject] = Time.time;
-                Debug.Log($"[{gameObject.name}] Continuous damage: {damage} to {other.gameObject.name}");
+                Debug.Log($"[{gameObject.name}] Continuous damage: {finalDamage} (base {damage}) to {other.gameObject.name}");
 
                 if (enableStatusEffects)
                 {
