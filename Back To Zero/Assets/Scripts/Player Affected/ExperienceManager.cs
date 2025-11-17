@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
 
 public class ExperienceManager : MonoBehaviour
 {
@@ -25,6 +26,8 @@ public class ExperienceManager : MonoBehaviour
     [SerializeField] GameObject[] rewardPanels;
 
     Button[] rewardButtons;
+    RewardPanelDisplay[] rewardPanelDisplays;
+    RewardSO[] currentRewards;
 
     int pendingLevelUps;
     bool levelUpMenuOpen;
@@ -67,6 +70,13 @@ public class ExperienceManager : MonoBehaviour
         UpdateInterface();
         ConfigureLevelUpMenu();
         HideLevelUpMenu();
+        
+        // Ensure RewardManager exists
+        if (RewardManager.Instance == null)
+        {
+            GameObject rewardManagerObj = new GameObject("RewardManager");
+            rewardManagerObj.AddComponent<RewardManager>();
+        }
     }
 
     public void AddExperience(int amount)
@@ -200,6 +210,7 @@ public class ExperienceManager : MonoBehaviour
                 ClearRewardButtonListeners();
             }
             rewardButtons = new Button[rewardPanels.Length];
+            rewardPanelDisplays = new RewardPanelDisplay[rewardPanels.Length];
         }
 
         for (int i = 0; i < rewardPanels.Length; i++)
@@ -210,7 +221,18 @@ public class ExperienceManager : MonoBehaviour
             if (panel == null)
             {
                 rewardButtons[i] = null;
+                rewardPanelDisplays[i] = null;
                 continue;
+            }
+
+            // Get or add RewardPanelDisplay component
+            if (rewardPanelDisplays[i] == null)
+            {
+                rewardPanelDisplays[i] = panel.GetComponent<RewardPanelDisplay>();
+                if (rewardPanelDisplays[i] == null)
+                {
+                    rewardPanelDisplays[i] = panel.AddComponent<RewardPanelDisplay>();
+                }
             }
 
             Button button = panel.GetComponent<Button>();
@@ -256,6 +278,9 @@ public class ExperienceManager : MonoBehaviour
             return;
         }
 
+        // Generate rewards for this level up
+        GenerateAndDisplayRewards();
+
         ShowLevelUpCanvas();
 
         if (levelUpMenu != null)
@@ -267,6 +292,38 @@ public class ExperienceManager : MonoBehaviour
         
         // Pause the game when level up menu opens
         Time.timeScale = 0f;
+    }
+
+    void GenerateAndDisplayRewards()
+    {
+        if (RewardManager.Instance == null)
+        {
+            Debug.LogError("ExperienceManager: RewardManager instance not found! Cannot generate rewards.");
+            return;
+        }
+
+        // Generate 3 rewards
+        var rewards = RewardManager.Instance.GenerateRewards(rewardPanels != null ? rewardPanels.Length : 3);
+        
+        if (rewards == null || rewards.Count == 0)
+        {
+            Debug.LogWarning("ExperienceManager: No rewards generated! Check RewardManager configuration.");
+            return;
+        }
+
+        currentRewards = rewards.ToArray();
+
+        // Display rewards on panels
+        if (rewardPanelDisplays != null && rewardPanels != null)
+        {
+            for (int i = 0; i < rewardPanels.Length && i < currentRewards.Length; i++)
+            {
+                if (rewardPanelDisplays[i] != null && currentRewards[i] != null)
+                {
+                    rewardPanelDisplays[i].DisplayReward(currentRewards[i]);
+                }
+            }
+        }
     }
 
     void HandleRewardSelection(int rewardIndex)
@@ -295,7 +352,33 @@ public class ExperienceManager : MonoBehaviour
 
     void GrantReward(int rewardIndex)
     {
-        Debug.Log($"Reward {rewardIndex + 1} selected. (Reward effect not yet implemented.)");
+        if (currentRewards == null || rewardIndex < 0 || rewardIndex >= currentRewards.Length)
+        {
+            Debug.LogWarning($"ExperienceManager: Invalid reward index {rewardIndex}. Cannot grant reward.");
+            return;
+        }
+
+        RewardSO selectedReward = currentRewards[rewardIndex];
+        
+        if (selectedReward == null)
+        {
+            Debug.LogWarning($"ExperienceManager: Reward at index {rewardIndex} is null!");
+            return;
+        }
+
+        // Apply the reward through RewardManager
+        if (RewardManager.Instance != null)
+        {
+            RewardManager.Instance.ApplyReward(selectedReward);
+            Debug.Log($"Granted reward: {selectedReward.rewardName} ({RewardRarityHelper.GetRarityName(selectedReward.rarity)})");
+        }
+        else
+        {
+            Debug.LogError("ExperienceManager: RewardManager instance not found! Cannot apply reward.");
+        }
+
+        // Clear current rewards
+        currentRewards = null;
     }
 
     void ShowLevelUpCanvas()
@@ -308,6 +391,18 @@ public class ExperienceManager : MonoBehaviour
 
     void HideLevelUpMenu()
     {
+        // Clear reward displays
+        if (rewardPanelDisplays != null)
+        {
+            foreach (var display in rewardPanelDisplays)
+            {
+                if (display != null)
+                {
+                    display.ClearDisplay();
+                }
+            }
+        }
+
         if (levelUpCanvas != null)
         {
             levelUpCanvas.SetActive(false);
