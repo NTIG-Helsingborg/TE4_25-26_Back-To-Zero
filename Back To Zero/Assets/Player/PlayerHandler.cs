@@ -18,7 +18,6 @@ public class PlayerHandler : MonoBehaviour
     [SerializeField] private float ultimateCharge = 0f;
     public float chargePerHarvest = 25f;
     public System.Action<float> OnUltimateChanged; // normalized 0..1
-    public GameObject ultimateBarPrefab;
 
     private Health playerHealth;
     private bool isDead = false;

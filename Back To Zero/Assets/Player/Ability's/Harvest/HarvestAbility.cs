@@ -90,6 +90,8 @@ public class HarvestAbility : Ability
         int totalHealAmount = 0;
 
         float thresholdFraction = CurrentHarvestThresholdFraction;
+
+        var playerHandler = playerObject.GetComponent<PlayerHandler>();
         
         foreach (Collider2D collider in nearbyEntities)
         {
@@ -110,13 +112,16 @@ public class HarvestAbility : Ability
                 int healAmount = Mathf.RoundToInt(maxHealth * healPercentage);
                 totalHealAmount += healAmount;
                 harvestedEntities.Add(collider.gameObject);
+
+
+                
             }
         }
         
         if (harvestedEntities.Count > 0)
         {
             Debug.Log($"Harvesting {harvestedEntities.Count} entities for {totalHealAmount} HP");
-            
+
             FreezeEntities(harvestedEntities, true);
             
             StartHarvestVisuals(harvestedEntities);
@@ -131,9 +136,16 @@ public class HarvestAbility : Ability
                         entityHealth.InstantKill();
                 }
             }
-            
+
             if (playerHealth != null && totalHealAmount > 0)
                 playerHealth.Heal(totalHealAmount);
+                
+            if (playerHandler != null)
+            {
+                //adds charge to ultimate
+                for (int i = 0; i < harvestedEntities.Count; i++)
+                    playerHandler.AddHarvestCharge();
+            }
         }
         else
         {
@@ -207,17 +219,6 @@ public class HarvestAbility : Ability
                     script.enabled = !freeze;
             }
         }
-    }
-
-    private void OnSuccessfulHarvest(Health victim)
-    {
-        var player = GameObject.FindGameObjectWithTag("Player");
-        if (player)
-        {
-            var handler = player.GetComponent<PlayerHandler>();
-            if (handler) handler.AddHarvestCharge();
-        }
-        // ...existing heal logic...
     }
 }
 
