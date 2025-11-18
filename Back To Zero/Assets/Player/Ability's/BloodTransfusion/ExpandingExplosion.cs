@@ -111,8 +111,6 @@ public class ExpandingExplosion : MonoBehaviour
                 {
                     int healAmount = Mathf.RoundToInt(maxH * healOnKillPercent);
                     if (healAmount > 0) healer.Heal(healAmount);
-                    if (playerHandler != null)
-                        playerHandler.AddHarvestCharge();
                 }
             }
 
