@@ -556,4 +556,10 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    // Public getter for active slots (used by AbilitySetter)
+    public ActiveSlot[] GetActiveSlots()
+    {
+        return activeSlots;
+    }
+
 }

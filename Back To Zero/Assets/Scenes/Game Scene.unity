@@ -3286,6 +3286,26 @@ PrefabInstance:
       propertyPath: healthBar
       value: 
       objectReference: {fileID: 771221766}
+    - target: {fileID: 3278557163740205405, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: allAbilities.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3278557163740205405, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: 'allAbilities.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 0ec2bab3e2fdd9248864fcf21b2d5ee4, type: 2}
+    - target: {fileID: 3278557163740205405, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: 'allAbilities.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 0edbd740f1d414d4480e2a13fb47d680, type: 2}
+    - target: {fileID: 3278557163740205405, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: 'allAbilities.Array.data[4]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 3cd434104c9fe4ff29089eaccc013e68, type: 2}
+    - target: {fileID: 3278557163740205405, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: 'allAbilities.Array.data[5]'
+      value: 
+      objectReference: {fileID: 11400000, guid: b8c4d0e6f2a3559906b7c8d9e0f1a2b3, type: 2}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: TopPanel
       value: 

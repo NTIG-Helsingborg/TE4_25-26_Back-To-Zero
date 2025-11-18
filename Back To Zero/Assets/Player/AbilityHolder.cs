@@ -15,11 +15,25 @@ public class AbilityHolder : MonoBehaviour
 
     public KeyCode key;
 
+    void Awake()
+    {
+        // Ensure key starts as None - AbilitySetter will set it
+        key = KeyCode.None;
+    }
+
     void Update()
     {
+        // Don't process input if game is paused (e.g., inventory is open)
+        if (Time.timeScale == 0f)
+            return;
+        
+        // Don't process if no ability assigned
+        if (ability == null)
+            return;
+            
         switch (state){
             case AbilityState.ready:
-                if (Input.GetKeyDown(key)){
+                if (key != KeyCode.None && Input.GetKeyDown(key)){
                     TriggerAbility();
                 }
             break;

@@ -56,6 +56,7 @@ GameObject:
   - component: {fileID: 6576621383432750835}
   - component: {fileID: 3839243146162092306}
   - component: {fileID: 2356233930430235773}
+  - component: {fileID: 3278557163740205405}
   - component: {fileID: 1698157271476681283}
   - component: {fileID: 3721271059765133813}
   - component: {fileID: 1240838975994050367}
@@ -162,6 +163,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
+--- !u!114 &3278557163740205405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5631687449377463173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0be936bef0e7e4387b169181cc8716ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allAbilities:
+  - {fileID: 11400000, guid: 0edbd740f1d414d4480e2a13fb47d680, type: 2}
+  - {fileID: 11400000, guid: 0ec2bab3e2fdd9248864fcf21b2d5ee4, type: 2}
+  - {fileID: 11400000, guid: 722f4621a60e8dd418d0a779d07966f2, type: 2}
+  - {fileID: 11400000, guid: 13ddefe0fb7600e429ad297163d573ad, type: 2}
+  abilitiesResourcePath: Abilities
+  inventoryManager: {fileID: 3351440291523874951}
+  slotKeybindOverrides: 430100006500000071000000
 --- !u!61 &1698157271476681283
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -473,6 +494,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
   slotsParent: {fileID: 0}
   artifactSlotsParent: {fileID: 0}
+  abilitySlotsParent: {fileID: 0}
+  activeSlots: []
+  activeEquipmentSlots: []
 --- !u!114 &2261580099307110445
 MonoBehaviour:
   m_ObjectHideFlags: 0
