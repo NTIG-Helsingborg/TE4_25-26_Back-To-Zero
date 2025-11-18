@@ -15,14 +15,13 @@ MonoBehaviour:
   name: 
   cooldownTime: 0
   activeTime: 0
-  damage: 0
-  radius: 0
-  duration: 0
-  knockbackForce: 0
-  HpCost: 0
+  damage: 50
+  radius: 10
+  duration: 0.5
+  knockbackForce: 10
   IsAbility: 1
   damageLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
-  includePlayer: 0
-  explosionVfxPrefab: {fileID: 0}
+    m_Bits: 1
+  explosionVfxPrefab: {fileID: 7737874149003893034, guid: 44f9ec1d5f02e6c42aab9b32edc9a4e5, type: 3}
+  harvestHealPercentage: 0.5
