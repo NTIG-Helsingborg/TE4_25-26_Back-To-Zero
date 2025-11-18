@@ -417,7 +417,21 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
-        // Clear the target active slot first
+        // If the active slot already has an item, return it to inventory first
+        if (!string.IsNullOrEmpty(targetSlot.itemName) && targetSlot.quantity > 0)
+        {
+            int returnLeftover = AddItem(targetSlot.itemName, targetSlot.itemSprite, targetSlot.quantity, targetSlot.itemDescription, 2);
+            if (returnLeftover > 0)
+            {
+                Debug.LogWarning($"InventoryManager: Could not return all of '{targetSlot.itemName}' to inventory. {returnLeftover} items lost.");
+            }
+            else
+            {
+                Debug.Log($"InventoryManager: Returned '{targetSlot.itemName}' from active slot to ability inventory.");
+            }
+        }
+
+        // Clear the target active slot
         targetSlot.EmptySlot();
 
         // Transfer the item to the active slot (transfer 1 item)
@@ -482,7 +496,21 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
-        // Clear the target active equipment slot first
+        // If the active equipment slot already has an item, return it to inventory first
+        if (!string.IsNullOrEmpty(targetSlot.itemName) && targetSlot.quantity > 0)
+        {
+            int returnLeftover = AddItem(targetSlot.itemName, targetSlot.itemSprite, targetSlot.quantity, targetSlot.itemDescription, 1);
+            if (returnLeftover > 0)
+            {
+                Debug.LogWarning($"InventoryManager: Could not return all of '{targetSlot.itemName}' to inventory. {returnLeftover} items lost.");
+            }
+            else
+            {
+                Debug.Log($"InventoryManager: Returned '{targetSlot.itemName}' from active equipment slot to artifact inventory.");
+            }
+        }
+
+        // Clear the target active equipment slot
         targetSlot.EmptySlot();
 
         // Transfer the item to the active equipment slot (transfer 1 item)
