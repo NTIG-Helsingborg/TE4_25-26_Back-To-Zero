@@ -1282,11 +1282,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2212924858141564195, guid: 03a0fe93987fd194f886c81bff25739c, type: 3}
   m_PrefabInstance: {fileID: 1218743259}
   m_PrefabAsset: {fileID: 0}
---- !u!224 &948574612 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 6376298973163718239, guid: 03a0fe93987fd194f886c81bff25739c, type: 3}
-  m_PrefabInstance: {fileID: 1218743259}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &948574613 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3539787461393189967, guid: 03a0fe93987fd194f886c81bff25739c, type: 3}
@@ -2100,6 +2095,16 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 03a0fe93987fd194f886c81bff25739c, type: 3}
+--- !u!224 &1218743260 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 5618728540898522984, guid: 03a0fe93987fd194f886c81bff25739c, type: 3}
+  m_PrefabInstance: {fileID: 1218743259}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &1218743261 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 4984637780275941941, guid: 03a0fe93987fd194f886c81bff25739c, type: 3}
+  m_PrefabInstance: {fileID: 1218743259}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1226924822 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
@@ -3007,11 +3012,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8185610490035550342, guid: 4cf52470352a74bf3b195505735fa866, type: 3}
   m_PrefabInstance: {fileID: 8484011323677827162}
   m_PrefabAsset: {fileID: 0}
---- !u!224 &2132096252 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 5903589905613655658, guid: 03a0fe93987fd194f886c81bff25739c, type: 3}
-  m_PrefabInstance: {fileID: 1218743259}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &2132096253 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8324161363245635803, guid: 03a0fe93987fd194f886c81bff25739c, type: 3}
@@ -3301,11 +3301,11 @@ PrefabInstance:
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: abilitySlotsParent
       value: 
-      objectReference: {fileID: 2132096252}
+      objectReference: {fileID: 1218743260}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: artifactSlotsParent
       value: 
-      objectReference: {fileID: 948574612}
+      objectReference: {fileID: 1218743261}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: InventoryMenuAbility
       value: 
@@ -3316,7 +3316,7 @@ PrefabInstance:
       objectReference: {fileID: 230368935}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: activeSlots.Array.size
-      value: 6
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: 'activeSlots.Array.data[0]'

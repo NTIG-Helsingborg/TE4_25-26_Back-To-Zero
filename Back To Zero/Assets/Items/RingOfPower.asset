@@ -18,5 +18,5 @@ MonoBehaviour:
   statToChange: 0
   amountToChangeStat: 0
   dropChance: 0
-  isArtifact: 0
+  isArtifact: 1
   isAbility: 0
