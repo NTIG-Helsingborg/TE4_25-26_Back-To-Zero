@@ -19,4 +19,4 @@ MonoBehaviour:
   statToChange: 1
   amountToChangeStat: 50
   dropChance: 40
-  isArtifact: 1
+  isArtifact: 0

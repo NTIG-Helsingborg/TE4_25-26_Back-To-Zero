@@ -66,6 +66,12 @@ public class PlayerHandler : MonoBehaviour
         isDead = true;
         Debug.Log("Player died! Respawning in " + respawnDelay + " seconds...");
         
+        // Reset waves when player dies
+        if (WaveManager.Instance != null)
+        {
+            WaveManager.Instance.ResetWaves();
+        }
+        
         if (freezePositionOnDeath)
         {
             FreezePosition(true);

@@ -1,13 +1,12 @@
-using NUnit.Framework;
 using Pathfinding;
 using UnityEngine;
 
 public class EnemyChase : MonoBehaviour
 {
 
-    public Transform player;
-    public float aggroRange = 8f;
-    public LayerMask obstacleMask; // Assign walls/obstacles in inspector
+    [SerializeField] private Transform player;
+    [SerializeField] private float aggroRange = 8f;
+    [SerializeField] private LayerMask obstacleMask; // Assign walls/obstacles in inspector
 
     private AIDestinationSetter destinationSetter;
     private AIPath aiPath;
@@ -35,6 +34,8 @@ public class EnemyChase : MonoBehaviour
 
     void Update()
     {
+        if (player == null) return;
+        
         float distance = Vector3.Distance(transform.position, player.position);
 
         // Acquire aggro
@@ -68,6 +69,8 @@ public class EnemyChase : MonoBehaviour
 
     bool HasLineOfSight()
     {
+        if (player == null) return false;
+        
         Vector3 direction = (player.position - transform.position).normalized;
         float distance = Vector3.Distance(transform.position, player.position);
 

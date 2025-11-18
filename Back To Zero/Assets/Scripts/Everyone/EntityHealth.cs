@@ -223,6 +223,12 @@ public class Health : MonoBehaviour
             return;
         }
 
+        // Notify WaveManager that an enemy died
+        if (WaveManager.Instance != null)
+        {
+            WaveManager.Instance.OnEnemyKilled();
+        }
+
         GrantExperience();
 
         Destroy(gameObject);
@@ -240,9 +246,17 @@ public class Health : MonoBehaviour
             return;
         }
 
+        // Safety: Check if ExperienceManager instance exists and is valid
         if (ExperienceManager.Instance == null)
         {
             Debug.LogWarning($"No ExperienceManager instance found when trying to grant experience from {gameObject.name}");
+            return;
+        }
+
+        // Additional safety: Verify the instance is still active
+        if (ExperienceManager.Instance.gameObject == null || !ExperienceManager.Instance.gameObject.activeInHierarchy)
+        {
+            Debug.LogWarning($"ExperienceManager instance is not active when trying to grant experience from {gameObject.name}");
             return;
         }
 

@@ -70,6 +70,7 @@ GameObject:
   - component: {fileID: 2070274060168788743}
   - component: {fileID: 7004101140356322880}
   - component: {fileID: 7239643960339905368}
+  - component: {fileID: 5322831608097000142}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -250,9 +251,9 @@ MonoBehaviour:
   currentHealth: 0
   isInvincible: 0
   healthBar: {fileID: 0}
-  grantsExperienceOnDeath: 1
+  grantsExperienceOnDeath: 0
   experienceReward: 60
-  enableHarvestFeedback: 1
+  enableHarvestFeedback: 0
 --- !u!114 &7225149296088934357
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -463,11 +464,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inventoryAction: {fileID: 1277660861749813583, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
-  InventoryMenu: {fileID: 5631687449377463173}
+  InventoryMenu: {fileID: 0}
+  InventoryMenuEquipment: {fileID: 0}
+  InventoryMenuAbility: {fileID: 0}
+  TopPanel: {fileID: 0}
   itemSOs:
   - {fileID: 11400000, guid: 346716a69a6dff84cbfbd8f3faf9e29b, type: 2}
   - {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
   slotsParent: {fileID: 0}
+  artifactSlotsParent: {fileID: 0}
 --- !u!114 &2261580099307110445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -482,7 +487,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healAction: {fileID: -8473864806744115226, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   inventoryManager: {fileID: 3351440291523874951}
-  healingItemName: Potion
+  healingItemName: Healthpot
   healingItemDefinition: {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
   consumeItemOnHeal: 1
   fallbackHealAmount: 30
@@ -531,6 +536,48 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ability: {fileID: 11400000, guid: 13ddefe0fb7600e429ad297163d573ad, type: 2}
   key: 53
+--- !u!114 &5322831608097000142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5631687449377463173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83e536a6d8a64404fbeac67ebdec7e66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  experienceCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  levelText: {fileID: 0}
+  experienceText: {fileID: 0}
+  experienceFill: {fileID: 0}
+  levelUpCanvas: {fileID: 0}
+  levelUpMenu: {fileID: 0}
+  rewardPanels: []
 --- !u!1 &8811310924032871480
 GameObject:
   m_ObjectHideFlags: 0
