@@ -417,7 +417,19 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
-        // Clear the target active slot first
+        // Return the currently equipped item to inventory first (if any)
+        if (!string.IsNullOrEmpty(targetSlot.itemName) && targetSlot.quantity > 0)
+        {
+            int returnLeftover = AddItem(targetSlot.itemName, targetSlot.itemSprite, targetSlot.quantity, targetSlot.itemDescription, 2);
+            if (returnLeftover > 0)
+            {
+                Debug.LogWarning($"InventoryManager: Could not return all of '{targetSlot.itemName}' to inventory. Cannot equip new item.");
+                return; // Don't equip new item if we couldn't return the old one
+            }
+            Debug.Log($"InventoryManager: Returned '{targetSlot.itemName}' from active slot to inventory.");
+        }
+
+        // Clear the target active slot
         targetSlot.EmptySlot();
 
         // Transfer the item to the active slot (transfer 1 item)
@@ -482,7 +494,19 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
-        // Clear the target active equipment slot first
+        // Return the currently equipped item to inventory first (if any)
+        if (!string.IsNullOrEmpty(targetSlot.itemName) && targetSlot.quantity > 0)
+        {
+            int returnLeftover = AddItem(targetSlot.itemName, targetSlot.itemSprite, targetSlot.quantity, targetSlot.itemDescription, 1);
+            if (returnLeftover > 0)
+            {
+                Debug.LogWarning($"InventoryManager: Could not return all of '{targetSlot.itemName}' to inventory. Cannot equip new item.");
+                return; // Don't equip new item if we couldn't return the old one
+            }
+            Debug.Log($"InventoryManager: Returned '{targetSlot.itemName}' from active equipment slot to inventory.");
+        }
+
+        // Clear the target active equipment slot
         targetSlot.EmptySlot();
 
         // Transfer the item to the active equipment slot (transfer 1 item)
