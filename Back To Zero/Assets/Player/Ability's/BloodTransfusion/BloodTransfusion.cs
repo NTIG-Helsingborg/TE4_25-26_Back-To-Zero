@@ -55,10 +55,11 @@ public class BloodTransfusion : Ability
         }
 
 
-        // Set HP to 1
-        int cur = playerHealth.GetCurrentHealth();
-        if (cur > 1) playerHealth.SpendHealth(cur - 1);
-        else if (cur < 1) playerHealth.Heal(1 - cur);
+        // HP cost: 50% of current HP, capped at 50% of max HP (floored so it never kills you)
+        int maxH = playerHealth.GetMaxHealth();
+        int curH = playerHealth.GetCurrentHealth();
+        int cost = Mathf.FloorToInt(0.5f * Mathf.Min(curH, maxH));
+        if (cost > 0) playerHealth.SpendHealth(cost);
 
         // Consume meter
         handler.ConsumeUltimate();

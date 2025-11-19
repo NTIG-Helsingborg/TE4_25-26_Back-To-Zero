@@ -3,46 +3,70 @@ using UnityEngine.UI;
 
 public class PlayerUltimateBar : MonoBehaviour
 {
-    [SerializeField] private Image fillImage;      // assign your BloodBar Image here
-    [SerializeField] private bool faceCamera = true;
+    [SerializeField] private Image fillImage;
+    [SerializeField] private bool colorWhenFull = true;
+    [SerializeField] private Color fullColor = Color.red;
+    [SerializeField] private Color normalColor = Color.white;
 
     private PlayerHandler handler;
 
     void Awake()
     {
-        if (handler == null)
-            handler = GetComponentInParent<PlayerHandler>(); // Player is the parent
+        if (!fillImage)
+            fillImage = GetComponentInChildren<Image>();
 
-        if (fillImage == null)
-            fillImage = GetComponentInChildren<Image>(true); // fallback
-
-        if (handler != null)
-            handler.OnUltimateChanged += OnUltChanged;
-
+        FindPlayerHandler();
+        Subscribe();
         Refresh();
     }
 
-    void OnDestroy()
+    void OnEnable()
+    {
+        if (handler == null) FindPlayerHandler();
+        Subscribe();
+        Refresh();
+    }
+
+    void OnDisable()
+    {
+        Unsubscribe();
+    }
+
+    void FindPlayerHandler()
+    {
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player) handler = player.GetComponent<PlayerHandler>();
+    }
+
+    void Subscribe()
+    {
+        if (handler != null)
+            handler.OnUltimateChanged += OnUltChanged;
+    }
+
+    void Unsubscribe()
     {
         if (handler != null)
             handler.OnUltimateChanged -= OnUltChanged;
     }
 
-    void LateUpdate()
+    void OnUltChanged(float norm) => SetFill(norm);
+
+    void Refresh()
     {
-        if (faceCamera && Camera.main != null)
-            transform.rotation = Camera.main.transform.rotation;
+        if (handler != null)
+            SetFill(handler.UltimateNormalized);
+        else
+            SetFill(0f);
     }
 
-    private void OnUltChanged(float norm) => SetFill(norm);
-
-    private void Refresh()
+    void SetFill(float v)
     {
-        if (handler != null) SetFill(handler.UltimateNormalized);
-    }
+        if (!fillImage) return;
+        float clamped = Mathf.Clamp01(v);
+        fillImage.fillAmount = clamped;
 
-    private void SetFill(float v)
-    {
-        if (fillImage) fillImage.fillAmount = Mathf.Clamp01(v);
+        if (colorWhenFull)
+            fillImage.color = (clamped >= 0.999f) ? fullColor : normalColor;
     }
 }
