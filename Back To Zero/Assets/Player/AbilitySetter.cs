@@ -190,15 +190,19 @@ public class AbilitySetter : MonoBehaviour
     {
         if (slot == null)
         {
+            Debug.LogWarning("AbilitySetter: GetKeybindFromSlotNr called with null slot!");
             // Fallback to default keybind if slot is null
             return slotKeybinds != null && slotKeybinds.Length > 0 ? slotKeybinds[0] : KeyCode.None;
         }
         
         string slotNrText = slot.GetSlotNrText();
+        Debug.Log($"AbilitySetter: GetKeybindFromSlotNr for slot '{slot.gameObject.name}', SlotNr text: '{slotNrText}'");
+        
         if (string.IsNullOrEmpty(slotNrText))
         {
             // Fallback to default keybind if SlotNr is empty
             int slotIndex = System.Array.IndexOf(activeSlots, slot);
+            Debug.LogWarning($"AbilitySetter: SlotNr text is empty for slot '{slot.gameObject.name}' (index {slotIndex}). Using fallback keybind.");
             if (slotIndex >= 0 && slotIndex < slotKeybinds.Length)
             {
                 return slotKeybinds[slotIndex];
@@ -210,6 +214,7 @@ public class AbilitySetter : MonoBehaviour
         KeyCode parsedKey = ParseKeyCodeFromText(slotNrText);
         if (parsedKey != KeyCode.None)
         {
+            Debug.Log($"AbilitySetter: Successfully parsed '{slotNrText}' to KeyCode: {parsedKey}");
             return parsedKey;
         }
         
@@ -217,10 +222,11 @@ public class AbilitySetter : MonoBehaviour
         int fallbackIndex = System.Array.IndexOf(activeSlots, slot);
         if (fallbackIndex >= 0 && fallbackIndex < slotKeybinds.Length)
         {
-            Debug.LogWarning($"AbilitySetter: Could not parse SlotNr text '{slotNrText}' to KeyCode. Using fallback keybind {slotKeybinds[fallbackIndex]}.");
+            Debug.LogWarning($"AbilitySetter: Could not parse SlotNr text '{slotNrText}' to KeyCode for slot '{slot.gameObject.name}' (index {fallbackIndex}). Using fallback keybind {slotKeybinds[fallbackIndex]}.");
             return slotKeybinds[fallbackIndex];
         }
         
+        Debug.LogError($"AbilitySetter: Could not determine keybind for slot '{slot.gameObject.name}' - SlotNr parsing failed and slot index {fallbackIndex} is out of range!");
         return KeyCode.None;
     }
     
@@ -261,12 +267,15 @@ public class AbilitySetter : MonoBehaviour
         // Try common key names (case-insensitive)
         string lowerText = text.ToLower();
         
-        // Mouse buttons
-        if (lowerText == "mouse0" || lowerText == "lmb" || lowerText == "left mouse")
+        // Mouse buttons - support various formats
+        if (lowerText == "mouse0" || lowerText == "lmb" || lowerText == "left mouse" || 
+            lowerText == "leftclick" || lowerText == "left click" || lowerText == "leftmousebutton")
             return KeyCode.Mouse0;
-        if (lowerText == "mouse1" || lowerText == "rmb" || lowerText == "right mouse")
+        if (lowerText == "mouse1" || lowerText == "rmb" || lowerText == "right mouse" || 
+            lowerText == "rightclick" || lowerText == "right click" || lowerText == "rightmousebutton")
             return KeyCode.Mouse1;
-        if (lowerText == "mouse2" || lowerText == "mmb" || lowerText == "middle mouse")
+        if (lowerText == "mouse2" || lowerText == "mmb" || lowerText == "middle mouse" || 
+            lowerText == "middleclick" || lowerText == "middle click" || lowerText == "middlemousebutton")
             return KeyCode.Mouse2;
         
         // Common keys
@@ -288,10 +297,11 @@ public class AbilitySetter : MonoBehaviour
         // Try direct KeyCode enum parse (case-insensitive)
         if (System.Enum.TryParse<KeyCode>(text, true, out KeyCode parsedKey))
         {
+            Debug.Log($"AbilitySetter: Parsed '{text}' to KeyCode {parsedKey} via direct enum parse.");
             return parsedKey;
         }
         
-        Debug.LogWarning($"AbilitySetter: Could not parse '{text}' to KeyCode.");
+        Debug.LogWarning($"AbilitySetter: Could not parse '{text}' to KeyCode. Tried: number, letter, common names, and direct enum parse.");
         return KeyCode.None;
     }
     

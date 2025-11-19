@@ -30,8 +30,8 @@ public class ActiveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         inventoryManager = GameObject.Find("Player").GetComponent<InventoryManager>();
         
-        // Auto-find SlotNr text component
-        Transform slotNrTransform = transform.Find("SlotNr");
+        // Auto-find SlotNr text component (recursively search children)
+        Transform slotNrTransform = FindChildRecursive(transform, "SlotNr");
         if (slotNrTransform != null)
         {
             slotNrText = slotNrTransform.GetComponent<TMP_Text>();
@@ -39,10 +39,31 @@ public class ActiveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             {
                 Debug.LogWarning($"ActiveSlot '{gameObject.name}': Found SlotNr GameObject but no TMP_Text component.");
             }
+            else
+            {
+                Debug.Log($"ActiveSlot '{gameObject.name}': Found SlotNr text component. Text value: '{slotNrText.text}'");
+            }
         }
         else
         {
-            Debug.LogWarning($"ActiveSlot '{gameObject.name}': No SlotNr child found. Keybind detection may not work.");
+            // Alternative: Try searching for TMP_Text components by name
+            TMP_Text[] allTexts = GetComponentsInChildren<TMP_Text>(true);
+            foreach (TMP_Text text in allTexts)
+            {
+                if (text.gameObject.name == "SlotNr")
+                {
+                    slotNrText = text;
+                    Debug.Log($"ActiveSlot '{gameObject.name}': Found SlotNr via GetComponentsInChildren. Text value: '{slotNrText.text}'");
+                    break;
+                }
+            }
+            
+            if (slotNrText == null)
+            {
+                Debug.LogWarning($"ActiveSlot '{gameObject.name}': No SlotNr child found. Keybind detection may not work. Searching hierarchy...");
+                // Debug: Print the hierarchy
+                PrintHierarchy(transform, 0);
+            }
         }
         
         // Auto-find itemInfoPopup if not assigned
@@ -72,26 +93,71 @@ public class ActiveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     }
 
     /// <summary>
+    /// Recursively searches for a child Transform by name
+    /// </summary>
+    private Transform FindChildRecursive(Transform parent, string name)
+    {
+        // Check direct children first
+        Transform found = parent.Find(name);
+        if (found != null)
+        {
+            return found;
+        }
+        
+        // Recursively search in all children
+        foreach (Transform child in parent)
+        {
+            found = FindChildRecursive(child, name);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+        
+        return null;
+    }
+    
+    /// <summary>
+    /// Debug helper to print the hierarchy
+    /// </summary>
+    private void PrintHierarchy(Transform parent, int depth)
+    {
+        string indent = new string(' ', depth * 2);
+        Debug.Log($"{indent}- {parent.name} (has TMP_Text: {parent.GetComponent<TMP_Text>() != null})");
+        
+        foreach (Transform child in parent)
+        {
+            PrintHierarchy(child, depth + 1);
+        }
+    }
+    
+    /// <summary>
     /// Gets the keybind text from SlotNr child component
     /// </summary>
     public string GetSlotNrText()
     {
         if (slotNrText != null)
         {
-            return slotNrText.text;
+            string text = slotNrText.text;
+            Debug.Log($"ActiveSlot '{gameObject.name}': GetSlotNrText() returning '{text}'");
+            return text;
         }
         
-        // Fallback: try to find it again
-        Transform slotNrTransform = transform.Find("SlotNr");
+        // Fallback: try to find it again recursively
+        Debug.Log($"ActiveSlot '{gameObject.name}': slotNrText is null, searching recursively...");
+        Transform slotNrTransform = FindChildRecursive(transform, "SlotNr");
         if (slotNrTransform != null)
         {
             slotNrText = slotNrTransform.GetComponent<TMP_Text>();
             if (slotNrText != null)
             {
-                return slotNrText.text;
+                string text = slotNrText.text;
+                Debug.Log($"ActiveSlot '{gameObject.name}': Found SlotNr on retry, returning '{text}'");
+                return text;
             }
         }
         
+        Debug.LogWarning($"ActiveSlot '{gameObject.name}': GetSlotNrText() returning empty string - SlotNr not found!");
         return string.Empty;
     }
 
