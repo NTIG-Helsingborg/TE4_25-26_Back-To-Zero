@@ -176,13 +176,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allAbilities:
-  - {fileID: 11400000, guid: 0edbd740f1d414d4480e2a13fb47d680, type: 2}
   - {fileID: 11400000, guid: 0ec2bab3e2fdd9248864fcf21b2d5ee4, type: 2}
+  - {fileID: 11400000, guid: 0edbd740f1d414d4480e2a13fb47d680, type: 2}
   - {fileID: 11400000, guid: 722f4621a60e8dd418d0a779d07966f2, type: 2}
   - {fileID: 11400000, guid: 13ddefe0fb7600e429ad297163d573ad, type: 2}
-  abilitiesResourcePath: Abilities
+  - {fileID: 11400000, guid: 3cd434104c9fe4ff29089eaccc013e68, type: 2}
+  - {fileID: 11400000, guid: b8c4d0e6f2a3559906b7c8d9e0f1a2b3, type: 2}
   inventoryManager: {fileID: 3351440291523874951}
-  slotKeybindOverrides: 430100006500000071000000
+  slotKeybinds: 43010000440100006500000071000000
+  defaultAbilityNames:
+  - Bloodknife
+  - Harvest
+  - BloodSpear
+  - BloodExplosion
+  autoEquipDefaults: 1
 --- !u!61 &1698157271476681283
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -492,11 +499,22 @@ MonoBehaviour:
   itemSOs:
   - {fileID: 11400000, guid: 346716a69a6dff84cbfbd8f3faf9e29b, type: 2}
   - {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
+  - {fileID: 11400000, guid: 33ee67aca3d874f4585197f95cfa8cff, type: 2}
+  - {fileID: 11400000, guid: 50b6a33ac0a45554c9b0de64435406bd, type: 2}
+  - {fileID: 11400000, guid: c9084dcb147efae4da2de50cf140c27a, type: 2}
+  - {fileID: 11400000, guid: 124b8bc464001b64f97929685dab665d, type: 2}
   slotsParent: {fileID: 0}
   artifactSlotsParent: {fileID: 0}
   abilitySlotsParent: {fileID: 0}
-  activeSlots: []
-  activeEquipmentSlots: []
+  activeSlots:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  activeEquipmentSlots:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  addAllAbilitiesOnStart: 1
 --- !u!114 &2261580099307110445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -585,13 +603,67 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 2
-      outSlope: 2
+      time: 5
+      value: 1000
+      inSlope: 38.199196
+      outSlope: 38.199196
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 10
+      value: 2500
+      inSlope: 324.47165
+      outSlope: 324.47165
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.050109588
+    - serializedVersion: 3
+      time: 46.548447
+      value: 85387.055
+      inSlope: 5631.2886
+      outSlope: 5631.2886
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 62.574368
+      value: 194113.78
+      inSlope: 9571.138
+      outSlope: 9571.138
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 72.18263
+      value: 275714.1
+      inSlope: 9776.728
+      outSlope: 9776.728
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 1
+    - serializedVersion: 3
+      time: 79.55347
+      value: 337668.12
+      inSlope: 9754.693
+      outSlope: 9754.693
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.20307536
+    - serializedVersion: 3
+      time: 99.116
+      value: 508126.7
+      inSlope: 11628.534
+      outSlope: 11628.534
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.2613498
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -601,7 +673,10 @@ MonoBehaviour:
   experienceFill: {fileID: 0}
   levelUpCanvas: {fileID: 0}
   levelUpMenu: {fileID: 0}
-  rewardPanels: []
+  rewardPanels:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1 &8811310924032871480
 GameObject:
   m_ObjectHideFlags: 0

@@ -22,8 +22,19 @@ public class AbilitySetter : MonoBehaviour
     [Tooltip("Enable auto-equip of default abilities on start")]
     [SerializeField] private bool autoEquipDefaults = true;
     
+    [Header("Forced Ability Keybinds")]
+    [Tooltip("These abilities will always use their designated keybinds, regardless of which slot they're in.")]
+    [SerializeField] private string harvestAbilityName = "Harvest";
+    [SerializeField] private KeyCode harvestKeybind = KeyCode.Mouse1;
+    [SerializeField] private string dashAbilityName = "Dash";
+    [SerializeField] private KeyCode dashKeybind = KeyCode.Space;
+    
     // Internal ability holders for each slot
     private AbilityHolder[] abilityHolders = new AbilityHolder[4];
+    
+    // Dedicated ability holders for forced keybinds (always active, regardless of slots)
+    private AbilityHolder harvestHolder = null;
+    private AbilityHolder dashHolder = null;
     
     // Mapping from item name to Ability ScriptableObject
     private Dictionary<string, Ability> abilityMap = new Dictionary<string, Ability>();
@@ -62,6 +73,9 @@ public class AbilitySetter : MonoBehaviour
         
         // Build ability mapping dictionary
         BuildAbilityMap();
+        
+        // Create dedicated holders for forced keybinds (Harvest and Dash)
+        CreateForcedAbilityHolders();
         
         // Create ability holders for each slot (4 slots now)
         for (int i = 0; i < abilityHolders.Length; i++)
@@ -125,20 +139,202 @@ public class AbilitySetter : MonoBehaviour
     /// </summary>
     private void VerifyKeybinds()
     {
-        if (slotKeybinds == null || slotKeybinds.Length < 4)
+        if (activeSlots == null || activeSlots.Length < 4)
             return;
             
-        for (int i = 0; i < 4 && i < abilityHolders.Length; i++)
+        for (int i = 0; i < 4 && i < abilityHolders.Length && i < activeSlots.Length; i++)
         {
-            if (abilityHolders[i] != null && abilityHolders[i].ability != null)
+            if (abilityHolders[i] != null && abilityHolders[i].ability != null && activeSlots[i] != null)
             {
-                KeyCode expectedKey = slotKeybinds[i];
+                // Get expected keybind (with special overrides for Harvest and Dash)
+                KeyCode expectedKey = GetExpectedKeybindForAbility(abilityHolders[i].ability, activeSlots[i]);
+                
                 if (abilityHolders[i].key != expectedKey)
                 {
                     Debug.LogWarning($"AbilitySetter: Key mismatch detected in slot {i}! Expected {expectedKey}, got {abilityHolders[i].key}. Fixing...");
                     abilityHolders[i].key = expectedKey;
                 }
             }
+        }
+    }
+    
+    /// <summary>
+    /// Gets the expected keybind for an ability, with special overrides for Harvest and Dash
+    /// Note: Harvest and Dash should not be in slots, they have dedicated holders
+    /// </summary>
+    private KeyCode GetExpectedKeybindForAbility(Ability ability, ActiveSlot slot)
+    {
+        if (ability == null)
+            return KeyCode.None;
+            
+        string abilityName = GetAbilityName(ability);
+        
+        // Special keybind overrides (though these shouldn't be in slots)
+        if (abilityName.Equals(harvestAbilityName, System.StringComparison.OrdinalIgnoreCase))
+        {
+            return harvestKeybind; // Right click
+        }
+        else if (abilityName.Equals(dashAbilityName, System.StringComparison.OrdinalIgnoreCase))
+        {
+            return dashKeybind; // Space bar
+        }
+        
+        // Default: get from SlotNr
+        return GetKeybindFromSlotNr(slot);
+    }
+    
+    /// <summary>
+    /// Gets the KeyCode from the SlotNr text in an ActiveSlot
+    /// </summary>
+    private KeyCode GetKeybindFromSlotNr(ActiveSlot slot)
+    {
+        if (slot == null)
+        {
+            // Fallback to default keybind if slot is null
+            return slotKeybinds != null && slotKeybinds.Length > 0 ? slotKeybinds[0] : KeyCode.None;
+        }
+        
+        string slotNrText = slot.GetSlotNrText();
+        if (string.IsNullOrEmpty(slotNrText))
+        {
+            // Fallback to default keybind if SlotNr is empty
+            int slotIndex = System.Array.IndexOf(activeSlots, slot);
+            if (slotIndex >= 0 && slotIndex < slotKeybinds.Length)
+            {
+                return slotKeybinds[slotIndex];
+            }
+            return KeyCode.None;
+        }
+        
+        // Parse the text to KeyCode
+        KeyCode parsedKey = ParseKeyCodeFromText(slotNrText);
+        if (parsedKey != KeyCode.None)
+        {
+            return parsedKey;
+        }
+        
+        // Fallback to default keybind if parsing failed
+        int fallbackIndex = System.Array.IndexOf(activeSlots, slot);
+        if (fallbackIndex >= 0 && fallbackIndex < slotKeybinds.Length)
+        {
+            Debug.LogWarning($"AbilitySetter: Could not parse SlotNr text '{slotNrText}' to KeyCode. Using fallback keybind {slotKeybinds[fallbackIndex]}.");
+            return slotKeybinds[fallbackIndex];
+        }
+        
+        return KeyCode.None;
+    }
+    
+    /// <summary>
+    /// Parses text string to KeyCode (handles numbers, letters, mouse buttons, etc.)
+    /// </summary>
+    private KeyCode ParseKeyCodeFromText(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return KeyCode.None;
+        
+        // Trim whitespace
+        text = text.Trim();
+        
+        // Try to parse as number (1-9, 0)
+        if (int.TryParse(text, out int number))
+        {
+            if (number >= 0 && number <= 9)
+            {
+                // Map to Alpha keys: 0 = Alpha0, 1 = Alpha1, etc.
+                return (KeyCode)((int)KeyCode.Alpha0 + number);
+            }
+        }
+        
+        // Try to parse as single letter (A-Z)
+        if (text.Length == 1 && char.IsLetter(text[0]))
+        {
+            char upperChar = char.ToUpper(text[0]);
+            string keyName = upperChar.ToString();
+            
+            // Try direct KeyCode parse
+            if (System.Enum.TryParse<KeyCode>(keyName, out KeyCode key))
+            {
+                return key;
+            }
+        }
+        
+        // Try common key names (case-insensitive)
+        string lowerText = text.ToLower();
+        
+        // Mouse buttons
+        if (lowerText == "mouse0" || lowerText == "lmb" || lowerText == "left mouse")
+            return KeyCode.Mouse0;
+        if (lowerText == "mouse1" || lowerText == "rmb" || lowerText == "right mouse")
+            return KeyCode.Mouse1;
+        if (lowerText == "mouse2" || lowerText == "mmb" || lowerText == "middle mouse")
+            return KeyCode.Mouse2;
+        
+        // Common keys
+        if (lowerText == "space")
+            return KeyCode.Space;
+        if (lowerText == "shift")
+            return KeyCode.LeftShift;
+        if (lowerText == "ctrl" || lowerText == "control")
+            return KeyCode.LeftControl;
+        if (lowerText == "alt")
+            return KeyCode.LeftAlt;
+        if (lowerText == "tab")
+            return KeyCode.Tab;
+        if (lowerText == "enter" || lowerText == "return")
+            return KeyCode.Return;
+        if (lowerText == "escape" || lowerText == "esc")
+            return KeyCode.Escape;
+        
+        // Try direct KeyCode enum parse (case-insensitive)
+        if (System.Enum.TryParse<KeyCode>(text, true, out KeyCode parsedKey))
+        {
+            return parsedKey;
+        }
+        
+        Debug.LogWarning($"AbilitySetter: Could not parse '{text}' to KeyCode.");
+        return KeyCode.None;
+    }
+    
+    /// <summary>
+    /// Creates dedicated AbilityHolders for forced keybind abilities (Harvest and Dash)
+    /// These are always active regardless of whether they're equipped in slots
+    /// </summary>
+    private void CreateForcedAbilityHolders()
+    {
+        // Create Harvest holder
+        GameObject harvestHolderObj = new GameObject("HarvestHolder");
+        harvestHolderObj.transform.SetParent(transform);
+        harvestHolder = harvestHolderObj.AddComponent<AbilityHolder>();
+        harvestHolder.key = harvestKeybind;
+        
+        // Find and assign Harvest ability
+        Ability harvestAbility = FindAbilityByName(harvestAbilityName);
+        if (harvestAbility != null)
+        {
+            harvestHolder.ability = harvestAbility;
+            Debug.Log($"AbilitySetter: Created dedicated Harvest holder with keybind {harvestKeybind}");
+        }
+        else
+        {
+            Debug.LogWarning($"AbilitySetter: Could not find '{harvestAbilityName}' ability for forced keybind holder.");
+        }
+        
+        // Create Dash holder
+        GameObject dashHolderObj = new GameObject("DashHolder");
+        dashHolderObj.transform.SetParent(transform);
+        dashHolder = dashHolderObj.AddComponent<AbilityHolder>();
+        dashHolder.key = dashKeybind;
+        
+        // Find and assign Dash ability
+        Ability dashAbility = FindAbilityByName(dashAbilityName);
+        if (dashAbility != null)
+        {
+            dashHolder.ability = dashAbility;
+            Debug.Log($"AbilitySetter: Created dedicated Dash holder with keybind {dashKeybind}");
+        }
+        else
+        {
+            Debug.LogWarning($"AbilitySetter: Could not find '{dashAbilityName}' ability for forced keybind holder.");
         }
     }
     
@@ -381,8 +577,24 @@ public class AbilitySetter : MonoBehaviour
             
             if (ability != null)
             {
+                // Get ability name for special keybind overrides
+                string abilityName = GetAbilityName(ability);
+                
+                // Skip Harvest and Dash - they have dedicated holders that are always active
+                if (abilityName.Equals(harvestAbilityName, System.StringComparison.OrdinalIgnoreCase) ||
+                    abilityName.Equals(dashAbilityName, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    // Don't assign Harvest/Dash to slot holders - they have dedicated holders
+                    Debug.Log($"AbilitySetter: Skipping '{abilityName}' in slot {i} - it has a dedicated forced keybind holder.");
+                    abilityHolders[i].ability = null;
+                    abilityHolders[i].key = KeyCode.None;
+                    continue;
+                }
+                
+                // Get keybind from SlotNr text in the ActiveSlot for other abilities
+                KeyCode slotKeybind = GetKeybindFromSlotNr(activeSlots[i]);
+                
                 // IMPORTANT: Set key FIRST before assigning ability, to prevent any potential override
-                KeyCode slotKeybind = slotKeybinds[i];
                 abilityHolders[i].key = slotKeybind;
                 
                 // Then assign ability to holder
@@ -395,7 +607,7 @@ public class AbilitySetter : MonoBehaviour
                     abilityHolders[i].key = slotKeybind;
                 }
                 
-                Debug.Log($"AbilitySetter: Slot {i} - Equipped '{itemName}' with keybind {slotKeybind} (ability's keybind {ability.keybind} was overridden). Current holder key: {abilityHolders[i].key}");
+                Debug.Log($"AbilitySetter: Slot {i} - Equipped '{itemName}' with keybind {slotKeybind} (from SlotNr: '{activeSlots[i].GetSlotNrText()}'). Current holder key: {abilityHolders[i].key}");
             }
             else
             {
