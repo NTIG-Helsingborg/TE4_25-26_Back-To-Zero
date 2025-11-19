@@ -24,10 +24,26 @@ public class ActiveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     [SerializeField] private ShopInfo itemInfoPopup; // Reference to the hover popup
 
     private InventoryManager inventoryManager;
+    private TMP_Text slotNrText; // Cache for SlotNr text component
 
     private void Start()
     {
         inventoryManager = GameObject.Find("Player").GetComponent<InventoryManager>();
+        
+        // Auto-find SlotNr text component
+        Transform slotNrTransform = transform.Find("SlotNr");
+        if (slotNrTransform != null)
+        {
+            slotNrText = slotNrTransform.GetComponent<TMP_Text>();
+            if (slotNrText == null)
+            {
+                Debug.LogWarning($"ActiveSlot '{gameObject.name}': Found SlotNr GameObject but no TMP_Text component.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"ActiveSlot '{gameObject.name}': No SlotNr child found. Keybind detection may not work.");
+        }
         
         // Auto-find itemInfoPopup if not assigned
         if (itemInfoPopup == null)
@@ -53,6 +69,30 @@ public class ActiveSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         {
             Debug.LogWarning($"ActiveSlot '{gameObject.name}': Image raycastTarget is disabled! Enable it for hover detection.");
         }
+    }
+
+    /// <summary>
+    /// Gets the keybind text from SlotNr child component
+    /// </summary>
+    public string GetSlotNrText()
+    {
+        if (slotNrText != null)
+        {
+            return slotNrText.text;
+        }
+        
+        // Fallback: try to find it again
+        Transform slotNrTransform = transform.Find("SlotNr");
+        if (slotNrTransform != null)
+        {
+            slotNrText = slotNrTransform.GetComponent<TMP_Text>();
+            if (slotNrText != null)
+            {
+                return slotNrText.text;
+            }
+        }
+        
+        return string.Empty;
     }
 
     /// <summary>

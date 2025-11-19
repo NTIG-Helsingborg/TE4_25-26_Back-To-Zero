@@ -187,8 +187,11 @@ public class ExperienceManager : MonoBehaviour
 
     void ConfigureLevelUpMenu()
     {
+        Debug.Log($"ExperienceManager: ConfigureLevelUpMenu called. rewardPanels is null: {rewardPanels == null}, Length: {(rewardPanels != null ? rewardPanels.Length : 0)}");
+        
         if (rewardPanels == null || rewardPanels.Length == 0)
         {
+            Debug.LogWarning("ExperienceManager: rewardPanels is null or empty. Cannot configure level up menu.");
             return;
         }
 
@@ -209,30 +212,169 @@ public class ExperienceManager : MonoBehaviour
 
             if (panel == null)
             {
+                Debug.LogWarning($"ExperienceManager: Reward panel at index {i} is null.");
                 rewardButtons[i] = null;
                 continue;
             }
+
+            Debug.Log($"ExperienceManager: Configuring button for panel {i}: {panel.name}");
 
             Button button = panel.GetComponent<Button>();
 
+            // If not found on panel, search children
             if (button == null)
             {
+                Debug.Log($"ExperienceManager: No Button on {panel.name}, searching children...");
                 button = panel.GetComponentInChildren<Button>(true);
+            }
+
+            // If still not found, try to find Button GameObject by name pattern (Button1, Button2, Button3)
+            if (button == null)
+            {
+                Debug.Log($"ExperienceManager: No Button in children of {panel.name}, searching for Button{i + 1} GameObject...");
+                Transform parent = panel.transform.parent;
+                if (parent != null)
+                {
+                    Transform buttonTransform = parent.Find($"Button{i + 1}");
+                    if (buttonTransform != null)
+                    {
+                        button = buttonTransform.GetComponent<Button>();
+                        if (button != null)
+                        {
+                            Debug.Log($"ExperienceManager: Found Button component on Button{i + 1} GameObject.");
+                        }
+                    }
+                }
+            }
+
+            // If still not found, search all siblings
+            if (button == null)
+            {
+                Debug.Log($"ExperienceManager: Searching siblings of {panel.name}...");
+                Transform parent = panel.transform.parent;
+                if (parent != null)
+                {
+                    for (int j = 0; j < parent.childCount; j++)
+                    {
+                        Transform sibling = parent.GetChild(j);
+                        if (sibling.name.Contains($"Button{i + 1}") || 
+                            (i == 0 && sibling.name == "Button1") ||
+                            (i == 1 && sibling.name == "Button2") ||
+                            (i == 2 && sibling.name == "Button3"))
+                        {
+                            button = sibling.GetComponent<Button>();
+                            if (button != null)
+                            {
+                                Debug.Log($"ExperienceManager: Found Button component on sibling {sibling.name}.");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // If still not found, search in parent's parent (ButtonWraper might be a sibling of LevelUpMenu)
+            if (button == null)
+            {
+                Debug.Log($"ExperienceManager: Searching parent's parent for Button{i + 1}...");
+                Transform parent = panel.transform.parent;
+                if (parent != null && parent.parent != null)
+                {
+                    Transform grandParent = parent.parent;
+                    // Search all children of grandparent
+                    for (int j = 0; j < grandParent.childCount; j++)
+                    {
+                        Transform child = grandParent.GetChild(j);
+                        // Check if this is ButtonWraper or contains Button GameObjects
+                        Transform buttonTransform = child.Find($"Button{i + 1}");
+                        if (buttonTransform != null)
+                        {
+                            button = buttonTransform.GetComponent<Button>();
+                            if (button != null)
+                            {
+                                Debug.Log($"ExperienceManager: Found Button component on Button{i + 1} in {child.name}.");
+                                break;
+                            }
+                        }
+                        // Also check direct children
+                        if (child.name == $"Button{i + 1}" || 
+                            (i == 0 && child.name == "Button1") ||
+                            (i == 1 && child.name == "Button2") ||
+                            (i == 2 && child.name == "Button3"))
+                        {
+                            button = child.GetComponent<Button>();
+                            if (button != null)
+                            {
+                                Debug.Log($"ExperienceManager: Found Button component directly on {child.name}.");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Last resort: search entire levelUpMenu hierarchy
+            if (button == null && levelUpMenu != null)
+            {
+                Debug.Log($"ExperienceManager: Searching entire levelUpMenu hierarchy for Button{i + 1}...");
+                Transform[] allChildren = levelUpMenu.GetComponentsInChildren<Transform>(true);
+                foreach (Transform child in allChildren)
+                {
+                    if (child.name == $"Button{i + 1}" || 
+                        (i == 0 && child.name == "Button1") ||
+                        (i == 1 && child.name == "Button2") ||
+                        (i == 2 && child.name == "Button3"))
+                    {
+                        button = child.GetComponent<Button>();
+                        if (button != null)
+                        {
+                            Debug.Log($"ExperienceManager: Found Button component on {child.name} in levelUpMenu hierarchy.");
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Final resort: search entire levelUpCanvas hierarchy (ButtonWraper might be at canvas level)
+            if (button == null && levelUpCanvas != null)
+            {
+                Debug.Log($"ExperienceManager: Searching entire levelUpCanvas hierarchy for Button{i + 1}...");
+                Transform[] allChildren = levelUpCanvas.GetComponentsInChildren<Transform>(true);
+                foreach (Transform child in allChildren)
+                {
+                    if (child.name == $"Button{i + 1}" || 
+                        (i == 0 && child.name == "Button1") ||
+                        (i == 1 && child.name == "Button2") ||
+                        (i == 2 && child.name == "Button3"))
+                    {
+                        button = child.GetComponent<Button>();
+                        if (button != null)
+                        {
+                            Debug.Log($"ExperienceManager: Found Button component on {child.name} in levelUpCanvas hierarchy.");
+                            break;
+                        }
+                    }
+                }
             }
 
             if (button == null)
             {
                 rewardButtons[i] = null;
-                Debug.LogWarning($"Reward panel at index {i} does not contain a Button component.");
+                Debug.LogError($"ExperienceManager: Reward panel at index {i} ({panel.name}) does not contain a Button component and no matching Button GameObject found.");
                 continue;
             }
 
+            Debug.Log($"ExperienceManager: Found button on {button.gameObject.name}. Adding listener for index {index}.");
             rewardButtons[i] = button;
             
             // Remove existing listeners to prevent duplicates
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(() => HandleRewardSelection(index));
+            
+            Debug.Log($"ExperienceManager: Button listener added. onClick listener count: {button.onClick.GetPersistentEventCount()}");
         }
+        
+        Debug.Log($"ExperienceManager: ConfigureLevelUpMenu completed. Configured {rewardPanels.Length} buttons.");
     }
 
     void ClearRewardButtonListeners()
@@ -255,6 +397,9 @@ public class ExperienceManager : MonoBehaviour
         {
             return;
         }
+
+        // Ensure buttons are configured before opening menu
+        ConfigureLevelUpMenu();
 
         ShowLevelUpCanvas();
 

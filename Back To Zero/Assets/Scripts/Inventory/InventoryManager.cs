@@ -31,6 +31,11 @@ public class InventoryManager : MonoBehaviour
     [Tooltip("The active equipment slots where equipped artifacts/equipment are placed.")]
     [SerializeField] private ActiveEquipmentSlot[] activeEquipmentSlots;
     
+    //Adds all Abilitys on start for testing purposes
+    [Header("Startup Settings")]
+    [Tooltip("If enabled, all abilities from ItemSOs will be added to inventory on start.")]
+    [SerializeField] private bool addAllAbilitiesOnStart = true;
+    
     private ItemSlot selectedAbilitySlot = null; // Track which ability slot is selected
     private ItemSlot selectedArtifactSlot = null; // Track which artifact slot is selected
     
@@ -101,6 +106,15 @@ public class InventoryManager : MonoBehaviour
         {
             abilitySlot = abilitySlotsParent.GetComponentsInChildren<ItemSlot>(true);
             Debug.Log($"InventoryManager: Found {abilitySlot.Length} ability slots in '{abilitySlotsParent.name}'.");
+        }
+    }
+
+    private void Start()
+    {
+        // Add all abilities to inventory on start if enabled
+        if (addAllAbilitiesOnStart)
+        {
+            AddAllAbilitiesToInventory();
         }
     }
 
@@ -554,6 +568,72 @@ public class InventoryManager : MonoBehaviour
         {
             Debug.LogWarning($"InventoryManager: Could not return all of '{activeSlot.itemName}' to inventory. {leftover} items remain in active equipment slot.");
         }
+    }
+
+    // Public getter for active slots (used by AbilitySetter)
+    public ActiveSlot[] GetActiveSlots()
+    {
+        return activeSlots;
+    }
+
+    /// <summary>
+    /// Adds all abilities (ItemSOs with isAbility == 1) to the ability inventory
+    /// </summary>
+    private void AddAllAbilitiesToInventory()
+    {
+        if (itemSOs == null || itemSOs.Length == 0)
+        {
+            Debug.LogWarning("InventoryManager: No ItemSOs assigned. Cannot add abilities to inventory.");
+            return;
+        }
+
+        if (abilitySlot == null || abilitySlot.Length == 0)
+        {
+            Debug.LogWarning("InventoryManager: No ability slots found. Cannot add abilities to inventory.");
+            return;
+        }
+
+        int abilitiesAdded = 0;
+        foreach (ItemSO itemSO in itemSOs)
+        {
+            if (itemSO != null && itemSO.isAbility == 1)
+            {
+                // Check if this ability is already in inventory
+                bool alreadyInInventory = false;
+                if (abilitySlot != null)
+                {
+                    for (int i = 0; i < abilitySlot.Length; i++)
+                    {
+                        if (abilitySlot[i] != null && abilitySlot[i].itemName == itemSO.itemName && abilitySlot[i].quantity > 0)
+                        {
+                            alreadyInInventory = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Only add if not already in inventory
+                if (!alreadyInInventory)
+                {
+                    int leftover = AddItem(itemSO.itemName, itemSO.itemSprite, 1, itemSO.itemDescription, 2);
+                    if (leftover == 0)
+                    {
+                        abilitiesAdded++;
+                        Debug.Log($"InventoryManager: Added ability '{itemSO.itemName}' to inventory.");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"InventoryManager: Could not add ability '{itemSO.itemName}' - inventory full or error occurred.");
+                    }
+                }
+                else
+                {
+                    Debug.Log($"InventoryManager: Ability '{itemSO.itemName}' already in inventory, skipping.");
+                }
+            }
+        }
+
+        Debug.Log($"InventoryManager: Added {abilitiesAdded} abilities to inventory on start.");
     }
 
 }

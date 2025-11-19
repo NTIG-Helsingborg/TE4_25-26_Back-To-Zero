@@ -55,7 +55,9 @@ public class InventoryManagerAutoSetup : Editor
         }
 
         // 2. Find GameObjects by name - prioritize "Inventory Canvas 1"
-        GameObject[] allObjects = FindObjectsOfType<GameObject>(true);
+        // Note: FindObjectsOfType doesn't work with GameObject directly, so we use Transform
+        Transform[] allTransforms = FindObjectsOfType<Transform>(true);
+        GameObject[] allObjects = allTransforms.Select(t => t.gameObject).ToArray();
         
         // First, try to find the "Inventory Canvas 1" parent
         GameObject inventoryCanvas = allObjects.FirstOrDefault(go => 

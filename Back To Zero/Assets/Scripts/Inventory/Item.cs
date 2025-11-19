@@ -7,6 +7,7 @@ public class Item : MonoBehaviour
     [SerializeField] private int quantity;
     [TextArea][SerializeField] private string itemDescription;
     [SerializeField] private int isArtifact; // 0 = no, 1 = yes
+    [SerializeField] private int isAbility; // 0 = no, 1 = yes
 
     private InventoryManager inventoryManager;
     
@@ -33,8 +34,20 @@ public class Item : MonoBehaviour
             
             if (inventoryManager != null)
             {
-                // Add item to inventory with artifact flag
-                int leftOverItems = inventoryManager.AddItem(itemName, itemIcon, quantity, itemDescription, isArtifact);
+                // Determine the override value: 0 = regular item, 1 = artifact, 2 = ability
+                // Abilities have priority over artifacts (though they shouldn't both be set)
+                int overrideValue = 0;
+                if (isAbility == 1)
+                {
+                    overrideValue = 2; // 2 = ability override
+                }
+                else if (isArtifact == 1)
+                {
+                    overrideValue = 1; // 1 = artifact override
+                }
+                
+                // Add item to inventory with appropriate flag
+                int leftOverItems = inventoryManager.AddItem(itemName, itemIcon, quantity, itemDescription, overrideValue);
                 if(leftOverItems <= 0)
                     Destroy(gameObject);
                 else
