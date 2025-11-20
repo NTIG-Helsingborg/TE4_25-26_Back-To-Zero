@@ -593,11 +593,27 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
+        Debug.Log($"InventoryManager: Checking {itemSOs.Length} ItemSOs for abilities (isAbility == 1)...");
+        
+        int abilityItemSOsFound = 0;
         int abilitiesAdded = 0;
+        int abilitiesSkipped = 0;
+        
         foreach (ItemSO itemSO in itemSOs)
         {
-            if (itemSO != null && itemSO.isAbility == 1)
+            if (itemSO == null)
             {
+                Debug.LogWarning("InventoryManager: Found null ItemSO in itemSOs array.");
+                continue;
+            }
+            
+            Debug.Log($"InventoryManager: Checking ItemSO '{itemSO.itemName}' - isAbility={itemSO.isAbility}, isArtifact={itemSO.isArtifact}");
+            
+            if (itemSO.isAbility == 1)
+            {
+                abilityItemSOsFound++;
+                Debug.Log($"InventoryManager: Found ability ItemSO: '{itemSO.itemName}' (isAbility={itemSO.isAbility})");
+                
                 // Check if this ability is already in inventory
                 bool alreadyInInventory = false;
                 if (abilitySlot != null)
@@ -619,21 +635,27 @@ public class InventoryManager : MonoBehaviour
                     if (leftover == 0)
                     {
                         abilitiesAdded++;
-                        Debug.Log($"InventoryManager: Added ability '{itemSO.itemName}' to inventory.");
+                        Debug.Log($"InventoryManager: ✓ Added ability '{itemSO.itemName}' to inventory.");
                     }
                     else
                     {
-                        Debug.LogWarning($"InventoryManager: Could not add ability '{itemSO.itemName}' - inventory full or error occurred.");
+                        Debug.LogWarning($"InventoryManager: ✗ Could not add ability '{itemSO.itemName}' - inventory full or error occurred (leftover: {leftover}).");
                     }
                 }
                 else
                 {
+                    abilitiesSkipped++;
                     Debug.Log($"InventoryManager: Ability '{itemSO.itemName}' already in inventory, skipping.");
                 }
             }
         }
 
-        Debug.Log($"InventoryManager: Added {abilitiesAdded} abilities to inventory on start.");
+        Debug.Log($"InventoryManager: Found {abilityItemSOsFound} ability ItemSOs. Added {abilitiesAdded} abilities, skipped {abilitiesSkipped} (already in inventory).");
+        
+        if (abilityItemSOsFound == 0)
+        {
+            Debug.LogWarning("InventoryManager: No ItemSOs with isAbility == 1 found! Make sure your ability ItemSOs have isAbility set to 1 in the inspector.");
+        }
     }
 
 }

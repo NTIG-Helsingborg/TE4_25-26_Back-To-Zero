@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class AbilitySetter : MonoBehaviour
@@ -47,6 +48,8 @@ public class AbilitySetter : MonoBehaviour
     
     void Start()
     {
+        Debug.Log("AbilitySetter: Start() called.");
+        
         // Find InventoryManager if not assigned
         if (inventoryManager == null)
         {
@@ -96,6 +99,16 @@ public class AbilitySetter : MonoBehaviour
         {
             defaultAbilityNames = new string[4] { "Bloodknife", "Harvest", "BloodSpear", "BloodExplosion" };
         }
+        
+        // Delay auto-equip to ensure InventoryManager has finished initializing
+        // Use coroutine to wait a frame so InventoryManager.Start() completes first
+        StartCoroutine(DelayedStart());
+    }
+    
+    private System.Collections.IEnumerator DelayedStart()
+    {
+        // Wait one frame to ensure InventoryManager.Start() has completed
+        yield return null;
         
         // Get active slots from InventoryManager
         RefreshActiveSlots();
@@ -357,14 +370,19 @@ public class AbilitySetter : MonoBehaviour
         
         if (allAbilities == null || allAbilities.Length == 0)
         {
-            Debug.LogWarning("AbilitySetter: No abilities assigned! Use the editor script to auto-load from Ability's folder.");
+            Debug.LogError("AbilitySetter: No abilities assigned in 'allAbilities' array! " +
+                          "Please assign Ability ScriptableObjects in the inspector, or use an editor script to auto-load from the Ability's folder.");
             return;
         }
         
+        int nullCount = 0;
         foreach (Ability ability in allAbilities)
         {
             if (ability == null)
+            {
+                nullCount++;
                 continue;
+            }
             
             // Get ability name - use name field, asset name, or class name
             string abilityName = GetAbilityName(ability);
@@ -381,9 +399,18 @@ public class AbilitySetter : MonoBehaviour
                     Debug.Log($"AbilitySetter: Mapped '{abilityName}'");
                 }
             }
+            else
+            {
+                Debug.LogWarning($"AbilitySetter: Could not determine name for ability of type {ability.GetType().Name}");
+            }
         }
         
-        Debug.Log($"AbilitySetter: Built ability map with {abilityMap.Count} abilities.");
+        if (nullCount > 0)
+        {
+            Debug.LogWarning($"AbilitySetter: Found {nullCount} null entries in allAbilities array. Please check your inspector assignments.");
+        }
+        
+        Debug.Log($"AbilitySetter: Built ability map with {abilityMap.Count} abilities (from {allAbilities.Length} total entries).");
     }
     
     /// <summary>
@@ -473,14 +500,23 @@ public class AbilitySetter : MonoBehaviour
     {
         if (activeSlots == null || activeSlots.Length < 4)
         {
-            Debug.LogWarning("AbilitySetter: Cannot auto-equip defaults - need at least 4 active slots.");
+            Debug.LogWarning($"AbilitySetter: Cannot auto-equip defaults - need at least 4 active slots. Found: {(activeSlots == null ? "null" : activeSlots.Length.ToString())}");
             return;
         }
         
         if (defaultAbilityNames == null || defaultAbilityNames.Length != 4)
         {
+            Debug.LogWarning("AbilitySetter: Default ability names array is not properly initialized.");
             return;
         }
+        
+        if (abilityMap == null || abilityMap.Count == 0)
+        {
+            Debug.LogWarning("AbilitySetter: Ability map is empty! Make sure 'allAbilities' array is populated in the inspector.");
+            return;
+        }
+        
+        Debug.Log($"AbilitySetter: Attempting to auto-equip {defaultAbilityNames.Length} default abilities. Ability map has {abilityMap.Count} abilities.");
         
         bool anyEquipped = false;
         for (int i = 0; i < 4 && i < activeSlots.Length; i++)
@@ -490,39 +526,62 @@ public class AbilitySetter : MonoBehaviour
                 string defaultAbilityName = defaultAbilityNames[i];
                 if (!string.IsNullOrEmpty(defaultAbilityName))
                 {
+                    Debug.Log($"AbilitySetter: Processing slot {i} with ability name '{defaultAbilityName}'");
+                    
                     // Find the ability
                     Ability ability = FindAbilityByName(defaultAbilityName);
                     if (ability != null)
                     {
+                        Debug.Log($"AbilitySetter: Found ability '{defaultAbilityName}' in ability map.");
+                        
                         // Find the ItemSO for this ability to add to inventory first
                         ItemSO itemSO = FindItemSOForAbility(defaultAbilityName);
                         if (itemSO != null && inventoryManager != null)
                         {
-                            // Add item to inventory first
+                            Debug.Log($"AbilitySetter: Found ItemSO '{itemSO.itemName}' for ability '{defaultAbilityName}'");
+                            
+                            // Add item to inventory first (type 2 = ability)
                             int leftover = inventoryManager.AddItem(itemSO.itemName, itemSO.itemSprite, 1, itemSO.itemDescription, 2);
                             if (leftover == 0)
                             {
                                 // Then equip it to the active slot
                                 activeSlots[i].AddItem(itemSO.itemName, itemSO.itemSprite, 1, itemSO.itemDescription);
                                 anyEquipped = true;
-                                Debug.Log($"AbilitySetter: Auto-equipped '{defaultAbilityName}' to slot {i}");
+                                Debug.Log($"AbilitySetter: ✓ Auto-equipped '{defaultAbilityName}' to slot {i}");
+                            }
+                            else
+                            {
+                                Debug.LogWarning($"AbilitySetter: Could not add '{defaultAbilityName}' to inventory (leftover: {leftover})");
                             }
                         }
                         else
                         {
+                            Debug.LogWarning($"AbilitySetter: No ItemSO found for '{defaultAbilityName}'. Attempting direct equip...");
                             // If no ItemSO found, try to equip directly by name
                             activeSlots[i].AddItem(defaultAbilityName, null, 1, "");
                             anyEquipped = true;
-                            Debug.Log($"AbilitySetter: Auto-equipped '{defaultAbilityName}' to slot {i} (no ItemSO found)");
+                            Debug.Log($"AbilitySetter: Auto-equipped '{defaultAbilityName}' to slot {i} (no ItemSO found, direct equip)");
                         }
                     }
+                    else
+                    {
+                        Debug.LogWarning($"AbilitySetter: Could not find ability '{defaultAbilityName}' in ability map. Available abilities: {string.Join(", ", abilityMap.Keys)}");
+                    }
                 }
+            }
+            else if (activeSlots[i] != null && !string.IsNullOrEmpty(activeSlots[i].itemName))
+            {
+                Debug.Log($"AbilitySetter: Slot {i} already has '{activeSlots[i].itemName}', skipping.");
             }
         }
         
         if (anyEquipped)
         {
-            Debug.Log("AbilitySetter: Auto-equipped default abilities.");
+            Debug.Log("AbilitySetter: ✓ Auto-equipped default abilities successfully.");
+        }
+        else
+        {
+            Debug.LogWarning("AbilitySetter: No abilities were auto-equipped. Check the console for details.");
         }
     }
     
@@ -583,7 +642,53 @@ public class AbilitySetter : MonoBehaviour
             }
             
             // Find ability by name (try exact, case-insensitive, then partial match)
+            Debug.Log($"AbilitySetter: Looking for ability matching itemName '{itemName}' in slot {i}. Ability map has {abilityMap.Count} abilities.");
+            if (abilityMap.Count > 0)
+            {
+                Debug.Log($"AbilitySetter: Available ability names in map: {string.Join(", ", abilityMap.Keys)}");
+            }
+            
+            // First try to find ability by name
             Ability ability = FindAbilityByName(itemName);
+            
+            // If not found, try to find via ItemSO (since ActiveSlot stores ItemSO names)
+            if (ability == null && inventoryManager != null && inventoryManager.itemSOs != null)
+            {
+                ItemSO matchingItemSO = FindItemSOForAbility(itemName);
+                if (matchingItemSO != null)
+                {
+                    // Try to find ability that matches the ItemSO's name or the ability class name
+                    ability = FindAbilityByName(matchingItemSO.itemName);
+                    
+                    // If still not found, try matching by ability class name patterns
+                    if (ability == null)
+                    {
+                        // Try common patterns: "Bloodknife" -> "BloodKnife", "Blood Knife", etc.
+                        string[] variations = new string[]
+                        {
+                            matchingItemSO.itemName,
+                            matchingItemSO.itemName.Replace(" ", ""),
+                            matchingItemSO.itemName.Replace("'", ""),
+                            matchingItemSO.itemName.Replace("-", ""),
+                            // Add space variations
+                            matchingItemSO.itemName.Replace("knife", " Knife"),
+                            matchingItemSO.itemName.Replace("spear", " Spear"),
+                            matchingItemSO.itemName.Replace("explosion", " Explosion"),
+                            matchingItemSO.itemName.Replace("slash", " Slash"),
+                        };
+                        
+                        foreach (string variation in variations)
+                        {
+                            ability = FindAbilityByName(variation);
+                            if (ability != null)
+                            {
+                                Debug.Log($"AbilitySetter: Found ability via ItemSO variation '{variation}' for '{itemName}'");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
             
             if (ability != null)
             {
@@ -617,11 +722,19 @@ public class AbilitySetter : MonoBehaviour
                     abilityHolders[i].key = slotKeybind;
                 }
                 
-                Debug.Log($"AbilitySetter: Slot {i} - Equipped '{itemName}' with keybind {slotKeybind} (from SlotNr: '{activeSlots[i].GetSlotNrText()}'). Current holder key: {abilityHolders[i].key}");
+                Debug.Log($"AbilitySetter: ✓ Slot {i} - Equipped '{itemName}' with keybind {slotKeybind} (from SlotNr: '{activeSlots[i].GetSlotNrText()}'). Current holder key: {abilityHolders[i].key}, Ability: {(abilityHolders[i].ability != null ? abilityHolders[i].ability.GetType().Name : "NULL")}");
             }
             else
             {
-                Debug.LogWarning($"AbilitySetter: Could not find ability for '{itemName}' in slot {i}. Available: {string.Join(", ", abilityMap.Keys)}");
+                Debug.LogError($"AbilitySetter: ✗ Could not find ability for '{itemName}' in slot {i}.");
+                if (abilityMap.Count == 0)
+                {
+                    Debug.LogError($"AbilitySetter: Ability map is EMPTY! Make sure 'allAbilities' array is populated in the inspector.");
+                }
+                else
+                {
+                    Debug.LogWarning($"AbilitySetter: Available abilities in map: {string.Join(", ", abilityMap.Keys)}");
+                }
                 abilityHolders[i].ability = null;
                 abilityHolders[i].key = KeyCode.None;
             }
@@ -633,9 +746,22 @@ public class AbilitySetter : MonoBehaviour
     /// </summary>
     private Ability FindAbilityByName(string itemName)
     {
+        if (string.IsNullOrEmpty(itemName))
+        {
+            Debug.LogWarning("AbilitySetter: FindAbilityByName called with empty itemName!");
+            return null;
+        }
+        
+        if (abilityMap == null || abilityMap.Count == 0)
+        {
+            Debug.LogWarning($"AbilitySetter: Ability map is empty! Cannot find ability '{itemName}'. Make sure 'allAbilities' array is populated.");
+            return null;
+        }
+        
         // Try exact match
         if (abilityMap.TryGetValue(itemName, out Ability ability))
         {
+            Debug.Log($"AbilitySetter: Found exact match for '{itemName}'");
             return ability;
         }
         
@@ -644,20 +770,35 @@ public class AbilitySetter : MonoBehaviour
         {
             if (string.Equals(kvp.Key, itemName, System.StringComparison.OrdinalIgnoreCase))
             {
+                Debug.Log($"AbilitySetter: Found case-insensitive match: '{kvp.Key}' matches '{itemName}'");
                 return kvp.Value;
             }
         }
         
-        // Try partial match
+        // Try partial match (ability name contains itemName or vice versa)
         foreach (var kvp in abilityMap)
         {
             if (kvp.Key.Contains(itemName, System.StringComparison.OrdinalIgnoreCase) || 
                 itemName.Contains(kvp.Key, System.StringComparison.OrdinalIgnoreCase))
             {
+                Debug.Log($"AbilitySetter: Found partial match: '{kvp.Key}' partially matches '{itemName}'");
                 return kvp.Value;
             }
         }
         
+        // Try removing spaces and special characters for matching
+        string normalizedItemName = itemName.Replace(" ", "").Replace("'", "").Replace("-", "");
+        foreach (var kvp in abilityMap)
+        {
+            string normalizedKey = kvp.Key.Replace(" ", "").Replace("'", "").Replace("-", "");
+            if (string.Equals(normalizedKey, normalizedItemName, System.StringComparison.OrdinalIgnoreCase))
+            {
+                Debug.Log($"AbilitySetter: Found normalized match: '{kvp.Key}' (normalized: '{normalizedKey}') matches '{itemName}' (normalized: '{normalizedItemName}')");
+                return kvp.Value;
+            }
+        }
+        
+        Debug.LogWarning($"AbilitySetter: Could not find ability matching '{itemName}'. Available abilities: {string.Join(", ", abilityMap.Keys)}");
         return null;
     }
     
