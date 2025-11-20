@@ -1076,22 +1076,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1240838975994050367, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: healthBar
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 3278557163740205405, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: dashAbilityName
-      value: Dash Ability
-      objectReference: {fileID: 0}
-    - target: {fileID: 3278557163740205405, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: harvestAbilityName
-      value: Harvest Ability
-      objectReference: {fileID: 0}
-    - target: {fileID: 3278557163740205405, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: allAbilities.Array.size
-      value: 6
-      objectReference: {fileID: 0}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: TopPanel
       value: 
@@ -1105,10 +1089,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 841251869}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: itemSOs.Array.size
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: artifactSlotsParent
       value: 
       objectReference: {fileID: 1066233556}
@@ -1117,45 +1097,9 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 499947408}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'itemSOs.Array.data[0]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 124b8bc464001b64f97929685dab665d, type: 2}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'itemSOs.Array.data[1]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 33ee67aca3d874f4585197f95cfa8cff, type: 2}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'itemSOs.Array.data[2]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 50b6a33ac0a45554c9b0de64435406bd, type: 2}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'itemSOs.Array.data[3]'
-      value: 
-      objectReference: {fileID: 11400000, guid: c9084dcb147efae4da2de50cf140c27a, type: 2}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'itemSOs.Array.data[4]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 346716a69a6dff84cbfbd8f3faf9e29b, type: 2}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'itemSOs.Array.data[5]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'itemSOs.Array.data[6]'
-      value: 
-      objectReference: {fileID: 11400000, guid: c9234329ac5cabc49b062ef9fc7f5808, type: 2}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'itemSOs.Array.data[7]'
-      value: 
-      objectReference: {fileID: 11400000, guid: c9234329ac5cabc49b062ef9fc7f5808, type: 2}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: InventoryMenuEquipment
       value: 
       objectReference: {fileID: 230368935}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: activeSlots.Array.size
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: 'activeSlots.Array.data[0]'
       value: 
@@ -1169,22 +1113,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2132096253}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'activeSlots.Array.data[3]'
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'activeSlots.Array.data[4]'
-      value: 
-      objectReference: {fileID: 2132096253}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'activeSlots.Array.data[5]'
-      value: 
-      objectReference: {fileID: 2132096253}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: activeEquipmentSlots.Array.size
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: 'activeEquipmentSlots.Array.data[0]'
       value: 
       objectReference: {fileID: 805061999}
@@ -1196,66 +1124,6 @@ PrefabInstance:
       propertyPath: 'activeEquipmentSlots.Array.data[2]'
       value: 
       objectReference: {fileID: 1443805115}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: levelText
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: levelUpMenu
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: levelUpCanvas
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: experienceFill
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: experienceText
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'rewardPanels.Array.data[0]'
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'rewardPanels.Array.data[1]'
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: 'rewardPanels.Array.data[2]'
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: experienceCurve.m_Curve.Array.data[0].value
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: experienceCurve.m_Curve.Array.data[0].inSlope
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: experienceCurve.m_Curve.Array.data[1].inSlope
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: experienceCurve.m_Curve.Array.data[0].outSlope
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: experienceCurve.m_Curve.Array.data[1].outSlope
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: experienceCurve.m_Curve.Array.data[0].tangentMode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5322831608097000142, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: experienceCurve.m_Curve.Array.data[1].tangentMode
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5631687449377463173, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: m_Name
       value: Player
@@ -1299,14 +1167,6 @@ PrefabInstance:
     - target: {fileID: 6576621383432750835, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7025894402150479544, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: key
-      value: 120
-      objectReference: {fileID: 0}
-    - target: {fileID: 8807523812355955747, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-      propertyPath: deathTxt
-      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
