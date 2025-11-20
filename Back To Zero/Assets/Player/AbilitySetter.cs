@@ -29,6 +29,8 @@ public class AbilitySetter : MonoBehaviour
     [SerializeField] private KeyCode harvestKeybind = KeyCode.Mouse1;
     [SerializeField] private string dashAbilityName = "Dash";
     [SerializeField] private KeyCode dashKeybind = KeyCode.Space;
+    [SerializeField] private string bloodTransfusionAbilityName = "BloodTransfusion";
+    [SerializeField] private KeyCode bloodTransfusionKeybind = KeyCode.X;
     
     // Internal ability holders for each slot
     private AbilityHolder[] abilityHolders = new AbilityHolder[4];
@@ -36,6 +38,7 @@ public class AbilitySetter : MonoBehaviour
     // Dedicated ability holders for forced keybinds (always active, regardless of slots)
     private AbilityHolder harvestHolder = null;
     private AbilityHolder dashHolder = null;
+    private AbilityHolder bloodTransfusionHolder = null;
     
     // Mapping from item name to Ability ScriptableObject
     private Dictionary<string, Ability> abilityMap = new Dictionary<string, Ability>();
@@ -77,7 +80,7 @@ public class AbilitySetter : MonoBehaviour
         // Build ability mapping dictionary
         BuildAbilityMap();
         
-        // Create dedicated holders for forced keybinds (Harvest and Dash)
+        // Create dedicated holders for forced keybinds (Harvest, Dash, and BloodTransfusion)
         CreateForcedAbilityHolders();
         
         // Create ability holders for each slot (4 slots now)
@@ -148,6 +151,17 @@ public class AbilitySetter : MonoBehaviour
     }
     
     /// <summary>
+    /// Public method to force AbilitySetter to refresh and update ability assignments
+    /// Call this when abilities are manually assigned to active slots
+    /// </summary>
+    public void RefreshAbilityAssignments()
+    {
+        Debug.Log("AbilitySetter: RefreshAbilityAssignments() called.");
+        RefreshActiveSlots();
+        UpdateEquippedAbilities();
+    }
+    
+    /// <summary>
     /// Verifies that all ability holders have the correct keybinds set
     /// </summary>
     private void VerifyKeybinds()
@@ -159,7 +173,7 @@ public class AbilitySetter : MonoBehaviour
         {
             if (abilityHolders[i] != null && abilityHolders[i].ability != null && activeSlots[i] != null)
             {
-                // Get expected keybind (with special overrides for Harvest and Dash)
+                // Get expected keybind (with special overrides for Harvest, Dash, and BloodTransfusion)
                 KeyCode expectedKey = GetExpectedKeybindForAbility(abilityHolders[i].ability, activeSlots[i]);
                 
                 if (abilityHolders[i].key != expectedKey)
@@ -172,8 +186,8 @@ public class AbilitySetter : MonoBehaviour
     }
     
     /// <summary>
-    /// Gets the expected keybind for an ability, with special overrides for Harvest and Dash
-    /// Note: Harvest and Dash should not be in slots, they have dedicated holders
+    /// Gets the expected keybind for an ability, with special overrides for Harvest, Dash, and BloodTransfusion
+    /// Note: Harvest, Dash, and BloodTransfusion should not be in slots, they have dedicated holders
     /// </summary>
     private KeyCode GetExpectedKeybindForAbility(Ability ability, ActiveSlot slot)
     {
@@ -190,6 +204,10 @@ public class AbilitySetter : MonoBehaviour
         else if (abilityName.Equals(dashAbilityName, System.StringComparison.OrdinalIgnoreCase))
         {
             return dashKeybind; // Space bar
+        }
+        else if (abilityName.Equals(bloodTransfusionAbilityName, System.StringComparison.OrdinalIgnoreCase))
+        {
+            return bloodTransfusionKeybind; // X key
         }
         
         // Default: get from SlotNr
@@ -319,7 +337,7 @@ public class AbilitySetter : MonoBehaviour
     }
     
     /// <summary>
-    /// Creates dedicated AbilityHolders for forced keybind abilities (Harvest and Dash)
+    /// Creates dedicated AbilityHolders for forced keybind abilities (Harvest, Dash, and BloodTransfusion)
     /// These are always active regardless of whether they're equipped in slots
     /// </summary>
     private void CreateForcedAbilityHolders()
@@ -358,6 +376,24 @@ public class AbilitySetter : MonoBehaviour
         else
         {
             Debug.LogWarning($"AbilitySetter: Could not find '{dashAbilityName}' ability for forced keybind holder.");
+        }
+        
+        // Create BloodTransfusion holder
+        GameObject bloodTransfusionHolderObj = new GameObject("BloodTransfusionHolder");
+        bloodTransfusionHolderObj.transform.SetParent(transform);
+        bloodTransfusionHolder = bloodTransfusionHolderObj.AddComponent<AbilityHolder>();
+        bloodTransfusionHolder.key = bloodTransfusionKeybind;
+        
+        // Find and assign BloodTransfusion ability
+        Ability bloodTransfusionAbility = FindAbilityByName(bloodTransfusionAbilityName);
+        if (bloodTransfusionAbility != null)
+        {
+            bloodTransfusionHolder.ability = bloodTransfusionAbility;
+            Debug.Log($"AbilitySetter: Created dedicated BloodTransfusion holder with keybind {bloodTransfusionKeybind}");
+        }
+        else
+        {
+            Debug.LogWarning($"AbilitySetter: Could not find '{bloodTransfusionAbilityName}' ability for forced keybind holder.");
         }
     }
     
@@ -695,11 +731,12 @@ public class AbilitySetter : MonoBehaviour
                 // Get ability name for special keybind overrides
                 string abilityName = GetAbilityName(ability);
                 
-                // Skip Harvest and Dash - they have dedicated holders that are always active
+                // Skip Harvest, Dash, and BloodTransfusion - they have dedicated holders that are always active
                 if (abilityName.Equals(harvestAbilityName, System.StringComparison.OrdinalIgnoreCase) ||
-                    abilityName.Equals(dashAbilityName, System.StringComparison.OrdinalIgnoreCase))
+                    abilityName.Equals(dashAbilityName, System.StringComparison.OrdinalIgnoreCase) ||
+                    abilityName.Equals(bloodTransfusionAbilityName, System.StringComparison.OrdinalIgnoreCase))
                 {
-                    // Don't assign Harvest/Dash to slot holders - they have dedicated holders
+                    // Don't assign Harvest/Dash/BloodTransfusion to slot holders - they have dedicated holders
                     Debug.Log($"AbilitySetter: Skipping '{abilityName}' in slot {i} - it has a dedicated forced keybind holder.");
                     abilityHolders[i].ability = null;
                     abilityHolders[i].key = KeyCode.None;

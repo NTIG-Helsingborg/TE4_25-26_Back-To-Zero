@@ -463,9 +463,30 @@ public class InventoryManager : MonoBehaviour
             }
             Debug.Log($"InventoryManager: Transferred '{selectedAbilitySlot.itemName}' to active slot.");
             
+            // Notify AbilitySetter to update ability assignments
+            NotifyAbilitySetter();
+            
             // Deselect the ability slot after successful transfer
             selectedAbilitySlot.DeselectVisuals();
             selectedAbilitySlot = null;
+        }
+    }
+    
+    /// <summary>
+    /// Notifies AbilitySetter to update ability assignments when slots change
+    /// </summary>
+    private void NotifyAbilitySetter()
+    {
+        AbilitySetter abilitySetter = FindFirstObjectByType<AbilitySetter>();
+        if (abilitySetter != null)
+        {
+            // Force AbilitySetter to check for changes immediately
+            abilitySetter.RefreshAbilityAssignments();
+            Debug.Log("InventoryManager: Notified AbilitySetter to update ability assignments.");
+        }
+        else
+        {
+            Debug.LogWarning("InventoryManager: AbilitySetter not found! Abilities won't be assigned to buttons. Make sure AbilitySetter component is attached to a GameObject in the scene.");
         }
     }
 

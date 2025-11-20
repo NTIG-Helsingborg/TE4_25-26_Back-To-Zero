@@ -1106,7 +1106,7 @@ PrefabInstance:
       objectReference: {fileID: 841251869}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: itemSOs.Array.size
-      value: 7
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: artifactSlotsParent
@@ -1142,6 +1142,10 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: 'itemSOs.Array.data[6]'
+      value: 
+      objectReference: {fileID: 11400000, guid: c9234329ac5cabc49b062ef9fc7f5808, type: 2}
+    - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: 'itemSOs.Array.data[7]'
       value: 
       objectReference: {fileID: 11400000, guid: c9234329ac5cabc49b062ef9fc7f5808, type: 2}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
@@ -1295,6 +1299,10 @@ PrefabInstance:
     - target: {fileID: 6576621383432750835, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7025894402150479544, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: key
+      value: 120
       objectReference: {fileID: 0}
     - target: {fileID: 8807523812355955747, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: deathTxt

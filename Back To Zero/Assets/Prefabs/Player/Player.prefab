@@ -71,6 +71,7 @@ GameObject:
   - component: {fileID: 7004101140356322880}
   - component: {fileID: 7239643960339905368}
   - component: {fileID: 7025894402150479544}
+  - component: {fileID: 3469059003383207221}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -476,6 +477,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
   slotsParent: {fileID: 0}
   artifactSlotsParent: {fileID: 0}
+  abilitySlotsParent: {fileID: 0}
+  activeSlots: []
+  activeEquipmentSlots: []
+  addAllAbilitiesOnStart: 1
 --- !u!114 &2261580099307110445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -553,6 +558,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ability: {fileID: 11400000, guid: 821f477e67a61aa42a4ccc49b2b188d6, type: 2}
   key: 103
+--- !u!114 &3469059003383207221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5631687449377463173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0be936bef0e7e4387b169181cc8716ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allAbilities:
+  - {fileID: 11400000, guid: 0ec2bab3e2fdd9248864fcf21b2d5ee4, type: 2}
+  - {fileID: 11400000, guid: 0edbd740f1d414d4480e2a13fb47d680, type: 2}
+  - {fileID: 11400000, guid: 722f4621a60e8dd418d0a779d07966f2, type: 2}
+  - {fileID: 11400000, guid: 13ddefe0fb7600e429ad297163d573ad, type: 2}
+  - {fileID: 11400000, guid: 821f477e67a61aa42a4ccc49b2b188d6, type: 2}
+  - {fileID: 11400000, guid: 3cd434104c9fe4ff29089eaccc013e68, type: 2}
+  - {fileID: 11400000, guid: b8c4d0e6f2a3559906b7c8d9e0f1a2b3, type: 2}
+  inventoryManager: {fileID: 3351440291523874951}
+  slotKeybinds: 43010000440100006500000071000000
+  defaultAbilityNames:
+  - Bloodknife
+  - Harvest
+  - BloodSpear
+  - BloodExplosion
+  autoEquipDefaults: 1
+  harvestAbilityName: Harvest
+  harvestKeybind: 324
+  dashAbilityName: Dash
+  dashKeybind: 32
 --- !u!1 &8811310924032871480
 GameObject:
   m_ObjectHideFlags: 0
