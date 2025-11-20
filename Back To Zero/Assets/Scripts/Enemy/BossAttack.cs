@@ -59,7 +59,6 @@ public class BossAttack : MonoBehaviour
     private float circularSprayCooldownTimer = 0f;
     
     // Attack pattern
-    private bool lastAttackWasBeam = false;
     private int lastAttackType = 0;
     
     // New: Global cooldown

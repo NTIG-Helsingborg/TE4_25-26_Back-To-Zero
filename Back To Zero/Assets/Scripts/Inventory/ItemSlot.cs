@@ -50,7 +50,7 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         // Auto-find itemInfoPopup if not assigned
         if (itemInfoPopup == null)
         {
-            itemInfoPopup = FindObjectOfType<ShopInfo>();
+            itemInfoPopup = FindFirstObjectByType<ShopInfo>();
             if (itemInfoPopup == null)
             {
                 Debug.LogWarning($"ItemSlot '{gameObject.name}': No ShopInfo component found in scene! Hover functionality will not work.");

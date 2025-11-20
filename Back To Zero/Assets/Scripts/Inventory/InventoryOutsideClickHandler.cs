@@ -15,7 +15,7 @@ public class InventoryOutsideClickHandler : MonoBehaviour, IPointerClickHandler
 
     private void Awake()
     {
-        inventoryManager = FindObjectOfType<InventoryManager>();
+        inventoryManager = FindFirstObjectByType<InventoryManager>();
         if (inventoryManager == null)
         {
             Debug.LogWarning("InventoryOutsideClickHandler: No InventoryManager found in scene.");

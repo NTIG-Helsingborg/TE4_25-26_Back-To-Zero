@@ -61,7 +61,7 @@ public class AbilitySetter : MonoBehaviour
             }
             if (inventoryManager == null)
             {
-                inventoryManager = FindObjectOfType<InventoryManager>();
+                inventoryManager = FindFirstObjectByType<InventoryManager>();
             }
         }
         
@@ -378,7 +378,7 @@ public class AbilitySetter : MonoBehaviour
                 else
                 {
                     abilityMap[abilityName] = ability;
-                    Debug.Log($"AbilitySetter: Mapped '{abilityName}' (ability keybind: {ability.keybind})");
+                    Debug.Log($"AbilitySetter: Mapped '{abilityName}'");
                 }
             }
         }
