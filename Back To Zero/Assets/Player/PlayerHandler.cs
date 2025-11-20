@@ -13,6 +13,12 @@ public class PlayerHandler : MonoBehaviour
     public GameObject deathTxt;
     public float deathTxtFadeDuration = 0.5f;
     
+    [Header("Ultimate Meter")]
+    public float ultimateMaxCharge = 100f;
+    [SerializeField] private float ultimateCharge = 0f;
+    public float chargePerHarvest = 25f;
+    public System.Action<float> OnUltimateChanged; // normalized 0..1
+
     private Health playerHealth;
     private bool isDead = false;
     private RigidbodyConstraints2D originalConstraints;
@@ -200,5 +206,25 @@ public class PlayerHandler : MonoBehaviour
         }
         
         deathTxtCanvasGroup.alpha = 1f;
+    }
+
+    public bool IsUltimateReady => ultimateCharge >= ultimateMaxCharge - 0.001f;
+    public float UltimateNormalized => Mathf.Clamp01(ultimateCharge / Mathf.Max(0.0001f, ultimateMaxCharge));
+
+    public void AddUltimateCharge(float amount)
+    {
+        if (ultimateMaxCharge <= 0f) return;
+        float before = ultimateCharge;
+        ultimateCharge = Mathf.Clamp(ultimateCharge + Mathf.Max(0f, amount), 0f, ultimateMaxCharge);
+        if (ultimateCharge != before) OnUltimateChanged?.Invoke(UltimateNormalized);
+    }
+
+    public void AddHarvestCharge() => AddUltimateCharge(chargePerHarvest);
+
+    public void ConsumeUltimate()
+    {
+        if (ultimateCharge <= 0f) return;
+        ultimateCharge = 0f;
+        OnUltimateChanged?.Invoke(UltimateNormalized);
     }
 }

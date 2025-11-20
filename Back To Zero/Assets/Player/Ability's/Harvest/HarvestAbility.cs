@@ -94,6 +94,8 @@ public class HarvestAbility : Ability
         int healAmountPerEnemy = Mathf.RoundToInt(playerMaxHealth * healPercentage);
 
         float thresholdFraction = CurrentHarvestThresholdFraction;
+
+        var playerHandler = playerObject.GetComponent<PlayerHandler>();
         
         foreach (Collider2D collider in nearbyEntities)
         {
@@ -113,13 +115,16 @@ public class HarvestAbility : Ability
 
                 totalHealAmount += healAmountPerEnemy;
                 harvestedEntities.Add(collider.gameObject);
+
+
+                
             }
         }
         
         if (harvestedEntities.Count > 0)
         {
             Debug.Log($"Harvesting {harvestedEntities.Count} entities for {totalHealAmount} HP");
-            
+
             FreezeEntities(harvestedEntities, true);
             
             StartHarvestVisuals(harvestedEntities);
@@ -134,9 +139,16 @@ public class HarvestAbility : Ability
                         entityHealth.InstantKill();
                 }
             }
-            
+
             if (playerHealth != null && totalHealAmount > 0)
                 playerHealth.Heal(totalHealAmount);
+                
+            if (playerHandler != null)
+            {
+                //adds charge to ultimate
+                for (int i = 0; i < harvestedEntities.Count; i++)
+                    playerHandler.AddHarvestCharge();
+            }
         }
         else
         {
