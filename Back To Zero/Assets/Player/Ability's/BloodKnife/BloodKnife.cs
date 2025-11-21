@@ -44,7 +44,8 @@ public class BloodKnife : Ability
         var proj = go.GetComponent<Projectiles>();
         if (proj != null)
         {
-            proj.Initialize(damage, speed, range, player);
+            float totalDamage = damage * PowerBonus.GetDamageMultiplier();
+            proj.Initialize(totalDamage, speed, range, player);
         }
         else
         {

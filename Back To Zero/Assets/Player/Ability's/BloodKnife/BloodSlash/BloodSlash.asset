@@ -15,10 +15,11 @@ MonoBehaviour:
   name: 
   cooldownTime: 0.5
   activeTime: 0
+  keybind: 0
   damage: 10
   knockbackForce: 3
   lifetime: 1
-  HpCost: 3
+  HpCost: 50
   IsAbility: 1
   slashPrefab: {fileID: 9040097098050866608, guid: a090cbda3bc275341a39faf62c279367, type: 3}
   firePointChildName: SpellTransform

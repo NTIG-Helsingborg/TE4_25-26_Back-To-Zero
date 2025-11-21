@@ -8,6 +8,7 @@ public class ItemSO : ScriptableObject
     public string itemDescription;
     public StatToChange statToChange = StatToChange.None;
     public int amountToChangeStat;
+    public Rarity itemRarity = Rarity.none;
     public int dropChance;  
     public int isArtifact; // 0 = no, 1 = yes
     public int isAbility; // 0 = no, 1 = yes
@@ -42,6 +43,36 @@ public class ItemSO : ScriptableObject
 
         return false;
     }
+    public bool ArtifactItem()
+    {
+        if (statToChange == StatToChange.HealthIncrease)
+        {
+            GameObject player = GameObject.Find("Player");
+            if (player == null)
+            {
+                return false;
+            }
+
+            Health health = player.GetComponent<Health>();
+            if (health == null)
+            {
+                return false;
+            }
+
+            health.IncreaseMaxHealth(amountToChangeStat);
+            return true;
+        }
+        
+        if (statToChange == StatToChange.Power)
+        {
+            // Increase power bonus for blood abilities
+            PowerBonus.AddPowerBonus(amountToChangeStat);
+            Debug.Log($"ArtifactItem: Increased Power by {amountToChangeStat}%. Total Power: {PowerBonus.GetTotalPowerPercentage()}%");
+            return true;
+        }
+        
+        return false;
+    }
 
     public enum StatToChange
     {
@@ -50,6 +81,15 @@ public class ItemSO : ScriptableObject
         Power,
         Agility,
         Intelligence,
-        Coin
+        Coin,
+        HealthIncrease
+    };
+    public enum Rarity{
+        none,
+        common,
+        rare,
+        epic,
+        legendary,
+        Cursed
     };
 }

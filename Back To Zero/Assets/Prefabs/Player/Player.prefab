@@ -190,6 +190,10 @@ MonoBehaviour:
   - BloodSpear
   - BloodExplosion
   autoEquipDefaults: 1
+  harvestAbilityName: Harvest Ability
+  harvestKeybind: 324
+  dashAbilityName: Dash Ability
+  dashKeybind: 32
 --- !u!61 &1698157271476681283
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -503,6 +507,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 50b6a33ac0a45554c9b0de64435406bd, type: 2}
   - {fileID: 11400000, guid: c9084dcb147efae4da2de50cf140c27a, type: 2}
   - {fileID: 11400000, guid: 124b8bc464001b64f97929685dab665d, type: 2}
+  - {fileID: 11400000, guid: c9234329ac5cabc49b062ef9fc7f5808, type: 2}
+  - {fileID: 11400000, guid: fa0e9e5a7dc26d847b0d05c1fd1a7210, type: 2}
+  - {fileID: 11400000, guid: 84f03799a04185343a656e150250d138, type: 2}
+  - {fileID: 11400000, guid: f9efe70d158d44b4a9684811d4fbef20, type: 2}
+  - {fileID: 11400000, guid: a5a6082346a05f34fb3d79fd37bebd5e, type: 2}
+  - {fileID: 11400000, guid: 2a3e2a8c7d5e62945b9fb95a9fed7150, type: 2}
+  - {fileID: 11400000, guid: 449673f06fb815c45ac46b08d1d55df4, type: 2}
   slotsParent: {fileID: 0}
   artifactSlotsParent: {fileID: 0}
   abilitySlotsParent: {fileID: 0}
@@ -605,8 +616,8 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 5
       value: 1000
-      inSlope: 38.199196
-      outSlope: 38.199196
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334

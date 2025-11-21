@@ -45,7 +45,8 @@ public class BloodExplosion : Ability
         var proj = go.GetComponent<Projectiles>();
         if (proj != null)
         {
-            proj.Initialize(damage, speed, range, player, true, radius, true);
+            float totalDamage = damage * PowerBonus.GetDamageMultiplier();
+            proj.Initialize(totalDamage, speed, range, player, true, radius, true);
         }
         else
         {

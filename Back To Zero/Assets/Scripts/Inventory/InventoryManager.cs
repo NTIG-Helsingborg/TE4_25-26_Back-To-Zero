@@ -508,9 +508,44 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
+        // If trying to equip the same item that's already equipped, don't do anything
+        if (!string.IsNullOrEmpty(targetSlot.itemName) && targetSlot.itemName == selectedArtifactSlot.itemName)
+        {
+            Debug.Log($"InventoryManager: '{selectedArtifactSlot.itemName}' is already equipped in this slot. No action taken.");
+            selectedArtifactSlot.DeselectVisuals();
+            selectedArtifactSlot = null;
+            return;
+        }
+
         // Return the currently equipped item to inventory first (if any)
         if (!string.IsNullOrEmpty(targetSlot.itemName) && targetSlot.quantity > 0)
         {
+            // Remove effect from old item before unequipping
+            ItemSO oldItemSO = GetItemSO(targetSlot.itemName);
+            if (oldItemSO != null)
+            {
+                // For HealthIncrease, we need to reverse the effect
+                if (oldItemSO.statToChange == ItemSO.StatToChange.HealthIncrease)
+                {
+                    GameObject player = GameObject.Find("Player");
+                    if (player != null)
+                    {
+                        Health health = player.GetComponent<Health>();
+                        if (health != null)
+                        {
+                            health.IncreaseMaxHealth(-oldItemSO.amountToChangeStat); // Negative to remove
+                            Debug.Log($"InventoryManager: Removed effect from '{targetSlot.itemName}' (HealthIncrease: {-oldItemSO.amountToChangeStat}).");
+                        }
+                    }
+                }
+                // For Power, remove the power bonus
+                else if (oldItemSO.statToChange == ItemSO.StatToChange.Power)
+                {
+                    PowerBonus.AddPowerBonus(-oldItemSO.amountToChangeStat); // Negative to remove
+                    Debug.Log($"InventoryManager: Removed effect from '{targetSlot.itemName}' (Power: {-oldItemSO.amountToChangeStat}).");
+                }
+            }
+
             int returnLeftover = AddItem(targetSlot.itemName, targetSlot.itemSprite, targetSlot.quantity, targetSlot.itemDescription, 1);
             if (returnLeftover > 0)
             {
@@ -522,6 +557,9 @@ public class InventoryManager : MonoBehaviour
 
         // Clear the target active equipment slot
         targetSlot.EmptySlot();
+
+        // Save the item name before modifying the source slot
+        string transferringItemName = selectedArtifactSlot.itemName;
 
         // Transfer the item to the active equipment slot (transfer 1 item)
         int leftover = targetSlot.AddItem(selectedArtifactSlot.itemName, selectedArtifactSlot.itemSprite, 1, selectedArtifactSlot.itemDescription);
@@ -538,7 +576,27 @@ public class InventoryManager : MonoBehaviour
             {
                 selectedArtifactSlot.UpdateQuantityDisplay();
             }
-            Debug.Log($"InventoryManager: Transferred '{selectedArtifactSlot.itemName}' to active equipment slot.");
+            Debug.Log($"InventoryManager: Transferred '{transferringItemName}' to active equipment slot.");
+            
+            // Apply ArtifactItem() effect for the newly equipped item (use saved name)
+            ItemSO newItemSO = GetItemSO(transferringItemName);
+            if (newItemSO != null)
+            {
+                Debug.Log($"InventoryManager: Found ItemSO for '{transferringItemName}', calling ArtifactItem()...");
+                bool effectApplied = newItemSO.ArtifactItem();
+                if (effectApplied)
+                {
+                    Debug.Log($"InventoryManager: Applied ArtifactItem effect for '{transferringItemName}'.");
+                }
+                else
+                {
+                    Debug.Log($"InventoryManager: ArtifactItem() returned false for '{transferringItemName}'.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"InventoryManager: Could not find ItemSO for '{transferringItemName}' to apply effect.");
+            }
             
             // Deselect the artifact slot after successful transfer
             selectedArtifactSlot.DeselectVisuals();
@@ -553,6 +611,32 @@ public class InventoryManager : MonoBehaviour
         {
             Debug.Log("InventoryManager: Active equipment slot is empty, nothing to return.");
             return;
+        }
+
+        // Remove ArtifactItem() effect before returning to inventory
+        ItemSO itemSO = GetItemSO(activeSlot.itemName);
+        if (itemSO != null)
+        {
+            // For HealthIncrease, we need to reverse the effect
+            if (itemSO.statToChange == ItemSO.StatToChange.HealthIncrease)
+            {
+                GameObject player = GameObject.Find("Player");
+                if (player != null)
+                {
+                    Health health = player.GetComponent<Health>();
+                    if (health != null)
+                    {
+                        health.IncreaseMaxHealth(-itemSO.amountToChangeStat); // Negative to remove
+                        Debug.Log($"InventoryManager: Removed effect from '{activeSlot.itemName}' (HealthIncrease: {-itemSO.amountToChangeStat}).");
+                    }
+                }
+            }
+            // For Power, remove the power bonus
+            else if (itemSO.statToChange == ItemSO.StatToChange.Power)
+            {
+                PowerBonus.AddPowerBonus(-itemSO.amountToChangeStat); // Negative to remove
+                Debug.Log($"InventoryManager: Removed effect from '{activeSlot.itemName}' (Power: {-itemSO.amountToChangeStat}).");
+            }
         }
 
         // Add the item back to artifact inventory
@@ -574,6 +658,50 @@ public class InventoryManager : MonoBehaviour
     public ActiveSlot[] GetActiveSlots()
     {
         return activeSlots;
+    }
+
+    /// <summary>
+    /// Get ItemSO by item name (case-insensitive)
+    /// </summary>
+    private ItemSO GetItemSO(string itemName)
+    {
+        if (itemSOs == null || string.IsNullOrEmpty(itemName))
+        {
+            Debug.LogWarning($"GetItemSO: itemSOs is null or itemName is empty. itemName: '{itemName}'");
+            return null;
+        }
+
+        // First try exact match
+        for (int i = 0; i < itemSOs.Length; i++)
+        {
+            if (itemSOs[i] != null && itemSOs[i].itemName == itemName)
+            {
+                return itemSOs[i];
+            }
+        }
+        
+        // If no exact match, try case-insensitive
+        string itemNameLower = itemName.ToLower();
+        for (int i = 0; i < itemSOs.Length; i++)
+        {
+            if (itemSOs[i] != null && itemSOs[i].itemName.ToLower() == itemNameLower)
+            {
+                Debug.LogWarning($"GetItemSO: Found ItemSO with case mismatch. Looking for '{itemName}', found '{itemSOs[i].itemName}'. Consider fixing the name to match exactly.");
+                return itemSOs[i];
+            }
+        }
+        
+        // Not found - show what's available
+        Debug.LogWarning($"GetItemSO: Could not find ItemSO for '{itemName}'. Available ItemSOs:");
+        for (int i = 0; i < itemSOs.Length; i++)
+        {
+            if (itemSOs[i] != null)
+            {
+                Debug.LogWarning($"  - ItemSO[{i}]: '{itemSOs[i].itemName}'");
+            }
+        }
+        
+        return null;
     }
 
     /// <summary>
