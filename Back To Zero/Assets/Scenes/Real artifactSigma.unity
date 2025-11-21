@@ -668,6 +668,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4cd5c4984ff9ba419acf516b99d93e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &747568520 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1816121464776991722, guid: 4974f1dd52cbb4fa3a8fc4b2bb9f082b, type: 3}
+  m_PrefabInstance: {fileID: 1494640398}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &774273609 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4063973256040355830, guid: 4974f1dd52cbb4fa3a8fc4b2bb9f082b, type: 3}
+  m_PrefabInstance: {fileID: 1494640398}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &805061999 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1440593901802350386, guid: 03a0fe93987fd194f886c81bff25739c, type: 3}
@@ -683,6 +693,11 @@ MonoBehaviour:
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5618728540898522984, guid: 03a0fe93987fd194f886c81bff25739c, type: 3}
   m_PrefabInstance: {fileID: 1218743259}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &915521393 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1926887298307189874, guid: 4974f1dd52cbb4fa3a8fc4b2bb9f082b, type: 3}
+  m_PrefabInstance: {fileID: 1494640398}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &928563747 stripped
 GameObject:
@@ -1404,6 +1419,10 @@ PrefabInstance:
       propertyPath: healthBar
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 1240838975994050367, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: grantsExperienceOnDeath
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3351440291523874951, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: TopPanel
       value: 
@@ -1476,6 +1495,22 @@ PrefabInstance:
       propertyPath: experienceText
       value: 
       objectReference: {fileID: 1494640400}
+    - target: {fileID: 6208324690607492849, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: rewardPanels.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6208324690607492849, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: 'rewardPanels.Array.data[0]'
+      value: 
+      objectReference: {fileID: 774273609}
+    - target: {fileID: 6208324690607492849, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: 'rewardPanels.Array.data[1]'
+      value: 
+      objectReference: {fileID: 915521393}
+    - target: {fileID: 6208324690607492849, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: 'rewardPanels.Array.data[2]'
+      value: 
+      objectReference: {fileID: 747568520}
     - target: {fileID: 6208324690607492849, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: experienceCurve.m_PreInfinity
       value: 2
