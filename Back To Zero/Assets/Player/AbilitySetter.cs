@@ -859,4 +859,19 @@ public class AbilitySetter : MonoBehaviour
         }
         return null;
     }
+    
+    /// <summary>
+    /// Gets the Harvest ability holder (forced keybind)
+    /// </summary>
+    public AbilityHolder GetHarvestHolder() => harvestHolder;
+    
+    /// <summary>
+    /// Gets the Dash ability holder (forced keybind - always active)
+    /// </summary>
+    public AbilityHolder GetDashHolder() => dashHolder;
+    
+    /// <summary>
+    /// Gets the BloodTransfusion ability holder (forced keybind)
+    /// </summary>
+    public AbilityHolder GetBloodTransfusionHolder() => bloodTransfusionHolder;
 }

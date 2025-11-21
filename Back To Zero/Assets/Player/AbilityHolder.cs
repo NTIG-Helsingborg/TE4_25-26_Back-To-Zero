@@ -6,7 +6,7 @@ public class AbilityHolder : MonoBehaviour
     float cooldownTimer;
     float activeTimer;
 
-    enum AbilityState{
+    public enum AbilityState{
         ready,
         active,
         cooldown
@@ -75,5 +75,34 @@ public class AbilityHolder : MonoBehaviour
     public bool IsAbilityReady()
     {
         return state == AbilityState.ready;
+    }
+    
+    // Public methods for cooldown display system
+    public float GetRemainingCooldown()
+    {
+        if (state == AbilityState.cooldown)
+            return cooldownTimer;
+        return 0f;
+    }
+    
+    public float GetCooldownProgress()
+    {
+        if (ability == null || ability.cooldownTime <= 0)
+            return 0f;
+        
+        if (state == AbilityState.cooldown)
+            return cooldownTimer / ability.cooldownTime;
+        
+        return 0f;
+    }
+    
+    public bool IsOnCooldown()
+    {
+        return state == AbilityState.cooldown;
+    }
+    
+    public AbilityState GetState()
+    {
+        return state;
     }
 }
