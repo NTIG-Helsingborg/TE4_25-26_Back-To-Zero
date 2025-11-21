@@ -15,6 +15,7 @@ MonoBehaviour:
   name: 
   cooldownTime: 0.5
   activeTime: 0
+  keybind: 0
   damage: 10
   knockbackForce: 3
   lifetime: 0.5

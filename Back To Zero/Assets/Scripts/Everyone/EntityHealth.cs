@@ -93,6 +93,41 @@ public class Health : MonoBehaviour
     public bool IsFullHealth() => currentHealth >= maxHealth;
     public void InstantKill() => Die();
 
+    public void IncreaseMaxHealth(int amount)
+    {
+        // If currentHealth hasn't been initialized yet (is 0), initialize it to maxHealth first
+        if (currentHealth <= 0)
+        {
+            currentHealth = maxHealth;
+        }
+        
+        maxHealth += amount;
+        if (maxHealth < 1)
+        {
+            maxHealth = 1; // Ensure maxHealth never goes below 1
+        }
+        
+        // Also increase current health by the same amount when maxHealth increases
+        if (amount > 0)
+        {
+            currentHealth += amount;
+        }
+        
+        // Clamp current health to not exceed new max
+        if (currentHealth > maxHealth)
+        {
+            currentHealth = maxHealth;
+        }
+        
+        // Ensure current health doesn't go below 1
+        if (currentHealth < 1)
+        {
+            currentHealth = 1;
+        }
+        
+        RefreshHealthBarFill();
+    }
+
     private void RefreshHealthBarFill()
     {
         if (healthBar != null)

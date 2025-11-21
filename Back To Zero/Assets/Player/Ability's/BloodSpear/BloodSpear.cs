@@ -44,7 +44,8 @@ public class BloodSpear : Ability
         var hitbox = go.GetComponent<MeleeHitbox>();
         if (hitbox != null)
         {
-            hitbox.Initialize(damage, knockbackForce, lifetime, player, hitLayers);
+            float totalDamage = damage * PowerBonus.GetDamageMultiplier();
+            hitbox.Initialize(totalDamage, knockbackForce, lifetime, player, hitLayers);
         }
         else
         {
