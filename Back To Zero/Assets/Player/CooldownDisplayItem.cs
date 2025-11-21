@@ -1,178 +1,79 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
-/// <summary>
-/// Component for displaying a single ability's cooldown information
-/// Attached to each dynamically created Holder GameObject
-/// </summary>
 public class CooldownDisplayItem : MonoBehaviour
 {
-    [Header("UI References")]
-    [SerializeField] private Image abilityIcon; // Image Background
-    [SerializeField] private Image cooldownFillImage; // Overlay for cooldown fill
-    [SerializeField] private TMP_Text keybindText; // The KeybindTxt child component
-    [SerializeField] private TMP_Text cooldownText; // Countdown text
-    
-    private AbilityHolder abilityHolder;
-    private float maxCooldownTime;
-    private InventoryManager inventoryManager;
+    private Image image;
+    private AbilityHolder holder;
+    private float maxCooldown;
+    private bool isDash;
     
     void Start()
     {
-        // Auto-find components if not assigned
-        if (abilityIcon == null)
-            abilityIcon = GetComponent<Image>();
-            
-        if (keybindText == null)
-        {
-            Transform keybindTxtTransform = transform.Find("KeybindTxt");
-            if (keybindTxtTransform != null)
-                keybindText = keybindTxtTransform.GetComponent<TMP_Text>();
-        }
-        
-        // Find InventoryManager for getting ability icons
-        if (inventoryManager == null)
-        {
-            GameObject player = GameObject.Find("Player");
-            if (player != null)
-                inventoryManager = player.GetComponent<InventoryManager>();
-        }
+        image = GetComponent<Image>();
     }
     
-    /// <summary>
-    /// Initialize this cooldown display with an ability holder
-    /// </summary>
-    public void Initialize(AbilityHolder holder, Sprite icon, string abilityName, KeyCode keybind)
+    public void Initialize(AbilityHolder h)
     {
-        abilityHolder = holder;
-        maxCooldownTime = holder.ability != null ? holder.ability.cooldownTime : 0f;
+        holder = h;
+        maxCooldown = h.ability?.cooldownTime ?? 0f;
+        isDash = h.ability?.name.Equals("Dash", System.StringComparison.OrdinalIgnoreCase) ?? false;
         
-        // Set ability icon if available
-        if (abilityIcon != null && icon != null)
-        {
-            abilityIcon.sprite = icon;
-        }
-        else if (abilityIcon != null && icon == null)
-        {
-            // Try to find icon from ItemSO
-            icon = GetAbilityIcon(abilityName);
-            if (icon != null)
-                abilityIcon.sprite = icon;
-        }
-        
-        // Set keybind text
-        if (keybindText != null)
-        {
-            keybindText.text = FormatKeybind(keybind);
-        }
+        HideDisplay();
     }
     
     void Update()
     {
-        if (abilityHolder == null || abilityHolder.ability == null)
+        if (holder?.ability == null)
         {
-            // Hide if ability is no longer valid
-            gameObject.SetActive(false);
+            HideDisplay();
             return;
         }
         
-        UpdateCooldownDisplay();
-    }
-    
-    private void UpdateCooldownDisplay()
-    {
-        float remainingCooldown = abilityHolder.GetRemainingCooldown();
-        float cooldownProgress = abilityHolder.GetCooldownProgress();
+        AbilityHolder.AbilityState state = holder.GetState();
+        float remaining = holder.GetRemainingCooldown();
         
-        // Update fill image (if using fill amount overlay)
-        if (cooldownFillImage != null)
-        {
-            cooldownFillImage.fillAmount = cooldownProgress;
-            cooldownFillImage.gameObject.SetActive(remainingCooldown > 0);
-        }
+        bool shouldShow = state == AbilityHolder.AbilityState.active || state == AbilityHolder.AbilityState.cooldown;
         
-        // Update countdown text
-        if (cooldownText != null)
+        if (shouldShow)
         {
-            if (remainingCooldown > 0)
+            ShowDisplay();
+            if (image != null && maxCooldown > 0)
             {
-                cooldownText.text = remainingCooldown.ToString("F1");
-                cooldownText.gameObject.SetActive(true);
-            }
-            else
-            {
-                cooldownText.text = "";
-                cooldownText.gameObject.SetActive(false);
+                if (state == AbilityHolder.AbilityState.cooldown)
+                {
+                    image.fillAmount = 1f - (remaining / maxCooldown);
+                }
+                else
+                {
+                    image.fillAmount = 0f;
+                }
             }
         }
-        
-        // Optionally dim the icon when on cooldown
-        if (abilityIcon != null)
+        else
         {
-            Color iconColor = abilityIcon.color;
-            if (remainingCooldown > 0)
-            {
-                iconColor.a = 0.5f; // Dimmed when on cooldown
-            }
-            else
-            {
-                iconColor.a = 1f; // Full opacity when ready
-            }
-            abilityIcon.color = iconColor;
+            HideDisplay();
         }
     }
     
-    private string FormatKeybind(KeyCode key)
+    private void ShowDisplay()
     {
-        // Format keybind for display (e.g., "Mouse0" -> "LMB", "Space" -> "SPACE")
-        switch (key)
+        if (image != null)
         {
-            case KeyCode.Mouse0:
-                return "LMB";
-            case KeyCode.Mouse1:
-                return "RMB";
-            case KeyCode.Mouse2:
-                return "MMB";
-            case KeyCode.Space:
-                return "SPACE";
-            case KeyCode.LeftShift:
-            case KeyCode.RightShift:
-                return "SHIFT";
-            case KeyCode.LeftControl:
-            case KeyCode.RightControl:
-                return "CTRL";
-            case KeyCode.LeftAlt:
-            case KeyCode.RightAlt:
-                return "ALT";
-            default:
-                // For letter keys, return uppercase letter
-                string keyString = key.ToString();
-                if (keyString.Length == 1)
-                    return keyString;
-                // For other keys, return as-is (e.g., "E", "Q", "Alpha1")
-                return keyString;
+            Color c = image.color;
+            c.a = 1f;
+            image.color = c;
         }
     }
     
-    private Sprite GetAbilityIcon(string abilityName)
+    private void HideDisplay()
     {
-        if (inventoryManager == null || inventoryManager.itemSOs == null)
-            return null;
-        
-        // Find ItemSO for this ability
-        foreach (ItemSO itemSO in inventoryManager.itemSOs)
+        if (image != null)
         {
-            if (itemSO != null && itemSO.isAbility == 1 && 
-                (itemSO.itemName.Equals(abilityName, System.StringComparison.OrdinalIgnoreCase) ||
-                 abilityName.Contains(itemSO.itemName, System.StringComparison.OrdinalIgnoreCase) ||
-                 itemSO.itemName.Contains(abilityName, System.StringComparison.OrdinalIgnoreCase)))
-            {
-                return itemSO.itemSprite;
-            }
+            Color c = image.color;
+            c.a = 0f;
+            image.color = c;
         }
-        
-        return null;
     }
 }
 
