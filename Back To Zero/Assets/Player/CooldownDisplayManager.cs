@@ -1,5 +1,7 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
 
 public class CooldownDisplayManager : MonoBehaviour
 {
@@ -21,6 +23,7 @@ public class CooldownDisplayManager : MonoBehaviour
         if (abilitySetter == null || cooldownShowcasePanel == null || cooldownHolderPrefab == null) return;
         
         RefreshDisplays();
+        UpdateAllDisplays();
     }
     
     private void RefreshDisplays()
@@ -41,10 +44,59 @@ public class CooldownDisplayManager : MonoBehaviour
             if (holder?.ability != null && !displays.ContainsKey(holder))
             {
                 GameObject display = Instantiate(cooldownHolderPrefab, cooldownShowcasePanel);
-                CooldownDisplayItem item = display.GetComponent<CooldownDisplayItem>();
-                if (item == null) item = display.AddComponent<CooldownDisplayItem>();
-                item.Initialize(holder);
+                SetupDisplay(display, holder);
                 displays[holder] = display;
+            }
+        }
+    }
+    
+    private void SetupDisplay(GameObject display, AbilityHolder holder)
+    {
+        CooldownDisplayItem item = display.GetComponent<CooldownDisplayItem>();
+        if (item == null) item = display.AddComponent<CooldownDisplayItem>();
+        
+        TMP_Text keybindText = item.GetKeybindText();
+        if (keybindText != null)
+            keybindText.text = FormatKeybind(holder.key);
+        
+        Transform fillTransform = display.transform.Find("AbilityCooldown");
+        if (fillTransform != null)
+        {
+            Image fillImage = fillTransform.GetComponent<Image>();
+            if (fillImage != null)
+            {
+                fillImage.fillAmount = 0f;
+            }
+        }
+    }
+    
+    private void UpdateAllDisplays()
+    {
+        foreach (var kvp in displays)
+        {
+            if (kvp.Key?.ability == null || kvp.Value == null) continue;
+            
+            AbilityHolder holder = kvp.Key;
+            GameObject display = kvp.Value;
+            
+            Transform fillTransform = display.transform.Find("AbilityCooldown");
+            if (fillTransform != null)
+            {
+                Image fillImage = fillTransform.GetComponent<Image>();
+                if (fillImage != null)
+                {
+                    AbilityHolder.AbilityState state = holder.GetState();
+                    float remaining = holder.GetRemainingCooldown();
+                    float maxCooldown = holder.ability.cooldownTime;
+                    
+                    if (maxCooldown > 0)
+                    {
+                        if (state == AbilityHolder.AbilityState.cooldown)
+                            fillImage.fillAmount = 1f - (remaining / maxCooldown);
+                        else
+                            fillImage.fillAmount = 0f;
+                    }
+                }
             }
         }
     }
@@ -66,5 +118,24 @@ public class CooldownDisplayManager : MonoBehaviour
         
         return holders;
     }
+    
+    private string FormatKeybind(KeyCode key)
+    {
+        switch (key)
+        {
+            case KeyCode.Mouse0: return "LMB";
+            case KeyCode.Mouse1: return "RMB";
+            case KeyCode.Mouse2: return "MMB";
+            case KeyCode.Space: return "SPACE";
+            case KeyCode.LeftShift:
+            case KeyCode.RightShift: return "SHIFT";
+            case KeyCode.LeftControl:
+            case KeyCode.RightControl: return "CTRL";
+            case KeyCode.LeftAlt:
+            case KeyCode.RightAlt: return "ALT";
+            default:
+                string keyString = key.ToString();
+                return keyString.Length == 1 ? keyString : keyString;
+        }
+    }
 }
-
