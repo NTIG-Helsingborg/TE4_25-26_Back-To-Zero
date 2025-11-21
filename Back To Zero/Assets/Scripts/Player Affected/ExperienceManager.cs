@@ -8,6 +8,8 @@ public class ExperienceManager : MonoBehaviour
 
     [Header("Experience")]
     [SerializeField] AnimationCurve experienceCurve;
+    [SerializeField] int maxLevel = 100; // Maximum level for curve calculation
+    [SerializeField] int baseExperienceRequirement = 100; // Base XP multiplier
 
     int currentLevel;
     int totalExperience;
@@ -135,14 +137,37 @@ public class ExperienceManager : MonoBehaviour
             return;
         }
 
-        previousLevelsExperience = (int)experienceCurve.Evaluate(currentLevel);
-        nextLevelsExperience = (int)experienceCurve.Evaluate(currentLevel + 1);
+        // Normalize level to 0-1 range for curve evaluation
+        float normalizedCurrentLevel = Mathf.Clamp01((float)currentLevel / maxLevel);
+        float normalizedNextLevel = Mathf.Clamp01((float)(currentLevel + 1) / maxLevel);
+
+        // Evaluate curve and scale by base requirement
+        previousLevelsExperience = Mathf.RoundToInt(experienceCurve.Evaluate(normalizedCurrentLevel) * baseExperienceRequirement * maxLevel);
+        nextLevelsExperience = Mathf.RoundToInt(experienceCurve.Evaluate(normalizedNextLevel) * baseExperienceRequirement * maxLevel);
+
+        // Force first level to always require base amount
+        if (currentLevel == 0)
+        {
+            previousLevelsExperience = 0;
+            nextLevelsExperience = baseExperienceRequirement;
+        }
+        else
+        {
+            // Ensure every level requires at least base amount more than the previous
+            int minimumIncrease = baseExperienceRequirement;
+            if (nextLevelsExperience < previousLevelsExperience + minimumIncrease)
+            {
+                nextLevelsExperience = previousLevelsExperience + minimumIncrease;
+            }
+        }
 
         // Ensure experience requirement always increases
         if (nextLevelsExperience <= previousLevelsExperience)
         {
             nextLevelsExperience = previousLevelsExperience + 1;
         }
+
+        Debug.Log($"Level {currentLevel}: Requires {previousLevelsExperience} XP, Next level at {nextLevelsExperience} XP");
     }
 
     void UpdateInterface()
