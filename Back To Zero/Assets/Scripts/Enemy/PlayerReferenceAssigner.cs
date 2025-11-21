@@ -10,8 +10,9 @@ public class PlayerReferenceAssigner : MonoBehaviour
     [Tooltip("If true, automatically assigns player references on Start")]
     [SerializeField] private bool assignOnStart = true;
     
-    [Tooltip("If true, also assigns to enemies spawned at runtime")]
-    [SerializeField] private bool assignToSpawnedEnemies = false;
+    // Note: assignToSpawnedEnemies is reserved for future runtime spawning functionality
+    // [Tooltip("If true, also assigns to enemies spawned at runtime")]
+    // [SerializeField] private bool assignToSpawnedEnemies = false;
 
     private Transform playerTransform;
 
@@ -46,7 +47,7 @@ public class PlayerReferenceAssigner : MonoBehaviour
         int assignedCount = 0;
 
         // Assign to EnemyChase components
-        EnemyChase[] enemyChases = FindObjectsOfType<EnemyChase>(true);
+        EnemyChase[] enemyChases = FindObjectsByType<EnemyChase>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (EnemyChase enemyChase in enemyChases)
         {
             // Use reflection to set the private SerializeField
@@ -64,7 +65,7 @@ public class PlayerReferenceAssigner : MonoBehaviour
         }
 
         // Assign to RangedSmallUndead components
-        RangedSmallUndead[] rangedEnemies = FindObjectsOfType<RangedSmallUndead>(true);
+        RangedSmallUndead[] rangedEnemies = FindObjectsByType<RangedSmallUndead>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (RangedSmallUndead rangedEnemy in rangedEnemies)
         {
             var playerField = typeof(RangedSmallUndead).GetField("player", 
@@ -81,7 +82,7 @@ public class PlayerReferenceAssigner : MonoBehaviour
         }
 
         // Assign to BossAttack components
-        BossAttack[] bossAttacks = FindObjectsOfType<BossAttack>(true);
+        BossAttack[] bossAttacks = FindObjectsByType<BossAttack>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (BossAttack bossAttack in bossAttacks)
         {
             if (bossAttack.playerTransform == null)

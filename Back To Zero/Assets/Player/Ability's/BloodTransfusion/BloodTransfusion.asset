@@ -9,20 +9,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3290e654cc436834c9930b3a64565a58, type: 3}
-  m_Name: BloodSlash
+  m_Script: {fileID: 11500000, guid: 27f02d0d0184e6447a0759a831854de9, type: 3}
+  m_Name: BloodTransfusion
   m_EditorClassIdentifier: 
   name: 
-  cooldownTime: 0.5
+  cooldownTime: 0
   activeTime: 0
-  keybind: 0
-  damage: 10
-  knockbackForce: 3
-  lifetime: 0.5
-  HpCost: 3
+  damage: 50
+  radius: 10
+  duration: 0.5
+  knockbackForce: 10
   IsAbility: 1
-  slashPrefab: {fileID: 9040097098050866608, guid: a090cbda3bc275341a39faf62c279367, type: 3}
-  firePointChildName: SpellTransform
-  hitLayers:
+  damageLayers:
     serializedVersion: 2
     m_Bits: 1
+  explosionVfxPrefab: {fileID: 7737874149003893034, guid: 44f9ec1d5f02e6c42aab9b32edc9a4e5, type: 3}
+  harvestHealPercentage: 0.5

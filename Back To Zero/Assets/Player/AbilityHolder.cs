@@ -33,8 +33,11 @@ public class AbilityHolder : MonoBehaviour
             
         switch (state){
             case AbilityState.ready:
-                if (key != KeyCode.None && Input.GetKeyDown(key)){
-                    TriggerAbility();
+                if (Input.GetKeyDown(key)){
+                    if (ability != null && ability.CanActivate())
+                    {
+                        TriggerAbility();
+                    }
                 }
             break;
             case AbilityState.active:

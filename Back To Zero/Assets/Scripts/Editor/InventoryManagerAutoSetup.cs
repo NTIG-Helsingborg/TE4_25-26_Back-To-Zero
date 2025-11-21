@@ -16,13 +16,86 @@ public class InventoryManagerAutoSetup : Editor
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Auto Setup", EditorStyles.boldLabel);
         
+        if (GUILayout.Button("Auto-Load ItemSOs from Items Folder", GUILayout.Height(30)))
+        {
+            AutoLoadItemSOsFromItemsFolder(inventoryManager);
+        }
+        
+        EditorGUILayout.Space();
+        
         if (GUILayout.Button("Auto-Populate All References", GUILayout.Height(30)))
         {
             AutoPopulateReferences(inventoryManager);
         }
 
         EditorGUILayout.Space();
-        EditorGUILayout.HelpBox("Click the button above to automatically find and assign all required references for InventoryManager.", MessageType.Info);
+        EditorGUILayout.HelpBox("Click 'Auto-Load ItemSOs from Items Folder' to automatically find and assign all ItemSOs from the Items folder.\n\nClick 'Auto-Populate All References' to automatically find and assign all other required references for InventoryManager.", MessageType.Info);
+    }
+
+    private void AutoLoadItemSOsFromItemsFolder(InventoryManager inventoryManager)
+    {
+        serializedObject.Update();
+        Undo.RecordObject(inventoryManager, "Auto-load ItemSOs from Items folder");
+        
+        SerializedProperty itemSOsProp = serializedObject.FindProperty("itemSOs");
+        if (itemSOsProp == null)
+        {
+            Debug.LogError("InventoryManager: Could not find 'itemSOs' property!");
+            return;
+        }
+        
+        // Find all ItemSO ScriptableObjects in the Items folder
+        string[] guids = AssetDatabase.FindAssets("t:ItemSO");
+        ItemSO[] allItemSOs = guids
+            .Select(guid => AssetDatabase.LoadAssetAtPath<ItemSO>(AssetDatabase.GUIDToAssetPath(guid)))
+            .Where(itemSO => itemSO != null)
+            .ToArray();
+        
+        // Filter to only ItemSOs from the Items folder
+        ItemSO[] itemsFromFolder = allItemSOs
+            .Where(itemSO => 
+            {
+                string path = AssetDatabase.GetAssetPath(itemSO);
+                // Check if path contains "Items" folder (case-insensitive)
+                return path.Contains("/Items/") || path.Contains("\\Items\\");
+            })
+            .ToArray();
+        
+        if (itemsFromFolder.Length > 0)
+        {
+            itemSOsProp.arraySize = itemsFromFolder.Length;
+            for (int i = 0; i < itemsFromFolder.Length; i++)
+            {
+                itemSOsProp.GetArrayElementAtIndex(i).objectReferenceValue = itemsFromFolder[i];
+            }
+            
+            serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(inventoryManager);
+            
+            Debug.Log($"InventoryManager: ✓ Auto-loaded {itemsFromFolder.Length} ItemSOs from Items folder:");
+            foreach (var itemSO in itemsFromFolder)
+            {
+                Debug.Log($"  - {itemSO.itemName} (isAbility={itemSO.isAbility}, isArtifact={itemSO.isArtifact})");
+            }
+        }
+        else if (allItemSOs.Length > 0)
+        {
+            // Fallback: use all ItemSOs if none found in Items folder
+            itemSOsProp.arraySize = allItemSOs.Length;
+            for (int i = 0; i < allItemSOs.Length; i++)
+            {
+                itemSOsProp.GetArrayElementAtIndex(i).objectReferenceValue = allItemSOs[i];
+            }
+            
+            serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(inventoryManager);
+            
+            Debug.LogWarning($"InventoryManager: No ItemSOs found in Items folder. Auto-loaded {allItemSOs.Length} ItemSOs from entire project instead.");
+        }
+        else
+        {
+            Debug.LogWarning("InventoryManager: No ItemSO ScriptableObjects found in project.");
+        }
     }
 
     private void AutoPopulateReferences(InventoryManager inventoryManager)
@@ -31,27 +104,13 @@ public class InventoryManagerAutoSetup : Editor
         Undo.RecordObject(inventoryManager, "Auto-populate InventoryManager references");
         bool hasChanges = false;
 
-        // 1. Find and assign ItemSOs
+        // 1. Find and assign ItemSOs (only if not already assigned)
         SerializedProperty itemSOsProp = serializedObject.FindProperty("itemSOs");
         if (itemSOsProp != null && (itemSOsProp.arraySize == 0 || itemSOsProp.GetArrayElementAtIndex(0).objectReferenceValue == null))
         {
-            string[] guids = AssetDatabase.FindAssets("t:ItemSO");
-            ItemSO[] itemSOs = guids.Select(guid => AssetDatabase.LoadAssetAtPath<ItemSO>(AssetDatabase.GUIDToAssetPath(guid))).ToArray();
-            
-            if (itemSOs.Length > 0)
-            {
-                itemSOsProp.arraySize = itemSOs.Length;
-                for (int i = 0; i < itemSOs.Length; i++)
-                {
-                    itemSOsProp.GetArrayElementAtIndex(i).objectReferenceValue = itemSOs[i];
-                }
-                Debug.Log($"InventoryManager: Auto-assigned {itemSOs.Length} ItemSOs.");
-                hasChanges = true;
-            }
-            else
-            {
-                Debug.LogWarning("InventoryManager: No ItemSO ScriptableObjects found in project.");
-            }
+            // Use the Items folder method
+            AutoLoadItemSOsFromItemsFolder(inventoryManager);
+            hasChanges = true;
         }
 
         // 2. Find GameObjects by name - prioritize "Inventory Canvas 1"
