@@ -13,17 +13,17 @@ MonoBehaviour:
   m_Name: BloodBind
   m_EditorClassIdentifier: 
   name: 
-  cooldownTime: 0
-  activeTime: 0
+  cooldownTime: 3
+  activeTime: 2.45
   bindRadius: 6
-  maxTargets: 3
+  maxTargets: 5
   enemyLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
   bindDuration: 2
-  BloodBindPrefab: {fileID: 0}
+  BloodBindPrefab: {fileID: 527144214560877348, guid: 5f350041f4259464c843440edd89dec0, type: 3}
   firePointChildName: SpellTransform
   extendTime: 0.2
-  holdTime: 0
+  holdTime: 2
   retractTime: 0.25
-  HpCost: 0
+  HpCost: 5

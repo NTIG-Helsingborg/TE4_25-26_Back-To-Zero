@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11c5a18b63a853a43a37b85f30a0f9f4, type: 3}
   m_Name: BloodBind
   m_EditorClassIdentifier: 
-  itemName: 
+  itemName: BloodBind
   itemSprite: {fileID: 0}
-  itemDescription: 
+  itemDescription: Makes the target stuck in the casters blood
   statToChange: 0
   amountToChangeStat: 0
   itemRarity: 0
   dropChance: 0
   isArtifact: 0
-  isAbility: 0
+  isAbility: 1
