@@ -195,25 +195,32 @@ public class WhipController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!MatchesMask(other.gameObject.layer))
-            return;
-        if (owner && other.transform.IsChildOf(owner))
-            return;
-        if (hitThisSwing.Contains(other))
-            return;
+        // Layer filtering
+        if (!MatchesMask(other.gameObject.layer)) return;
+        // Ignore owner
+        if (owner && other.transform.IsChildOf(owner)) return;
+        // Already hit this swing
+        if (hitThisSwing.Contains(other)) return;
 
         hitThisSwing.Add(other);
 
-        // Apply damage (generic)
+        // Damage (adapt name if your enemy uses a different method)
         other.SendMessage("TakeDamage", Mathf.RoundToInt(damage), SendMessageOptions.DontRequireReceiver);
 
-        // Knockback
-        var rb2 = other.attachedRigidbody;
-        if (rb2)
+        // Knockback via KnockbackReceiver if present
+        var kb = other.GetComponent<KnockbackReceiver>();
+        Vector2 fromOrigin = (Vector2)other.bounds.center - (Vector2)(origin ? origin.position : transform.position);
+        if (fromOrigin.sqrMagnitude < 0.0001f) fromOrigin = aimDir; // fallback
+        if (kb)
         {
-            Vector2 fromOrigin = (Vector2)other.bounds.center - (Vector2)(origin ? origin.position : transform.position);
-            if (fromOrigin.sqrMagnitude < 0.0001f) fromOrigin = Vector2.right;
-            rb2.AddForce(fromOrigin.normalized * knockback, ForceMode2D.Impulse);
+            kb.ApplyKnockback(fromOrigin.normalized, knockback);
+        }
+        else
+        {
+            // Fallback: Rigidbody2D impulse
+            var rb2 = other.attachedRigidbody;
+            if (rb2)
+                rb2.AddForce(fromOrigin.normalized * knockback, ForceMode2D.Impulse);
         }
     }
 
