@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: Coin
   m_EditorClassIdentifier: 
   itemName: Coin
-  itemSprite: {fileID: 0}
+  itemSprite: {fileID: 3234001637869761286, guid: a821e06db0e584943bd05c7b3c9c741c, type: 3}
   itemDescription: A valueble piece of metal.
   statToChange: 5
   amountToChangeStat: 1
+  itemRarity: 0
   dropChance: 100
+  isArtifact: 0
+  isAbility: 0
