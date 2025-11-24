@@ -96,6 +96,8 @@ public class BindController : MonoBehaviour
         if (boundApplied || !target) return;
         if (ai) { ai.isStopped = true; ai.canMove = false; }
         if (rb) { rb.linearVelocity = Vector2.zero; rb.isKinematic = true; }
+        // Notify target it is bound
+        target.SendMessage("OnBoundStart", bindDuration, SendMessageOptions.DontRequireReceiver);
         boundApplied = true;
     }
 
@@ -104,6 +106,8 @@ public class BindController : MonoBehaviour
         if (!boundApplied) return;
         if (ai) { ai.isStopped = false; ai.canMove = true; }
         if (rb) rb.isKinematic = false;
+        // Notify target binding ended
+        target.SendMessage("OnBoundEnd", SendMessageOptions.DontRequireReceiver);
         boundApplied = false;
     }
 

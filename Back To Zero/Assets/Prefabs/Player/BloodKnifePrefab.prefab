@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: -8005979616728811238}
   - component: {fileID: -46796706144276361}
   - component: {fileID: 5720623125938778016}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: BloodKnifePrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -175,3 +175,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 632e7b3699d718f41ab77389607024ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  explodeOnImpact: 0
+  explosionRadius: 0
+  includeOwnerInExplosion: 0
+  explosionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  explosionVfx: {fileID: 0}
+  autoScaleExplosionVfx: 1
+  autoDestroyDelay: 0.5

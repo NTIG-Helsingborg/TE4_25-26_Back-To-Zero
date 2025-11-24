@@ -51,6 +51,8 @@ public class RangedSmallUndead : MonoBehaviour
     private float dashPower;
     private float dashDuration;
     private Coroutine dashRoutine;
+    private bool isBound;
+    private float boundUntilTime;
 
     private void Awake()
     {
@@ -111,6 +113,15 @@ public class RangedSmallUndead : MonoBehaviour
         {
             TryResolvePlayerReference();
             if (player == null) return;
+        }
+
+        // Binding: block dash & attacks
+        if (isBound)
+        {
+            if (Time.time >= boundUntilTime)
+                OnBoundEnd();
+            // Optional: keep facing player
+            return;
         }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
@@ -349,5 +360,31 @@ public class RangedSmallUndead : MonoBehaviour
     {
         if (dashTrail == null) return;
         dashTrail.emitting = emitting;
+    }
+
+    // Called by BindController via SendMessage
+    public void OnBoundStart(float duration)
+    {
+        isBound = true;
+        boundUntilTime = Time.time + duration;
+        StopDashRoutine();
+        if (rb) rb.linearVelocity = Vector2.zero;
+        // Already frozen AIPath by BindController; ensure disabled
+        if (aiPath)
+        {
+            aiPath.isStopped = true;
+            aiPath.canMove = false;
+        }
+    }
+
+    public void OnBoundEnd()
+    {
+        isBound = false;
+        // Restore movement (unless some other effect is stopping it)
+        if (aiPath)
+        {
+            aiPath.isStopped = false;
+            aiPath.canMove = true;
+        }
     }
 }
