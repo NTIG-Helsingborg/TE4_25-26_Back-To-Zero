@@ -9,17 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3290e654cc436834c9930b3a64565a58, type: 3}
+  m_Script: {fileID: 0}
   m_Name: BloodSlash
-  m_EditorClassIdentifier: 
-  name: 
-  cooldownTime: 0.5
-  activeTime: 0
-  keybind: 0
+  m_EditorClassIdentifier: Assembly-CSharp::BloodSlash
+  name: BloodSlash
+  cooldownTime: 1
+  activeTime: 0.5
   damage: 10
-  knockbackForce: 3
+  knockbackForce: 5
   lifetime: 0.5
-  HpCost: 3
+  HpCost: 5
   IsAbility: 1
   slashPrefab: {fileID: 9040097098050866608, guid: a090cbda3bc275341a39faf62c279367, type: 3}
   firePointChildName: SpellTransform

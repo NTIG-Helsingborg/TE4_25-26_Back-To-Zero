@@ -4,9 +4,7 @@ using UnityEngine.UI;
 public class PlayerUltimateBar : MonoBehaviour
 {
     [SerializeField] private Image fillImage;
-    [SerializeField] private bool colorWhenFull = true;
-    [SerializeField] private Color fullColor = Color.red;
-    [SerializeField] private Color normalColor = Color.white;
+
 
     private PlayerHandler handler;
 
@@ -65,8 +63,5 @@ public class PlayerUltimateBar : MonoBehaviour
         if (!fillImage) return;
         float clamped = Mathf.Clamp01(v);
         fillImage.fillAmount = clamped;
-
-        if (colorWhenFull)
-            fillImage.color = (clamped >= 0.999f) ? fullColor : normalColor;
     }
 }

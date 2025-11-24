@@ -40,17 +40,15 @@ public class InventoryManager : MonoBehaviour
     private ItemSlot selectedArtifactSlot = null; // Track which artifact slot is selected
     
     private bool menuActivated = false;
+    private int lastToggleFrame = -1; // prevent double-trigger in the same frame
 
     void OnEnable()
     {
         if (inventoryAction != null)
         {
-            
             inventoryAction.action.Enable();
             inventoryAction.action.performed += OnInventory;
         }
-        
-        // Subscribe to shop events to close inventory when shop opens
         Merchant.OnShopStateChanged += OnShopStateChanged;
     }
 
@@ -58,12 +56,9 @@ public class InventoryManager : MonoBehaviour
     {
         if (inventoryAction != null)
         {
-            
             inventoryAction.action.performed -= OnInventory;
             inventoryAction.action.Disable();
         }
-        
-        // Unsubscribe from shop events
         Merchant.OnShopStateChanged -= OnShopStateChanged;
     }
 
@@ -118,49 +113,66 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public void OnInventory(InputAction.CallbackContext context)
+    // Centralized toggle logic
+    private void ToggleInventory()
     {
         // Don't allow opening inventory if shop is open
         if (Merchant.currentShopKeeper != null)
-        {
             return;
-        }
-        
+
         menuActivated = !menuActivated;
-        
-        // When closing, close ALL panels
+
         if (!menuActivated)
         {
-            InventoryMenu.SetActive(false);
+            if (InventoryMenu != null) InventoryMenu.SetActive(false);
             if (InventoryMenuEquipment != null) InventoryMenuEquipment.SetActive(false);
             if (InventoryMenuAbility != null) InventoryMenuAbility.SetActive(false);
         }
         else
         {
-            // When opening, only open main menu
-            InventoryMenu.SetActive(true);
+            if (InventoryMenu != null) InventoryMenu.SetActive(true);
         }
-        
+
         if (TopPanel != null)
-        {
             TopPanel.SetActive(menuActivated);
-        }
-        
-        // Pause/unpause time
+
         Time.timeScale = menuActivated ? 0f : 1f;
+    }
+
+    // Called by C# event subscription
+    public void OnInventory(InputAction.CallbackContext context)
+    {
+        if (!context.performed) return;
+        if (lastToggleFrame == Time.frameCount) return;
+        lastToggleFrame = Time.frameCount;
+        ToggleInventory();
+    }
+
+    // Called by PlayerInput "Send Messages" without args
+    public void OnInventory()
+    {
+        if (lastToggleFrame == Time.frameCount) return;
+        lastToggleFrame = Time.frameCount;
+        ToggleInventory();
+    }
+
+    // Called by PlayerInput "Send Messages" with InputValue
+    public void OnInventory(InputValue value)
+    {
+        if (lastToggleFrame == Time.frameCount) return;
+        lastToggleFrame = Time.frameCount;
+        ToggleInventory();
     }
 
     private void CloseInventory()
     {
         menuActivated = false;
-        InventoryMenu.SetActive(false);
-        InventoryMenuEquipment.SetActive(false);
-        InventoryMenuAbility.SetActive(false);
-        
+        if (InventoryMenu != null) InventoryMenu.SetActive(false);
+        if (InventoryMenuEquipment != null) InventoryMenuEquipment.SetActive(false);
+        if (InventoryMenuAbility != null) InventoryMenuAbility.SetActive(false);
+
         if (TopPanel != null)
-        {
             TopPanel.SetActive(false);
-        }
         // Don't change timeScale here - let the shop manage it
     }
 
