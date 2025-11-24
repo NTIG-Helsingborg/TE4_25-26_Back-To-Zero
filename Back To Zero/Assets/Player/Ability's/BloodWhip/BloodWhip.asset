@@ -16,9 +16,9 @@ MonoBehaviour:
   cooldownTime: 0
   activeTime: 0.32
   damage: 10
-  knockbackForce: 0
+  knockbackForce: 3
   maxLength: 5
-  thickness: 0.15
+  thickness: 0.1
   HpCost: 5
   IsAbility: 1
   segmentCount: 16
