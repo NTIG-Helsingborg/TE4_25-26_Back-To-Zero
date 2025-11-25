@@ -9,6 +9,11 @@ public class Health : MonoBehaviour
     public bool isInvincible = false;
     public Image healthBar;
 
+    [Header("Shield")]
+    [SerializeField] private Image shieldBar;
+    [SerializeField] private int currentShield = 0;
+    [SerializeField] private float shieldTimer = 0f;
+
     [Header("Experience Reward")]
     [SerializeField] private bool grantsExperienceOnDeath = false;
     [SerializeField] private int experienceReward = 10;
@@ -43,7 +48,22 @@ public class Health : MonoBehaviour
             currentHealth = maxHealth;
         }
         RefreshHealthBarFill();
+        UpdateShieldBar();
         EvaluateHarvestability();
+    }
+
+    private void Update()
+    {
+        // Handle shield decay
+        if (currentShield > 0 && shieldTimer > 0f)
+        {
+            shieldTimer -= Time.deltaTime;
+            
+            if (shieldTimer <= 0f)
+            {
+                RemoveShield(currentShield);
+            }
+        }
     }
 
     public void SpendHealth(int amount)
@@ -66,6 +86,12 @@ public class Health : MonoBehaviour
     {
         if (!isInvincible)
         {
+            // Shield absorbs damage first
+            if (currentShield > 0)
+            {
+                damage = AbsorbDamage(damage);
+            }
+            
             currentHealth -= damage;
             RefreshHealthBarFill();
             EvaluateHarvestability();
@@ -86,6 +112,59 @@ public class Health : MonoBehaviour
         RefreshHealthBarFill();
         EvaluateHarvestability();
     }
+
+    // Shield Methods
+    public void AddShield(int amount, float duration)
+    {
+        currentShield += amount;
+        shieldTimer = Mathf.Max(shieldTimer, duration);
+        UpdateShieldBar();
+    }
+
+    private int AbsorbDamage(int damage)
+    {
+        if (currentShield <= 0)
+            return damage;
+
+        if (damage <= currentShield)
+        {
+            // Shield absorbs all damage
+            RemoveShield(damage);
+            return 0;
+        }
+        else
+        {
+            // Shield absorbs part, overflow goes to health
+            int overflow = damage - currentShield;
+            RemoveShield(currentShield);
+            return overflow;
+        }
+    }
+
+    private void RemoveShield(int amount)
+    {
+        currentShield -= amount;
+        if (currentShield < 0)
+            currentShield = 0;
+            
+        if (currentShield == 0)
+            shieldTimer = 0f;
+            
+        UpdateShieldBar();
+    }
+
+    private void UpdateShieldBar()
+    {
+        if (shieldBar != null && maxHealth > 0)
+        {
+            // Display shield as a fraction of max health
+            float shieldFraction = (float)currentShield / maxHealth;
+            shieldBar.fillAmount = Mathf.Clamp(shieldFraction, 0f, 1f);
+            shieldBar.enabled = currentShield > 0;
+        }
+    }
+
+    public int GetCurrentShield() => currentShield;
 
     // Unified API combining both branches
     public int GetMaxHealth() => maxHealth;
@@ -126,6 +205,7 @@ public class Health : MonoBehaviour
         }
         
         RefreshHealthBarFill();
+        UpdateShieldBar();
     }
 
     private void RefreshHealthBarFill()
@@ -298,4 +378,3 @@ public class Health : MonoBehaviour
         ExperienceManager.Instance.AddExperience(experienceReward);
     }
 }
-
