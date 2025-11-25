@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
@@ -9,6 +10,16 @@ public class LootBag : MonoBehaviour
 
     [Tooltip("Number of items to drop when loot bag is opened")]
     public int numberOfItemsToDrop = 3;
+    
+    [Header("Animator Controllers")]
+    [Tooltip("Animator controller for coins")]
+    public RuntimeAnimatorController coinAnimatorController;
+    
+    [Tooltip("Animator controller for health potions")]
+    public RuntimeAnimatorController hpPotAnimatorController;
+    
+    [Tooltip("Animator controller for gems")]
+    public RuntimeAnimatorController gemAnimatorController;
 
     List<ItemSO> GetDroppedItems()
     {
@@ -69,6 +80,27 @@ public class LootBag : MonoBehaviour
                 if (spriteRenderer != null && item.itemSprite != null)
                 {
                     spriteRenderer.sprite = item.itemSprite;
+                }
+
+                // Add animator for coins and health potions
+                Animator animator = droppedItem.GetComponent<Animator>();
+                if (animator == null)
+                {
+                    animator = droppedItem.AddComponent<Animator>();
+                }
+                
+                // Assign the appropriate animator controller based on item type
+                if (item.statToChange == ItemSO.StatToChange.Coin && coinAnimatorController != null)
+                {
+                    animator.runtimeAnimatorController = coinAnimatorController;
+                }
+                else if (item.statToChange == ItemSO.StatToChange.Health && hpPotAnimatorController != null)
+                {
+                    animator.runtimeAnimatorController = hpPotAnimatorController;
+                }
+                else if (item.statToChange == ItemSO.StatToChange.Gem && gemAnimatorController != null)
+                {
+                    animator.runtimeAnimatorController = gemAnimatorController;
                 }
 
                 // Configure the Item component with data from ItemSO

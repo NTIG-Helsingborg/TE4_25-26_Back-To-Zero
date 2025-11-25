@@ -25,10 +25,12 @@ public class Health : MonoBehaviour
     private Vector3 healthBarOriginalLocalPosition;
     private Coroutine harvestShakeCoroutine;
     private bool isHarvestable;
+    private Animator animator;
 
     private void OnEnable()
     {
         CacheHealthBarRect();
+        animator = GetComponent<Animator>();
         HarvestAbility.HarvestSettingsChanged += OnHarvestSettingsChanged;
         healthBarOriginalLocalPosition = healthBarRect != null ? healthBarRect.localPosition : Vector3.zero;
         EvaluateHarvestability();
@@ -286,6 +288,23 @@ public class Health : MonoBehaviour
         StopHarvestShake();
     }
 
+    private IEnumerator HandlePotDestruction()
+    {
+        // Wait for animation to complete (adjust time if needed)
+        yield return new WaitForSeconds(0.9f);
+        
+        // Disable animator to prevent reverting to original sprite
+        if (animator != null)
+        {
+            animator.enabled = false;
+        }
+        
+        // Wait a tiny bit more before destroying
+        yield return new WaitForSeconds(0.1f);
+        
+        Destroy(gameObject);
+    }
+
     private void StopHarvestShake()
     {
         if (harvestShakeCoroutine != null)
@@ -320,6 +339,12 @@ public class Health : MonoBehaviour
 
     private void Die()
     {
+        // Set animation parameter if animator exists
+        if (animator != null)
+        {
+            animator.SetBool("IsBreaking", true);
+        }
+
         LootBag lootBag = GetComponent<LootBag>();
         if (lootBag != null)
         {
@@ -335,6 +360,28 @@ public class Health : MonoBehaviour
 
         if (gameObject.CompareTag("Player"))
         {
+            return;
+        }
+
+        // Don't destroy pots immediately - let animation play first
+        // Check by name or layer instead of tag to avoid tag not defined error
+        if (gameObject.name.ToLower().Contains("pot"))
+        {
+            // Disable health bar if it exists
+            if (healthBar != null)
+            {
+                healthBar.gameObject.SetActive(false);
+            }
+            
+            // Disable collider to prevent further damage
+            Collider2D col = GetComponent<Collider2D>();
+            if (col != null)
+            {
+                col.enabled = false;
+            }
+            
+            // Start coroutine to handle animation and destruction
+            StartCoroutine(HandlePotDestruction());
             return;
         }
 

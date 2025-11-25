@@ -82,7 +82,8 @@ public class ItemSO : ScriptableObject
         Agility,
         Intelligence,
         Coin,
-        HealthIncrease
+        HealthIncrease,
+        Gem
     };
     public enum Rarity{
         none,
