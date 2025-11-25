@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e1a358e51c469249b2b7e08bbd06421, type: 3}
   m_Name: BloodShield
   m_EditorClassIdentifier: 
-  name: 
-  cooldownTime: 0
+  name: BloodShield
+  cooldownTime: 20
   activeTime: 0
-  healthCost: 0
-  shieldAmount: 0
-  shieldDuration: 0
+  healthCost: 20
+  shieldAmount: 50
+  shieldDuration: 30
+  IsAbility: 1
