@@ -74,8 +74,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294901975
-  m_fontColor: {r: 0.8438916, g: 0, b: 1, a: 1}
+    rgba: 4294944768
+  m_fontColor: {r: 0, g: 0.6580112, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -364,6 +364,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventoryManager: {fileID: 0}
   moneyText: {fileID: 2619366566539675901}
-  crystalsText: {fileID: 4704909761483541188}
+  gemsText: {fileID: 4704909761483541188}
   moneyItemName: Coin
-  crystalItemName: Crystal
+  gemItemName: Gem

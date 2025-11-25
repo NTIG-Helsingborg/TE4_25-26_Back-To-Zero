@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Healthpot
   m_EditorClassIdentifier: 
   itemName: Healthpot
-  itemSprite: {fileID: -1333086307896101198, guid: cb9d15b395a181a4f95155e06b9c22a7, type: 3}
+  itemSprite: {fileID: -6883939170787372506, guid: 7662b1b7b215a7742bcdcd678fbbe8c6, type: 3}
   itemDescription: A mighty delicious looking potion of health. Looks to been created
     by a pretty average mage.  Rstores 50:hp.
   statToChange: 1

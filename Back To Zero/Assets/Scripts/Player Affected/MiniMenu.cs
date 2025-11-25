@@ -6,14 +6,14 @@ public class MiniMenu : MonoBehaviour
     [Header("References")]
     [SerializeField] InventoryManager inventoryManager;
     [SerializeField] TextMeshProUGUI moneyText;
-    [SerializeField] TextMeshProUGUI crystalsText;
+    [SerializeField] TextMeshProUGUI gemsText;
 
     [Header("Item Names")]
     [SerializeField] string moneyItemName = "Coin";
-    [SerializeField] string crystalItemName = "Crystal";
+    [SerializeField] string gemItemName = "Gem";
 
     int lastMoneyAmount = -1;
-    int lastCrystalAmount = -1;
+    int lastGemAmount = -1;
 
     void Awake()
     {
@@ -55,7 +55,7 @@ public class MiniMenu : MonoBehaviour
         }
 
         int moneyAmount = inventoryManager != null ? inventoryManager.GetItemCount(moneyItemName) : 0;
-        int crystalAmount = inventoryManager != null ? inventoryManager.GetItemCount(crystalItemName) : 0;
+        int gemAmount = inventoryManager != null ? inventoryManager.GetItemCount(gemItemName) : 0;
 
         if (forceRefresh || moneyAmount != lastMoneyAmount)
         {
@@ -66,12 +66,12 @@ public class MiniMenu : MonoBehaviour
             }
         }
 
-        if (forceRefresh || crystalAmount != lastCrystalAmount)
+        if (forceRefresh || gemAmount != lastGemAmount)
         {
-            lastCrystalAmount = crystalAmount;
-            if (crystalsText != null)
+            lastGemAmount = gemAmount;
+            if (gemsText != null)
             {
-                crystalsText.text = crystalAmount.ToString();
+                gemsText.text = gemAmount.ToString();
             }
         }
     }

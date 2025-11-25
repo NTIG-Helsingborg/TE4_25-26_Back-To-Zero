@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: d06bbf6a5a494e347bb0a026f6974b65
+guid: c79cd2140d9640a47843879e05420d5d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7889824963763406308
-    second: "po\xE7\xE3o vermelha meio vazia_0"
-  - first:
-      213: 2833949424651261891
-    second: "po\xE7\xE3o vermelha meio vazia_1"
-  - first:
-      213: -7830709446107870290
-    second: "po\xE7\xE3o vermelha meio vazia_2"
+      213: -6040195540950196541
+    second: Coin-3.png_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -43,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -80,7 +74,7 @@ TextureImporter:
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
-    textureFormat: -1
+    textureFormat: 4
     textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
@@ -106,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "po\xE7\xE3o vermelha meio vazia_0"
+      name: Coin-3.png_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 16
-        height: 48
+        x: 5
+        y: 1
+        width: 6
+        height: 14
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -121,52 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c1a7fde5ff5b18290800000000000000
-      internalID: -7889824963763406308
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: "po\xE7\xE3o vermelha meio vazia_1"
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 0
-        width: 16
-        height: 48
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3c7d2cf9cf5345720800000000000000
-      internalID: 2833949424651261891
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: "po\xE7\xE3o vermelha meio vazia_2"
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 15
-        width: 16
-        height: 33
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: eabc1756f3bb35390800000000000000
-      internalID: -7830709446107870290
+      spriteID: 3ced3c7682aec2ca0800000000000000
+      internalID: -6040195540950196541
       vertices: []
       indices: 
       edges: []
@@ -185,9 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "po\xE7\xE3o vermelha meio vazia_0": -7889824963763406308
-      "po\xE7\xE3o vermelha meio vazia_1": 2833949424651261891
-      "po\xE7\xE3o vermelha meio vazia_2": -7830709446107870290
+      Coin-3.png_0: -6040195540950196541
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
