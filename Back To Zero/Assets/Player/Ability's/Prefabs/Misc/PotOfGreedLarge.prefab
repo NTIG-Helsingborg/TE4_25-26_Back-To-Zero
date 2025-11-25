@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5677372387861933359}
   m_Layer: 0
-  m_Name: potofgreeed 1
+  m_Name: PotOfGreedLarge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 4562828038282411940}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3, y: 1, z: 1}
+  m_LocalPosition: {x: 6, y: 1, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -64,7 +64,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 3}
-  m_LocalScale: {x: 5, y: 5, z: 1}
+  m_LocalScale: {x: 6, y: 6, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5677372387861933359}
@@ -113,7 +113,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 5182458799326370893, guid: dde0751fa0a414645ba48007db5ca5a2, type: 3}
+  m_Sprite: {fileID: -1731231316895545074, guid: aeec26735ebb77a44bc5b54dc4f1c7ed, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -181,7 +181,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.13, y: 0.16}
+    oldSize: {x: 0.18, y: 0.24}
     newSize: {x: 0.32, y: 0.17}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -233,7 +233,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 346716a69a6dff84cbfbd8f3faf9e29b, type: 2}
   - {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
   - {fileID: 11400000, guid: 7c64497ce766bc94e90b74ebe0703b2e, type: 2}
-  numberOfItemsToDrop: 3
+  numberOfItemsToDrop: 5
   coinAnimatorController: {fileID: 9100000, guid: c59391e5a9e437f419eb0d0f6f8acbdf, type: 2}
   hpPotAnimatorController: {fileID: 9100000, guid: 6e43b59ee31ab364ab1e61201d2b42c2, type: 2}
   gemAnimatorController: {fileID: 9100000, guid: 623c374f991833e4caf64c6cff4ca808, type: 2}
@@ -247,7 +247,7 @@ Animator:
   m_GameObject: {fileID: 8700436897569576750}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: eeed5e5e15aac604fb1d3704ef953f87, type: 2}
+  m_Controller: {fileID: 9100000, guid: cddac35f6e5558c49ad7ffb19effbdc3, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
