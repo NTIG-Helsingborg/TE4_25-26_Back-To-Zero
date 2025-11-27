@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5396804825849237206}
   - component: {fileID: 4747587865819932893}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: RotaionPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -71,8 +71,8 @@ GameObject:
   - component: {fileID: 7004101140356322880}
   - component: {fileID: 7239643960339905368}
   - component: {fileID: 7025894402150479544}
-  - component: {fileID: 3469059003383207221}
-  m_Layer: 0
+  - component: {fileID: 3278557163740205405}
+  m_Layer: 8
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -163,37 +163,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
---- !u!114 &3278557163740205405
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5631687449377463173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0be936bef0e7e4387b169181cc8716ae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  allAbilities:
-  - {fileID: 11400000, guid: 0ec2bab3e2fdd9248864fcf21b2d5ee4, type: 2}
-  - {fileID: 11400000, guid: 0edbd740f1d414d4480e2a13fb47d680, type: 2}
-  - {fileID: 11400000, guid: 722f4621a60e8dd418d0a779d07966f2, type: 2}
-  - {fileID: 11400000, guid: 13ddefe0fb7600e429ad297163d573ad, type: 2}
-  - {fileID: 11400000, guid: 3cd434104c9fe4ff29089eaccc013e68, type: 2}
-  - {fileID: 11400000, guid: b8c4d0e6f2a3559906b7c8d9e0f1a2b3, type: 2}
-  inventoryManager: {fileID: 3351440291523874951}
-  slotKeybinds: 43010000440100006500000071000000
-  defaultAbilityNames:
-  - Bloodknife
-  - Harvest
-  - BloodSpear
-  - BloodExplosion
-  autoEquipDefaults: 1
-  harvestAbilityName: Harvest Ability
-  harvestKeybind: 324
-  dashAbilityName: Dash Ability
-  dashKeybind: 32
 --- !u!61 &1698157271476681283
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -283,9 +252,9 @@ MonoBehaviour:
   currentHealth: 0
   isInvincible: 0
   healthBar: {fileID: 0}
-  grantsExperienceOnDeath: 1
+  grantsExperienceOnDeath: 0
   experienceReward: 60
-  enableHarvestFeedback: 1
+  enableHarvestFeedback: 0
 --- !u!114 &7225149296088934357
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -508,14 +477,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 33ee67aca3d874f4585197f95cfa8cff, type: 2}
   - {fileID: 11400000, guid: 50b6a33ac0a45554c9b0de64435406bd, type: 2}
   - {fileID: 11400000, guid: c9084dcb147efae4da2de50cf140c27a, type: 2}
-  - {fileID: 11400000, guid: 124b8bc464001b64f97929685dab665d, type: 2}
+  - {fileID: 11400000, guid: 346716a69a6dff84cbfbd8f3faf9e29b, type: 2}
+  - {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
   - {fileID: 11400000, guid: c9234329ac5cabc49b062ef9fc7f5808, type: 2}
-  - {fileID: 11400000, guid: fa0e9e5a7dc26d847b0d05c1fd1a7210, type: 2}
-  - {fileID: 11400000, guid: 84f03799a04185343a656e150250d138, type: 2}
-  - {fileID: 11400000, guid: f9efe70d158d44b4a9684811d4fbef20, type: 2}
-  - {fileID: 11400000, guid: a5a6082346a05f34fb3d79fd37bebd5e, type: 2}
-  - {fileID: 11400000, guid: 2a3e2a8c7d5e62945b9fb95a9fed7150, type: 2}
-  - {fileID: 11400000, guid: 449673f06fb815c45ac46b08d1d55df4, type: 2}
+  - {fileID: 11400000, guid: c9234329ac5cabc49b062ef9fc7f5808, type: 2}
   slotsParent: {fileID: 0}
   artifactSlotsParent: {fileID: 0}
   abilitySlotsParent: {fileID: 0}
@@ -603,93 +568,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de3e8dd05d5d240f28903333a80c60c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  experienceCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 5
-      value: 1000
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 10
-      value: 2500
-      inSlope: 324.47165
-      outSlope: 324.47165
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.050109588
-    - serializedVersion: 3
-      time: 46.548447
-      value: 85387.055
-      inSlope: 5631.2886
-      outSlope: 5631.2886
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 62.574368
-      value: 194113.78
-      inSlope: 9571.138
-      outSlope: 9571.138
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 72.18263
-      value: 275714.1
-      inSlope: 9776.728
-      outSlope: 9776.728
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 1
-    - serializedVersion: 3
-      time: 79.55347
-      value: 337668.12
-      inSlope: 9754.693
-      outSlope: 9754.693
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.20307536
-    - serializedVersion: 3
-      time: 99.116
-      value: 508126.7
-      inSlope: 11628.534
-      outSlope: 11628.534
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.2613498
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  levelText: {fileID: 0}
-  experienceText: {fileID: 0}
-  experienceFill: {fileID: 0}
-  levelUpCanvas: {fileID: 0}
-  levelUpMenu: {fileID: 0}
-  rewardPanels:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  ability: {fileID: 0}
+  key: 120
+--- !u!114 &3278557163740205405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5631687449377463173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0be936bef0e7e4387b169181cc8716ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allAbilities:
+  - {fileID: 11400000, guid: 0ec2bab3e2fdd9248864fcf21b2d5ee4, type: 2}
+  - {fileID: 11400000, guid: 0edbd740f1d414d4480e2a13fb47d680, type: 2}
+  - {fileID: 11400000, guid: 722f4621a60e8dd418d0a779d07966f2, type: 2}
+  - {fileID: 11400000, guid: 13ddefe0fb7600e429ad297163d573ad, type: 2}
+  - {fileID: 11400000, guid: 3cd434104c9fe4ff29089eaccc013e68, type: 2}
+  - {fileID: 11400000, guid: b8c4d0e6f2a3559906b7c8d9e0f1a2b3, type: 2}
+  inventoryManager: {fileID: 3351440291523874951}
+  slotKeybinds: 43010000440100006500000071000000
+  defaultAbilityNames:
+  - Bloodknife
+  - Harvest
+  - BloodSpear
+  - BloodExplosion
+  autoEquipDefaults: 1
+  harvestAbilityName: Harvest Ability
+  harvestKeybind: 324
+  dashAbilityName: Dash Ability
+  dashKeybind: 32
+  bloodTransfusionAbilityName: BloodTransfusion
+  bloodTransfusionKeybind: 120
 --- !u!1 &8811310924032871480
 GameObject:
   m_ObjectHideFlags: 0
@@ -700,7 +613,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4024565464823187153}
   - component: {fileID: 2369247252341524410}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: SpellTransform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
