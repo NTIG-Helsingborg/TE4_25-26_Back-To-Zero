@@ -20,6 +20,7 @@ public class PlayerMove : MonoBehaviour
     private const string RunDownParam = "RunDown";
     private const string RunRightParam = "RunRight";
     private const string RunLeftParam = "RunLeft";
+    private const string RunUpParam = "RunUp";
     
     void Start()
     {
@@ -70,8 +71,12 @@ public class PlayerMove : MonoBehaviour
 
         bool isMovingRight = moveInput.x > 0.2f && isMoving;
         animator.SetBool(RunRightParam, isMovingRight);
+        
         bool isMovingLeft = moveInput.x < -0.2f && isMoving;
         animator.SetBool(RunLeftParam, isMovingLeft);
+
+        bool isMovingUp = moveInput.y > 0.2f && isMoving;
+        animator.SetBool(RunUpParam, isMovingUp);
     }
 
     private void FixedUpdate()
