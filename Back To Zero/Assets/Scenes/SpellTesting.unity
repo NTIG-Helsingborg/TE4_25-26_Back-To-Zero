@@ -1012,6 +1012,10 @@ PrefabInstance:
       propertyPath: m_SpriteTilingProperty.oldSize.y
       value: 0.14
       objectReference: {fileID: 0}
+    - target: {fileID: 2070274060168788743, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 2085005479}
     - target: {fileID: 2356233930430235773, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: animator
       value: 
@@ -1132,6 +1136,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7004101140356322880, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 2085005479}
+    - target: {fileID: 7025894402150479544, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 2085005479}
+    - target: {fileID: 7239643960339905368, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 2085005479}
+    - target: {fileID: 7404539395882553980, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 2085005479}
     - target: {fileID: 8807523812355955747, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: deathTxt
       value: 

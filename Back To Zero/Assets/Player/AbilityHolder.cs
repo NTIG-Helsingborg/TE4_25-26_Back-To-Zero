@@ -14,7 +14,8 @@ public class AbilityHolder : MonoBehaviour
     AbilityState state = AbilityState.ready;
 
     public KeyCode key;
-
+    [SerializeField] private Animator animator;
+    private const string IsAttackingParam = "IsAttacking";
     void Awake()
     {
         // Ensure key starts as None - AbilitySetter will set it
@@ -45,6 +46,7 @@ public class AbilityHolder : MonoBehaviour
                     activeTimer -= Time.deltaTime;
                 }
                 else{
+                    if (animator) animator.SetBool(IsAttackingParam, false);
                     state = AbilityState.cooldown;
                     cooldownTimer = ability.cooldownTime;
                 }
@@ -66,6 +68,7 @@ public class AbilityHolder : MonoBehaviour
         if (state == AbilityState.ready && ability != null)
         {
             ability.Activate();
+            if (animator) animator.SetBool(IsAttackingParam, true);
             state = AbilityState.active;
             activeTimer = ability.activeTime;
         }
