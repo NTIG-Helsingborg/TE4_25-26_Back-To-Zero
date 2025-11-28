@@ -31,6 +31,9 @@ public class AbilitySetter : MonoBehaviour
     [SerializeField] private KeyCode dashKeybind = KeyCode.Space;
     [SerializeField] private string bloodTransfusionAbilityName = "BloodTransfusion";
     [SerializeField] private KeyCode bloodTransfusionKeybind = KeyCode.X;
+
+    [Header("Animation")]
+    [SerializeField] private Animator animator;
     
     // Internal ability holders for each slot
     private AbilityHolder[] abilityHolders = new AbilityHolder[4];
@@ -76,21 +79,38 @@ public class AbilitySetter : MonoBehaviour
             Debug.LogError("AbilitySetter: Could not find InventoryManager!");
             return;
         }
-        
-        // Build ability mapping dictionary
+
+        // Acquire player Animator (component is directly on the player object, not a child)
+        if (animator == null)
+        {
+            // Try on this GameObject first
+            animator = GetComponent<Animator>();
+            if (animator == null)
+            {
+                // Try tagged Player object
+                GameObject player = GameObject.FindGameObjectWithTag("Player");
+                if (player != null)
+                    animator = player.GetComponent<Animator>();
+            }
+            if (animator == null)
+            {
+                Debug.LogWarning("AbilitySetter: Player Animator not found. Spell holders will have no animator.");
+            }
+        }
+
         BuildAbilityMap();
-        
-        // Create dedicated holders for forced keybinds (Harvest, Dash, and BloodTransfusion)
-        CreateForcedAbilityHolders();
-        
-        // Create ability holders for each slot (4 slots now)
+        CreateForcedAbilityHolders(); // forced holders get NO animator
+
+        // Create ability holders for spell slots (assign animator)
         for (int i = 0; i < abilityHolders.Length; i++)
         {
             GameObject holderObj = new GameObject($"AbilityHolder_{i}");
             holderObj.transform.SetParent(transform);
             abilityHolders[i] = holderObj.AddComponent<AbilityHolder>();
+            if (animator != null)
+                abilityHolders[i].SetAnimator(animator);
         }
-        
+
         // Ensure slot keybinds array is initialized
         if (slotKeybinds == null || slotKeybinds.Length != 4)
         {

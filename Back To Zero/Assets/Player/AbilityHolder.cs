@@ -18,8 +18,13 @@ public class AbilityHolder : MonoBehaviour
     private const string IsAttackingParam = "IsAttacking";
     void Awake()
     {
-        // Ensure key starts as None - AbilitySetter will set it
         key = KeyCode.None;
+    }
+
+    // Allow AbilitySetter to inject the player's Animator
+    public void SetAnimator(Animator anim)
+    {
+        animator = anim;
     }
 
     void Update()
@@ -38,18 +43,21 @@ public class AbilityHolder : MonoBehaviour
                     if (ability != null && ability.CanActivate())
                     {
                         TriggerAbility();
+                        
                     }
+                    
                 }
             break;
             case AbilityState.active:
                 if (activeTimer > 0){
                     activeTimer -= Time.deltaTime;
+                    
                 }
                 else{
-                    if (animator) animator.SetBool(IsAttackingParam, false);
                     state = AbilityState.cooldown;
                     cooldownTimer = ability.cooldownTime;
                 }
+                if (animator) animator.SetBool(IsAttackingParam, false);
             break;
             case AbilityState.cooldown:
                 if (cooldownTimer > 0){
