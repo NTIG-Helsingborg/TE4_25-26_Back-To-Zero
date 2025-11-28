@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: BloodSlash
   m_EditorClassIdentifier: 
   itemName: BloodSlash
-  itemSprite: {fileID: 0}
+  itemSprite: {fileID: -2054530540237406577, guid: b425492b72a58f740b98bbb7b4fa797d, type: 3}
   itemDescription: Katchao
   statToChange: 0
   amountToChangeStat: 0
+  itemRarity: 0
   dropChance: 0
   isArtifact: 0
   isAbility: 1

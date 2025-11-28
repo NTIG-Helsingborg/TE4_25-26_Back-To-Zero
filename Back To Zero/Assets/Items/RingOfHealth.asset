@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RingOfHealth
   m_EditorClassIdentifier: 
   itemName: RingOfHealth
-  itemSprite: {fileID: 0}
+  itemSprite: {fileID: -2510476293373519475, guid: e58890c25f04f05418dcef82e1dd5379, type: 3}
   itemDescription: Cold
   statToChange: 6
   amountToChangeStat: 50

@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: BloodKnife
   m_EditorClassIdentifier: 
   itemName: Bloodknife
-  itemSprite: {fileID: 0}
+  itemSprite: {fileID: -3405186859655012684, guid: 2fb21b4fc00ad0840b6ae35c6c7c212a, type: 3}
   itemDescription: A knife made of your own blood, surly wont hurt, right?
   statToChange: 0
   amountToChangeStat: 0
+  itemRarity: 0
   dropChance: 0
   isArtifact: 0
   isAbility: 1

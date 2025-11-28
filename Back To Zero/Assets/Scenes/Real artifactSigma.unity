@@ -2244,7 +2244,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5045234726941252771, guid: 27d4355bdfa12cf4a8b8c71f718eee67, type: 3}
       propertyPath: m_Name
-      value: BloodweaveBand
+      value: BloodSkull
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

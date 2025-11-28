@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BloodShield
   m_EditorClassIdentifier: 
   itemName: Blood Shield
-  itemSprite: {fileID: 0}
+  itemSprite: {fileID: 4810702507026764722, guid: 492e70db51f699a4cbf91bee6dfe5b26, type: 3}
   itemDescription: Creates a shield around the casters body
   statToChange: 0
   amountToChangeStat: 0

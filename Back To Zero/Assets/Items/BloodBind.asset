@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BloodBind
   m_EditorClassIdentifier: 
   itemName: BloodBind
-  itemSprite: {fileID: 0}
+  itemSprite: {fileID: -4388899747337525858, guid: 729fa48583837b04c9d46833c921e1cf, type: 3}
   itemDescription: Makes the target stuck in the casters blood
   statToChange: 0
   amountToChangeStat: 0

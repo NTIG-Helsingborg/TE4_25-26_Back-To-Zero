@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: BloodExplosion
   m_EditorClassIdentifier: 
   itemName: BloodExplosion
-  itemSprite: {fileID: 0}
+  itemSprite: {fileID: 2200852615102758396, guid: 3798ee278ccb2884b9f23688c161c031, type: 3}
   itemDescription: Kaboom but it's red!!
   statToChange: 0
   amountToChangeStat: 0
+  itemRarity: 0
   dropChance: 0
   isArtifact: 0
   isAbility: 1
