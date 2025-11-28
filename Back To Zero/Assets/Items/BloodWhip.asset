@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: BloodWhip
   m_EditorClassIdentifier: 
   itemName: BloodWhip
-  itemSprite: {fileID: 0}
+  itemSprite: {fileID: 4895402694010236284, guid: ea8b02aa146815d498b064ca711c4a25, type: 3}
   itemDescription: A whip made of the casters blood
   statToChange: 0
   amountToChangeStat: 0
+  itemRarity: 0
   dropChance: 0
   isArtifact: 0
   isAbility: 1

@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: BloodSpear
   m_EditorClassIdentifier: 
   itemName: BloodSpear
-  itemSprite: {fileID: 0}
+  itemSprite: {fileID: -7461187039433813729, guid: 3eda08ac64927c248afc84eb3229377f, type: 3}
   itemDescription: Skadosh
   statToChange: 0
   amountToChangeStat: 0
+  itemRarity: 0
   dropChance: 0
   isArtifact: 0
   isAbility: 1
