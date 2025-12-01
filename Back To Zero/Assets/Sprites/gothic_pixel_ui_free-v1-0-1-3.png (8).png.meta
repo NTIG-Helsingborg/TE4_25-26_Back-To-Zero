@@ -1,14 +1,13 @@
 fileFormatVersion: 2
-guid: dd570c8ddf931c446acd92cf7fb02a95
-AssetOrigin:
-  serializedVersion: 1
-  productId: 275304
-  packageName: Pixel art Menu package (5 sets)
-  packageVersion: 1.0
-  assetPath: Assets/Pixel art Menu package (5 sets)/viking/border.png
-  uploadId: 639604
+guid: 9e737a6b0d7cdec468571daf5bf1cef2
 TextureImporter:
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      213: -3575295448502044848
+    second: gothic_pixel_ui_free-v1-0-1-3.png (8)_0
+  - first:
+      213: 5012709727239044872
+    second: gothic_pixel_ui_free-v1-0-1-3.png (8)_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -50,14 +49,14 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
-  spriteExtrude: 31
+  spriteMode: 2
+  spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
-  spritePivot: {x: 1, y: 1}
+  spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 96, y: 55, z: 20, w: 61}
-  spriteGenerateFallbackPhysicsShape: 0
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
@@ -79,19 +78,6 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: 4
-    textureCompression: 0
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
@@ -113,28 +99,59 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Server
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: gothic_pixel_ui_free-v1-0-1-3.png (8)_0
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 19
+        width: 232
+        height: 159
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 057f6f87bbff16ec0800000000000000
+      internalID: -3575295448502044848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gothic_pixel_ui_free-v1-0-1-3.png (8)_1
+      rect:
+        serializedVersion: 2
+        x: 73
+        y: 172
+        width: 104
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80f7a3e30f8b09540800000000000000
+      internalID: 5012709727239044872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
-    internalID: 1537655665
+    spriteID: 
+    internalID: 0
     vertices: []
     indices: 
     edges: []
@@ -142,7 +159,9 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      gothic_pixel_ui_free-v1-0-1-3.png (8)_0: -3575295448502044848
+      gothic_pixel_ui_free-v1-0-1-3.png (8)_1: 5012709727239044872
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
