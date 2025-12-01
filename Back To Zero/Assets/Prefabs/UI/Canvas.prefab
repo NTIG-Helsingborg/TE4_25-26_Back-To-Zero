@@ -1566,9 +1566,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventoryManager: {fileID: 0}
   moneyText: {fileID: 7513165979756640876}
-  crystalsText: {fileID: 961182230136158293}
+  gemsText: {fileID: 0}
   moneyItemName: Coin
-  crystalItemName: Crystal
+  gemItemName: Gem
 --- !u!1 &3560479423441704906
 GameObject:
   m_ObjectHideFlags: 0
