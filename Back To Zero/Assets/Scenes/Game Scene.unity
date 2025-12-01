@@ -1838,22 +1838,6 @@ PrefabInstance:
       propertyPath: canvas
       value: 
       objectReference: {fileID: 1234335690}
-    - target: {fileID: 2969118431303851006, guid: a5f93b5bb2aaf46328c7868e4c024bc6, type: 3}
-      propertyPath: displayDuration
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2969118431303851006, guid: a5f93b5bb2aaf46328c7868e4c024bc6, type: 3}
-      propertyPath: overlayFadeSpeed
-      value: 0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2969118431303851006, guid: a5f93b5bb2aaf46328c7868e4c024bc6, type: 3}
-      propertyPath: textFadeInDuration
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2969118431303851006, guid: a5f93b5bb2aaf46328c7868e4c024bc6, type: 3}
-      propertyPath: textFadeOutDuration
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 6552670265747095532, guid: a5f93b5bb2aaf46328c7868e4c024bc6, type: 3}
       propertyPath: m_Name
       value: Intermissions
