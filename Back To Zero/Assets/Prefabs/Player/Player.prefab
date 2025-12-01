@@ -26,8 +26,8 @@ Transform:
   m_GameObject: {fileID: 5307987928695524702}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.251, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4024565464823187153}
@@ -45,6 +45,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce53dbfd90443ba4bbc6e2a178477c7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pivot: {fileID: 5396804825849237206}
+  spellTransform: {fileID: 4024565464823187153}
+  muzzleOffset: 1
+  compensateParentScale: 1
+  keepPivotCentered: 1
+  centerFromRenderers:
+  - {fileID: 3839243146162092306}
 --- !u!1 &5631687449377463173
 GameObject:
   m_ObjectHideFlags: 0
@@ -72,8 +79,8 @@ GameObject:
   - component: {fileID: 7239643960339905368}
   - component: {fileID: 7025894402150479544}
   - component: {fileID: 3278557163740205405}
-  - component: {fileID: 2206287710207572214}
-  m_Layer: 8
+  - component: {fileID: 4955149891241847005}
+  m_Layer: 0
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -141,7 +148,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 2971653748508199937, guid: d3d9dbf3b01c3df49a95b07c7ebe1233, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.9764151, b: 0.9764151, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -164,7 +171,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
-  animator: {fileID: 2206287710207572214}
+  animator: {fileID: 4955149891241847005}
 --- !u!61 &1698157271476681283
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -304,6 +311,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ability: {fileID: 11400000, guid: 3cd434104c9fe4ff29089eaccc013e68, type: 2}
   key: 32
+  animator: {fileID: 0}
 --- !u!114 &6111033029218181290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -318,6 +326,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ability: {fileID: 11400000, guid: b8c4d0e6f2a3559906b7c8d9e0f1a2b3, type: 2}
   key: 49
+  animator: {fileID: 0}
 --- !u!96 &4914285945736904853
 TrailRenderer:
   serializedVersion: 3
@@ -446,6 +455,7 @@ MonoBehaviour:
   ultimateMaxCharge: 100
   ultimateCharge: 0
   chargePerHarvest: 25
+  animator: {fileID: 4955149891241847005}
 --- !u!114 &7404539395882553980
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -460,6 +470,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ability: {fileID: 11400000, guid: 0edbd740f1d414d4480e2a13fb47d680, type: 2}
   key: 50
+  animator: {fileID: 4955149891241847005}
 --- !u!114 &3351440291523874951
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -536,6 +547,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ability: {fileID: 11400000, guid: 722f4621a60e8dd418d0a779d07966f2, type: 2}
   key: 51
+  animator: {fileID: 4955149891241847005}
 --- !u!114 &7004101140356322880
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -550,6 +562,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ability: {fileID: 11400000, guid: 0ec2bab3e2fdd9248864fcf21b2d5ee4, type: 2}
   key: 52
+  animator: {fileID: 4955149891241847005}
 --- !u!114 &7239643960339905368
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -564,6 +577,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ability: {fileID: 11400000, guid: 13ddefe0fb7600e429ad297163d573ad, type: 2}
   key: 53
+  animator: {fileID: 4955149891241847005}
 --- !u!114 &7025894402150479544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -577,7 +591,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ability: {fileID: 0}
-  key: 120
+  key: 0
+  animator: {fileID: 4955149891241847005}
 --- !u!114 &3278557163740205405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -615,7 +630,8 @@ MonoBehaviour:
   dashKeybind: 32
   bloodTransfusionAbilityName: BloodTransfusion
   bloodTransfusionKeybind: 120
---- !u!95 &2206287710207572214
+  animator: {fileID: 4955149891241847005}
+--- !u!95 &4955149891241847005
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0
@@ -663,8 +679,8 @@ Transform:
   m_GameObject: {fileID: 8811310924032871480}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.178, y: 0, z: 0}
-  m_LocalScale: {x: 0.05, y: 0.05, z: 1}
+  m_LocalPosition: {x: 3.5, y: 0, z: 0}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5396804825849237206}
@@ -714,7 +730,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 742c6ff9f188840b5aaf3d1dc6790a52, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
