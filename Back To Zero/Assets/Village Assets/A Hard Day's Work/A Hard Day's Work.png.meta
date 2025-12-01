@@ -1,0 +1,741 @@
+fileFormatVersion: 2
+guid: 4bd31b096d8cc4c58a24173789b303af
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7722510163762045832
+    second: A Hard Day's Work_0
+  - first:
+      213: -3502737942434978037
+    second: A Hard Day's Work_1
+  - first:
+      213: 8420357832508679484
+    second: A Hard Day's Work_2
+  - first:
+      213: 207061970519457913
+    second: A Hard Day's Work_3
+  - first:
+      213: -6442952104322782306
+    second: A Hard Day's Work_4
+  - first:
+      213: 6576481687741975346
+    second: A Hard Day's Work_5
+  - first:
+      213: -7178334275065822868
+    second: A Hard Day's Work_6
+  - first:
+      213: 4787508543411466953
+    second: A Hard Day's Work_7
+  - first:
+      213: 49395210157219867
+    second: A Hard Day's Work_8
+  - first:
+      213: 2215920681553989746
+    second: A Hard Day's Work_9
+  - first:
+      213: 7499121474013851388
+    second: A Hard Day's Work_10
+  - first:
+      213: 2881141700069267137
+    second: A Hard Day's Work_11
+  - first:
+      213: 5067207143720299190
+    second: A Hard Day's Work_12
+  - first:
+      213: -3747550601930625313
+    second: A Hard Day's Work_13
+  - first:
+      213: -2960169839424346298
+    second: A Hard Day's Work_14
+  - first:
+      213: 1183288646058081094
+    second: A Hard Day's Work_15
+  - first:
+      213: -7585361922814482202
+    second: A Hard Day's Work_16
+  - first:
+      213: 9175239572036537418
+    second: A Hard Day's Work_17
+  - first:
+      213: -8208935336620254521
+    second: A Hard Day's Work_18
+  - first:
+      213: 6290597689649848621
+    second: A Hard Day's Work_19
+  - first:
+      213: -3854724159870718485
+    second: A Hard Day's Work_20
+  - first:
+      213: -790494750811713831
+    second: A Hard Day's Work_21
+  - first:
+      213: -1875959499086626264
+    second: A Hard Day's Work_22
+  - first:
+      213: 3267788694068772676
+    second: A Hard Day's Work_23
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: A Hard Day's Work_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 79
+        width: 353
+        height: 241
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87c9e92fbe124d490800000000000000
+      internalID: -7722510163762045832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_1
+      rect:
+        serializedVersion: 2
+        x: 353
+        y: 159
+        width: 206
+        height: 159
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0761ef4666c36fc0800000000000000
+      internalID: -3502737942434978037
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_2
+      rect:
+        serializedVersion: 2
+        x: 527
+        y: 175
+        width: 34
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c35ab50f5de1bd470800000000000000
+      internalID: 8420357832508679484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_3
+      rect:
+        serializedVersion: 2
+        x: 561
+        y: 159
+        width: 222
+        height: 159
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9700e4fd3c1afd200800000000000000
+      internalID: 207061970519457913
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_4
+      rect:
+        serializedVersion: 2
+        x: 356
+        y: 137
+        width: 24
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9b2cf482390696a0800000000000000
+      internalID: -6442952104322782306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_5
+      rect:
+        serializedVersion: 2
+        x: 353
+        y: 111
+        width: 30
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23bc8b5504b544b50800000000000000
+      internalID: 6576481687741975346
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_6
+      rect:
+        serializedVersion: 2
+        x: 353
+        y: 95
+        width: 30
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c61c0bf520f616c90800000000000000
+      internalID: -7178334275065822868
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_7
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 111
+        width: 30
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c23039a7a5a07240800000000000000
+      internalID: 4787508543411466953
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_8
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 95
+        width: 30
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b10e6039eac7fa000800000000000000
+      internalID: 49395210157219867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_9
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 6
+        width: 56
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27097729e1880ce10800000000000000
+      internalID: 2215920681553989746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_10
+      rect:
+        serializedVersion: 2
+        x: 259
+        y: 66
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cfe6912af3b321860800000000000000
+      internalID: 7499121474013851388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_11
+      rect:
+        serializedVersion: 2
+        x: 275
+        y: 66
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c6913c7c1fdbf720800000000000000
+      internalID: 2881141700069267137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_12
+      rect:
+        serializedVersion: 2
+        x: 291
+        y: 66
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ba25cccc06525640800000000000000
+      internalID: 5067207143720299190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_13
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 66
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fdeaf1a35960efbc0800000000000000
+      internalID: -3747550601930625313
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_14
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 66
+        width: 16
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6476946f63d5be6d0800000000000000
+      internalID: -2960169839424346298
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_15
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 66
+        width: 16
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64b7b0711c2eb6010800000000000000
+      internalID: 1183288646058081094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_16
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 66
+        width: 16
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e86ed925816bb690800000000000000
+      internalID: -7585361922814482202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_17
+      rect:
+        serializedVersion: 2
+        x: 368
+        y: 66
+        width: 16
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4c485c37cff45f70800000000000000
+      internalID: 9175239572036537418
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_18
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 66
+        width: 16
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ca199cddc0041e80800000000000000
+      internalID: -8208935336620254521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_19
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 66
+        width: 16
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d21e87c0541bc4750800000000000000
+      internalID: 6290597689649848621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_20
+      rect:
+        serializedVersion: 2
+        x: 259
+        y: 50
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bed2acfbcc4418ac0800000000000000
+      internalID: -3854724159870718485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_21
+      rect:
+        serializedVersion: 2
+        x: 271
+        y: 51
+        width: 17
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9de8e0d56399705f0800000000000000
+      internalID: -790494750811713831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_22
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 51
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8220ceb56c047f5e0800000000000000
+      internalID: -1875959499086626264
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A Hard Day's Work_23
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 0
+        width: 194
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44fb107f084895d20800000000000000
+      internalID: 3267788694068772676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      A Hard Day's Work_0: -7722510163762045832
+      A Hard Day's Work_1: -3502737942434978037
+      A Hard Day's Work_10: 7499121474013851388
+      A Hard Day's Work_11: 2881141700069267137
+      A Hard Day's Work_12: 5067207143720299190
+      A Hard Day's Work_13: -3747550601930625313
+      A Hard Day's Work_14: -2960169839424346298
+      A Hard Day's Work_15: 1183288646058081094
+      A Hard Day's Work_16: -7585361922814482202
+      A Hard Day's Work_17: 9175239572036537418
+      A Hard Day's Work_18: -8208935336620254521
+      A Hard Day's Work_19: 6290597689649848621
+      A Hard Day's Work_2: 8420357832508679484
+      A Hard Day's Work_20: -3854724159870718485
+      A Hard Day's Work_21: -790494750811713831
+      A Hard Day's Work_22: -1875959499086626264
+      A Hard Day's Work_23: 3267788694068772676
+      A Hard Day's Work_3: 207061970519457913
+      A Hard Day's Work_4: -6442952104322782306
+      A Hard Day's Work_5: 6576481687741975346
+      A Hard Day's Work_6: -7178334275065822868
+      A Hard Day's Work_7: 4787508543411466953
+      A Hard Day's Work_8: 49395210157219867
+      A Hard Day's Work_9: 2215920681553989746
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
