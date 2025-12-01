@@ -184,10 +184,10 @@ MonoBehaviour:
   textColor: {r: 1, g: 1, b: 1, a: 1}
   fontSize: 80
   enableTextFadeIn: 1
-  textFadeInDuration: 1
-  textFadeOutDuration: 1
+  textFadeInDuration: 2
+  textFadeOutDuration: 2
   textFadeSpeed: 1
-  displayDuration: 3
+  displayDuration: 4
   intermissionEntries:
   - text: Before The Shift...
     triggerType: 1
@@ -204,7 +204,7 @@ MonoBehaviour:
   overlayColor: {r: 0, g: 0, b: 0, a: 1}
   overlayFadeInDuration: 1
   overlayFadeOutDuration: 1
-  overlayFadeSpeed: 0.1
+  overlayFadeSpeed: 0.2
   canvas: {fileID: 0}
   canvasFadeDuration: 2
   freezeGame: 1
