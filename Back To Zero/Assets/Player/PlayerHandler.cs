@@ -23,6 +23,9 @@ public class PlayerHandler : MonoBehaviour
     private bool isDead = false;
     private RigidbodyConstraints2D originalConstraints;
     private CanvasGroup deathTxtCanvasGroup;
+
+    [SerializeField] public Animator animator;
+    private const string IsDeadParam = "IsDead";
     
     void Start()
     {
@@ -69,6 +72,7 @@ public class PlayerHandler : MonoBehaviour
     
     void Die()
     {
+        if (animator) animator.SetBool(IsDeadParam, true);
         isDead = true;
         Debug.Log("Player died! Respawning in " + respawnDelay + " seconds...");
         
@@ -130,6 +134,7 @@ public class PlayerHandler : MonoBehaviour
         
         EnablePlayerControls();
         isDead = false;
+        if (animator) animator.SetBool(IsDeadParam, false);
         
         Debug.Log("Player respawned!");
     }
