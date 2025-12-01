@@ -12,6 +12,7 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
     public Sprite itemSprite;
     public bool isFull;
     public string itemDescription;
+    public Sprite EmptySprite;
 
     [SerializeField]
     private int maxNumberOfItems;
@@ -173,17 +174,18 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
                 inventoryManager.SetSelectedArtifactSlot(this);
             }
             
+            // Update item description panel (show empty if slot is empty)
             if (ItemDescriptionNameText != null)
             {
-                ItemDescriptionNameText.text = itemName;
+                ItemDescriptionNameText.text = string.IsNullOrEmpty(itemName) ? "" : itemName;
             }
             if (ItemDescriptionText != null)
             {
-                ItemDescriptionText.text = itemDescription;
+                ItemDescriptionText.text = string.IsNullOrEmpty(itemDescription) ? "" : itemDescription;
             }
             if (itemDescriptionImage != null)
             {
-                itemDescriptionImage.sprite = itemSprite;
+                itemDescriptionImage.sprite = string.IsNullOrEmpty(itemName) ? EmptySprite : itemSprite;
             }
            
         }
