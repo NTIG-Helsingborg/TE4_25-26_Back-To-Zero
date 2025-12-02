@@ -14,6 +14,35 @@ public class TilemapColliderManagerEditor : Editor
         
         TilemapColliderManager manager = (TilemapColliderManager)target;
         
+        // Bulk delete selected elements
+        SerializedProperty colliderDataProp = serializedObject.FindProperty("colliderData");
+        if (colliderDataProp != null && colliderDataProp.isArray)
+        {
+            int selectedCount = TileColliderDataSelection.GetSelectedCount(manager.GetInstanceID());
+            if (selectedCount > 0)
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.HelpBox($"{selectedCount} element(s) selected", MessageType.Info);
+                if (GUILayout.Button($"Delete Selected ({selectedCount})", GUILayout.Height(25)))
+                {
+                    if (EditorUtility.DisplayDialog(
+                        "Delete Selected Elements",
+                        $"Are you sure you want to delete {selectedCount} selected element(s)?",
+                        "Yes", "No"))
+                    {
+                        TileColliderDataDrawer.DeleteSelectedElements(colliderDataProp);
+                        serializedObject.ApplyModifiedProperties();
+                    }
+                }
+                if (GUILayout.Button("Clear Selection", GUILayout.Height(25), GUILayout.Width(120)))
+                {
+                    TileColliderDataSelection.ClearSelection(manager.GetInstanceID());
+                }
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.Space(5);
+            }
+        }
+        
         // Show folder structure info
         Transform collidersFolder = manager.transform.Find("Tilemap Colliders");
         if (collidersFolder != null && collidersFolder.childCount > 0)

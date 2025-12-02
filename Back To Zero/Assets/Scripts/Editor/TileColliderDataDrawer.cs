@@ -1,6 +1,51 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.Tilemaps;
+using System.Collections.Generic;
+
+// Static class to track selected indices for bulk deletion
+public static class TileColliderDataSelection
+{
+    private static Dictionary<int, HashSet<int>> selectedIndices = new Dictionary<int, HashSet<int>>();
+    
+    public static bool IsSelected(int objectInstanceID, int index)
+    {
+        if (!selectedIndices.ContainsKey(objectInstanceID))
+            return false;
+        return selectedIndices[objectInstanceID].Contains(index);
+    }
+    
+    public static void ToggleSelection(int objectInstanceID, int index)
+    {
+        if (!selectedIndices.ContainsKey(objectInstanceID))
+            selectedIndices[objectInstanceID] = new HashSet<int>();
+        
+        if (selectedIndices[objectInstanceID].Contains(index))
+            selectedIndices[objectInstanceID].Remove(index);
+        else
+            selectedIndices[objectInstanceID].Add(index);
+    }
+    
+    public static void ClearSelection(int objectInstanceID)
+    {
+        if (selectedIndices.ContainsKey(objectInstanceID))
+            selectedIndices[objectInstanceID].Clear();
+    }
+    
+    public static HashSet<int> GetSelectedIndices(int objectInstanceID)
+    {
+        if (!selectedIndices.ContainsKey(objectInstanceID))
+            return new HashSet<int>();
+        return new HashSet<int>(selectedIndices[objectInstanceID]);
+    }
+    
+    public static int GetSelectedCount(int objectInstanceID)
+    {
+        if (!selectedIndices.ContainsKey(objectInstanceID))
+            return 0;
+        return selectedIndices[objectInstanceID].Count;
+    }
+}
 
 [CustomPropertyDrawer(typeof(TileColliderData))]
 public class TileColliderDataDrawer : PropertyDrawer
@@ -8,6 +53,8 @@ public class TileColliderDataDrawer : PropertyDrawer
     private const float PreviewSize = 48f;
     private const float MiniPreviewSize = 16f;
     private const float Spacing = 5f;
+    private const float ButtonWidth = 20f;
+    private const float CheckboxWidth = 18f;
     
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
@@ -27,14 +74,42 @@ public class TileColliderDataDrawer : PropertyDrawer
             previewSprite = GetPreviewSprite(matchModeProp, tileAssetProp, spriteAssetProp);
         }
         
-        // Draw foldout with mini preview on the right
-        Rect foldoutRect = new Rect(position.x, yPos, width - MiniPreviewSize - Spacing, EditorGUIUtility.singleLineHeight);
+        // Get element index for selection tracking
+        int elementIndex = GetElementIndex(property);
+        int objectInstanceID = property.serializedObject.targetObject.GetInstanceID();
+        bool isSelected = TileColliderDataSelection.IsSelected(objectInstanceID, elementIndex);
+        
+        // Calculate layout: checkbox | foldout | remove button | preview
+        float checkboxX = position.x;
+        float foldoutX = checkboxX + CheckboxWidth + Spacing;
+        float buttonX = position.x + width - ButtonWidth - MiniPreviewSize - Spacing;
+        float previewX = position.x + width - MiniPreviewSize;
+        float foldoutWidth = buttonX - foldoutX - Spacing;
+        
+        // Draw checkbox for multi-select
+        Rect checkboxRect = new Rect(checkboxX, yPos, CheckboxWidth, EditorGUIUtility.singleLineHeight);
+        bool newSelection = EditorGUI.Toggle(checkboxRect, isSelected);
+        if (newSelection != isSelected)
+        {
+            TileColliderDataSelection.ToggleSelection(objectInstanceID, elementIndex);
+        }
+        
+        // Draw foldout
+        Rect foldoutRect = new Rect(foldoutX, yPos, foldoutWidth, EditorGUIUtility.singleLineHeight);
         property.isExpanded = EditorGUI.Foldout(foldoutRect, property.isExpanded, label, true);
         
-        // Draw mini preview next to foldout (always visible)
+        // Draw remove button
+        Rect buttonRect = new Rect(buttonX, yPos, ButtonWidth, EditorGUIUtility.singleLineHeight);
+        if (GUI.Button(buttonRect, "×", EditorStyles.miniButton))
+        {
+            RemoveArrayElement(property);
+            return;
+        }
+        
+        // Draw mini preview next to button (always visible)
         if (previewSprite != null)
         {
-            Rect miniPreviewRect = new Rect(position.x + width - MiniPreviewSize, yPos, MiniPreviewSize, MiniPreviewSize);
+            Rect miniPreviewRect = new Rect(previewX, yPos, MiniPreviewSize, MiniPreviewSize);
             DrawSpritePreview(miniPreviewRect, previewSprite);
         }
         
@@ -160,5 +235,98 @@ public class TileColliderDataDrawer : PropertyDrawer
             );
             GUI.DrawTextureWithTexCoords(rect, sprite.texture, uvRect);
         }
+    }
+    
+    private void RemoveArrayElement(SerializedProperty elementProperty)
+    {
+        // Parse the property path to find array and index
+        // Path format: "colliderData.Array.data[5]"
+        string path = elementProperty.propertyPath;
+        
+        // Find the array property path (everything before ".Array.data[")
+        int arrayDataIndex = path.IndexOf(".Array.data[");
+        if (arrayDataIndex == -1)
+            return;
+        
+        string arrayPath = path.Substring(0, arrayDataIndex);
+        
+        // Extract the index
+        int indexStart = arrayDataIndex + ".Array.data[".Length;
+        int indexEnd = path.IndexOf(']', indexStart);
+        if (indexEnd == -1)
+            return;
+        
+        if (!int.TryParse(path.Substring(indexStart, indexEnd - indexStart), out int index))
+            return;
+        
+        // Get the array property
+        SerializedProperty arrayProperty = elementProperty.serializedObject.FindProperty(arrayPath);
+        if (arrayProperty == null || !arrayProperty.isArray)
+            return;
+        
+        if (index < 0 || index >= arrayProperty.arraySize)
+            return;
+        
+        // Record undo
+        Undo.RecordObject(elementProperty.serializedObject.targetObject, "Remove Array Element");
+        
+        // Delete the array element
+        arrayProperty.DeleteArrayElementAtIndex(index);
+        
+        // Mark object as dirty - Unity will handle serialization automatically (much faster)
+        EditorUtility.SetDirty(elementProperty.serializedObject.targetObject);
+    }
+    
+    private int GetElementIndex(SerializedProperty elementProperty)
+    {
+        // Parse the property path to find index
+        string path = elementProperty.propertyPath;
+        int arrayDataIndex = path.IndexOf(".Array.data[");
+        if (arrayDataIndex == -1)
+            return -1;
+        
+        int indexStart = arrayDataIndex + ".Array.data[".Length;
+        int indexEnd = path.IndexOf(']', indexStart);
+        if (indexEnd == -1)
+            return -1;
+        
+        if (int.TryParse(path.Substring(indexStart, indexEnd - indexStart), out int index))
+            return index;
+        
+        return -1;
+    }
+    
+    public static void DeleteSelectedElements(SerializedProperty arrayProperty)
+    {
+        if (arrayProperty == null || !arrayProperty.isArray)
+            return;
+        
+        int objectInstanceID = arrayProperty.serializedObject.targetObject.GetInstanceID();
+        HashSet<int> selectedIndices = TileColliderDataSelection.GetSelectedIndices(objectInstanceID);
+        
+        if (selectedIndices.Count == 0)
+            return;
+        
+        // Record undo
+        Undo.RecordObject(arrayProperty.serializedObject.targetObject, "Delete Selected Elements");
+        
+        // Delete from highest index to lowest to avoid index shifting issues
+        List<int> sortedIndices = new List<int>(selectedIndices);
+        sortedIndices.Sort();
+        sortedIndices.Reverse();
+        
+        foreach (int index in sortedIndices)
+        {
+            if (index >= 0 && index < arrayProperty.arraySize)
+            {
+                arrayProperty.DeleteArrayElementAtIndex(index);
+            }
+        }
+        
+        // Clear selection
+        TileColliderDataSelection.ClearSelection(objectInstanceID);
+        
+        // Mark object as dirty
+        EditorUtility.SetDirty(arrayProperty.serializedObject.targetObject);
     }
 }
