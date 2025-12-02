@@ -267,6 +267,25 @@ public class TileColliderDataDrawer : PropertyDrawer
         if (index < 0 || index >= arrayProperty.arraySize)
             return;
         
+        // Get the manager to track deletions
+        TilemapColliderManager manager = elementProperty.serializedObject.targetObject as TilemapColliderManager;
+        
+        // Track deleted sprites/tiles before deleting
+        if (manager != null)
+        {
+            SerializedProperty spriteProp = elementProperty.FindPropertyRelative("spriteAsset");
+            SerializedProperty tileProp = elementProperty.FindPropertyRelative("tileAsset");
+            
+            if (spriteProp != null && spriteProp.objectReferenceValue != null)
+            {
+                manager.AddToExclusionList(spriteProp.objectReferenceValue as Sprite, null);
+            }
+            if (tileProp != null && tileProp.objectReferenceValue != null)
+            {
+                manager.AddToExclusionList(null, tileProp.objectReferenceValue as TileBase);
+            }
+        }
+        
         // Record undo
         Undo.RecordObject(elementProperty.serializedObject.targetObject, "Remove Array Element");
         
@@ -307,6 +326,9 @@ public class TileColliderDataDrawer : PropertyDrawer
         if (selectedIndices.Count == 0)
             return;
         
+        // Get the manager to track deletions
+        TilemapColliderManager manager = arrayProperty.serializedObject.targetObject as TilemapColliderManager;
+        
         // Record undo
         Undo.RecordObject(arrayProperty.serializedObject.targetObject, "Delete Selected Elements");
         
@@ -319,6 +341,23 @@ public class TileColliderDataDrawer : PropertyDrawer
         {
             if (index >= 0 && index < arrayProperty.arraySize)
             {
+                // Track deleted sprites/tiles before deleting
+                if (manager != null)
+                {
+                    SerializedProperty elementProp = arrayProperty.GetArrayElementAtIndex(index);
+                    SerializedProperty spriteProp = elementProp.FindPropertyRelative("spriteAsset");
+                    SerializedProperty tileProp = elementProp.FindPropertyRelative("tileAsset");
+                    
+                    if (spriteProp != null && spriteProp.objectReferenceValue != null)
+                    {
+                        manager.AddToExclusionList(spriteProp.objectReferenceValue as Sprite, null);
+                    }
+                    if (tileProp != null && tileProp.objectReferenceValue != null)
+                    {
+                        manager.AddToExclusionList(null, tileProp.objectReferenceValue as TileBase);
+                    }
+                }
+                
                 arrayProperty.DeleteArrayElementAtIndex(index);
             }
         }

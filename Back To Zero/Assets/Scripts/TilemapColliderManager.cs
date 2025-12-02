@@ -73,7 +73,12 @@ public class TilemapColliderManager : MonoBehaviour
     [SerializeField] private GameObject tilemapParent;
     
     [Header("Collider Configuration")]
-    [SerializeField] private TileColliderData[] colliderData = new TileColliderData[0];
+    [SerializeField] public TileColliderData[] colliderData = new TileColliderData[0];
+    
+    [Header("Auto-Detect Settings")]
+    [Tooltip("Sprites and tiles that have been manually deleted and should not be auto-added again")]
+    [SerializeField] public List<Sprite> excludedSprites = new List<Sprite>();
+    [SerializeField] public List<TileBase> excludedTiles = new List<TileBase>();
     
     [Header("Generation Settings")]
     [SerializeField] private bool generateOnStart = true;
@@ -89,6 +94,15 @@ public class TilemapColliderManager : MonoBehaviour
     
     private List<Tilemap> foundTilemaps = new List<Tilemap>();
     private HashSet<string> existingColliderKeys = new HashSet<string>();
+    
+    /// <summary>
+    /// Gets the list of found tilemaps (for editor use)
+    /// </summary>
+    public List<Tilemap> GetFoundTilemaps()
+    {
+        FindAllTilemaps();
+        return new List<Tilemap>(foundTilemaps);
+    }
     
     private void Start()
     {
@@ -604,7 +618,10 @@ public class TilemapColliderManager : MonoBehaviour
                 }
             }
             
-            if (!alreadyExists)
+            // Check if this sprite/tile is in the excluded list
+            bool isExcluded = excludedSprites.Contains(sprite) || excludedTiles.Contains(sampleTile);
+            
+            if (!alreadyExists && !isExcluded)
             {
                 // Create new entry
                 TileColliderData newData = new TileColliderData
@@ -624,6 +641,44 @@ public class TilemapColliderManager : MonoBehaviour
         colliderData = newColliderData.ToArray();
         
         Debug.Log($"TilemapColliderManager: Auto-detected {spriteToTileMap.Count} unique sprite(s) from {foundTilemaps.Count} Tilemap(s). Added {spriteToTileMap.Count} new TileColliderData entries.");
+        
+        #if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+        #endif
+    }
+    
+    /// <summary>
+    /// Adds a sprite/tile to the exclusion list so it won't be auto-added
+    /// </summary>
+    public void AddToExclusionList(Sprite sprite, TileBase tile)
+    {
+        if (sprite != null && !excludedSprites.Contains(sprite))
+        {
+            excludedSprites.Add(sprite);
+        }
+        if (tile != null && !excludedTiles.Contains(tile))
+        {
+            excludedTiles.Add(tile);
+        }
+        
+        #if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+        #endif
+    }
+    
+    /// <summary>
+    /// Removes a sprite/tile from the exclusion list
+    /// </summary>
+    public void RemoveFromExclusionList(Sprite sprite, TileBase tile)
+    {
+        if (sprite != null)
+        {
+            excludedSprites.Remove(sprite);
+        }
+        if (tile != null)
+        {
+            excludedTiles.Remove(tile);
+        }
         
         #if UNITY_EDITOR
         UnityEditor.EditorUtility.SetDirty(this);
