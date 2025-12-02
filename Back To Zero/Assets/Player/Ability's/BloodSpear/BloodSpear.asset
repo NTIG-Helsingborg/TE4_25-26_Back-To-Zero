@@ -19,8 +19,10 @@ MonoBehaviour:
   knockbackForce: 3
   lifetime: 0.15
   HpCost: 3
+  IsAbility: 1
   spearPrefab: {fileID: 4273991108398286714, guid: dedb542aae611554087794499c513700, type: 3}
   firePointChildName: SpellTransform
   hitLayers:
     serializedVersion: 2
     m_Bits: 1
+  spawnAngleOffsetDeg: -45

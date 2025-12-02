@@ -20,6 +20,10 @@ public class Projectiles : MonoBehaviour
     private Collider2D col;
     private bool destroyed;
 
+    // Use a custom travel direction if provided (keeps aim exact while visuals can be rotated)
+    private bool useCustomDir = false;
+    private Vector2 travelDir;
+
 
     private void Awake()
     {
@@ -27,10 +31,21 @@ public class Projectiles : MonoBehaviour
         col = GetComponent<Collider2D>();
         if (rb) rb.gravityScale = 0f;
     }
+
     public void Initialize(float damage, float speed, float range, GameObject owner)
     {
         Initialize(damage, speed, range, owner, false, 0f, false, ~0, null);
     }
+
+    // New overload: supply travel direction explicitly
+    public void Initialize(float damage, float speed, float range, GameObject owner, Vector2 travelDirection)
+    {
+        Initialize(damage, speed, range, owner);
+        useCustomDir = true;
+        travelDir = travelDirection.normalized;
+        if (rb) rb.linearVelocity = travelDir * speed;
+    }
+
     public void Initialize(
         float damage,
         float speed,
@@ -55,7 +70,7 @@ public class Projectiles : MonoBehaviour
 
         startPos = transform.position;
 
-        if (rb) rb.linearVelocity = transform.right * speed;
+        if (rb && !useCustomDir) rb.linearVelocity = transform.right * speed;
 
         if (col && owner)
         {
@@ -66,9 +81,13 @@ public class Projectiles : MonoBehaviour
 
     private void Update()
     {
-        if (!rb) transform.position += transform.right * (speed * Time.deltaTime);
+        if (!rb)
+        {
+            Vector2 dir = useCustomDir ? travelDir : (Vector2)transform.right;
+            transform.position += (Vector3)(dir * (speed * Time.deltaTime));
+        }
         if (Vector3.Distance(startPos, transform.position) >= maxDistance)
-        DestroySelf();
+            DestroySelf();
     }
 
     private void OnTriggerEnter2D(Collider2D other)

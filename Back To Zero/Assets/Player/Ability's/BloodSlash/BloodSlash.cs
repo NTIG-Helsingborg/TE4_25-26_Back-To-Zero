@@ -8,66 +8,52 @@ public class BloodSlash : Ability
     public float knockbackForce;
     public float lifetime;
     public float HpCost;
-
     public bool IsAbility = true;
-    
 
     [Header("References")]
     public GameObject slashPrefab;
     [SerializeField] private string firePointChildName = "SpellTransform";
-    [SerializeField] private LayerMask hitLayers; // set to Enemy layer(s)
+    [SerializeField] private LayerMask hitLayers;
+
+    [SerializeField, Tooltip("Not applied at runtime when rotating prefab directly.")]
+    private float spawnAngleOffsetDeg = -10f;
+
+    [SerializeField, Tooltip("Sprite-only visual rotation (clockwise negative).")]
+    private float visualRotationOffsetDeg = -10f;
 
     public override void Activate()
     {
         var player = GameObject.FindGameObjectWithTag("Player");
-        if (!player)
-        {
-            Debug.LogError("[BloodSlash] No Player tagged 'Player' in scene.");
-            return;
-        }
+        if (!player) return;
 
         var firePoint = FindChildByName(player.transform, firePointChildName);
-        if (!firePoint)
-        {
-            Debug.LogError($"[BloodSlash] Could not find child '{firePointChildName}' under Player hierarchy.");
-            return;
-        }
+        if (!firePoint || !slashPrefab) return;
 
-        if (!slashPrefab)
-        {
-            Debug.LogError("[BloodSlash] No slash prefab assigned.");
-            return;
-        }
-
-        // Spawn unparented so scale isn't inherited from SpellTransform
         var go = Object.Instantiate(slashPrefab, firePoint.position, firePoint.rotation);
 
-        var motion = go.GetComponent<SlashingMotion>();
-        if (motion)
-        {
-            // Use firePoint aim as base angle, set desired reach (radius) and lifetime
-            float baseAngle = firePoint.eulerAngles.z;
-            float reach = 1.0f; // tune this to match your sprite/collider size
-            motion.Initialize(player.transform, baseAngle, reach, lifetime);
-        }
+        // Visual rotation only
+        var sr = go.GetComponentInChildren<SpriteRenderer>();
+        if (sr) sr.transform.localRotation = Quaternion.Euler(0f, 0f, visualRotationOffsetDeg);
 
-        var hitbox = go.GetComponent<MeleeHitbox>();
-        if (hitbox != null)
+        // Pass runtime values to the event driver
+        var ev = go.GetComponent<SlashAnimationEvents>();
+        if (ev)
         {
             float totalDamage = damage * PowerBonus.GetDamageMultiplier();
-            hitbox.Initialize(totalDamage, knockbackForce, lifetime, player, hitLayers);
-        }
-        else
-        {
-            Debug.LogWarning("[BloodSlash] Prefab missing MeleeHitbox component.");
-            Object.Destroy(go, Mathf.Max(0.01f, lifetime));
+            ev.Setup(player, totalDamage, knockbackForce, hitLayers);
         }
 
+        // Keep motion logic as-is
+        var motion = go.GetComponent<SlashingMotion>();
+        if (motion) motion.Initialize(player.transform, firePoint.eulerAngles.z, 1f, lifetime);
+
+        // Auto-destroy after lifetime (fallback if SlashingMotion doesn’t do it)
+        if (lifetime > 0f)
+            Object.Destroy(go, lifetime);
+
         var playerHealth = player.GetComponent<Health>();
-        if (playerHealth != null && HpCost > 0f)
-        {
+        if (playerHealth && HpCost > 0f)
             playerHealth.SpendHealth(Mathf.RoundToInt(HpCost));
-        }
     }
 
     private static Transform FindChildByName(Transform root, string name)
