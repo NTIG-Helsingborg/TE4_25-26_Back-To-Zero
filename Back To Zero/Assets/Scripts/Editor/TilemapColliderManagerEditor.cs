@@ -23,6 +23,26 @@ public class TilemapColliderManagerEditor : Editor
                 MessageType.Info);
         }
         
+        // Auto-Detect by Sprite button
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Auto-Detect Tiles by Sprite", GUILayout.Height(30)))
+        {
+            if (EditorUtility.DisplayDialog(
+                "Auto-Detect Tiles by Sprite",
+                "This will scan all Tilemaps and create TileColliderData entries for each unique sprite found.\n\n" +
+                "Tiles with the same sprite (but different TileBase assets) will be grouped together.\n\n" +
+                "Continue?",
+                "Yes", "No"))
+            {
+                manager.AutoDetectTilesBySprite();
+                EditorUtility.SetDirty(manager);
+                UnityEditor.SceneView.RepaintAll();
+            }
+        }
+        EditorGUILayout.EndHorizontal();
+        
+        EditorGUILayout.Space(5);
+        
         // Generate Colliders button
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("Generate Colliders", GUILayout.Height(30)))
@@ -58,6 +78,9 @@ public class TilemapColliderManagerEditor : Editor
         
         EditorGUILayout.Space();
         EditorGUILayout.HelpBox(
+            "Auto-Detect by Sprite: Scans all Tilemaps and automatically creates TileColliderData entries for each unique sprite.\n" +
+            "• Groups tiles with the same sprite together (even if they're different TileBase assets)\n" +
+            "• Perfect for tiles that look the same but have different names\n\n" +
             "Generate Colliders: Creates colliders for all tiles matching the configured TileColliderData.\n" +
             "• Automatically prevents duplicates if clicked multiple times\n" +
             "• Organizes colliders in folders (Tilemap Colliders > Colliders_[TilemapName])\n\n" +

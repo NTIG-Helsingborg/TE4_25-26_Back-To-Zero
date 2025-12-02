@@ -10,11 +10,25 @@ public enum ColliderType
     Edge
 }
 
+public enum MatchMode
+{
+    ByTileAsset,    // Match by TileBase reference (exact match)
+    BySprite        // Match by sprite (visual match, works across different TileBase assets)
+}
+
 [System.Serializable]
 public class TileColliderData
 {
-    [Header("Tile Reference")]
+    [Header("Matching Mode")]
+    [Tooltip("ByTileAsset: Matches exact TileBase reference\nBySprite: Matches any tile with the same sprite (works across different TileBase assets)")]
+    public MatchMode matchMode = MatchMode.ByTileAsset;
+    
+    [Header("Tile Reference (for ByTileAsset mode)")]
     public TileBase tileAsset;
+    
+    [Header("Sprite Reference (for BySprite mode)")]
+    [Tooltip("Drag a sprite here to match all tiles that use this sprite, regardless of their TileBase asset")]
+    public Sprite spriteAsset;
     
     [Header("Collider Settings")]
     public ColliderType colliderType = ColliderType.Box;
@@ -198,36 +212,37 @@ public class TilemapColliderManager : MonoBehaviour
                 tilemapContainer = containerObj.transform;
             }
             
-            // Get all tile positions
-            BoundsInt bounds = currentTilemap.cellBounds;
+            // Use GetUsedTiles for better performance (only iterates over tiles that exist)
+            // This is much faster than iterating through entire bounds
             int tilemapColliderCount = 0;
+            BoundsInt bounds = currentTilemap.cellBounds;
             
-            for (int x = bounds.xMin; x < bounds.xMax; x++)
+            // Get all used tile positions
+            foreach (Vector3Int tilePosition in currentTilemap.cellBounds.allPositionsWithin)
             {
-                for (int y = bounds.yMin; y < bounds.yMax; y++)
+                TileBase tile = currentTilemap.GetTile(tilePosition);
+                
+                if (tile == null) continue;
+                
+                // Get sprite for sprite-based matching
+                Sprite tileSprite = GetTileSprite(currentTilemap, tilePosition);
+                
+                // Find matching collider data (checks both tile asset and sprite)
+                TileColliderData matchingData = GetMatchingColliderData(tile, tileSprite);
+                if (matchingData != null)
                 {
-                    Vector3Int tilePosition = new Vector3Int(x, y, 0);
-                    TileBase tile = currentTilemap.GetTile(tilePosition);
-                    
-                    if (tile == null) continue;
-                    
-                    // Find matching collider data
-                    TileColliderData matchingData = GetMatchingColliderData(tile);
-                    if (matchingData != null)
+                    // Check for duplicates
+                    string colliderKey = GetColliderKey(currentTilemap, tilePosition);
+                    if (!existingColliderKeys.Contains(colliderKey))
                     {
-                        // Check for duplicates
-                        string colliderKey = GetColliderKey(currentTilemap, tilePosition);
-                        if (!existingColliderKeys.Contains(colliderKey))
-                        {
-                            CreateColliderForTile(currentTilemap, tilePosition, matchingData, tilemapContainer);
-                            existingColliderKeys.Add(colliderKey);
-                            tilemapColliderCount++;
-                            totalColliderCount++;
-                        }
-                        else
-                        {
-                            duplicateCount++;
-                        }
+                        CreateColliderForTile(currentTilemap, tilePosition, matchingData, tilemapContainer);
+                        existingColliderKeys.Add(colliderKey);
+                        tilemapColliderCount++;
+                        totalColliderCount++;
+                    }
+                    else
+                    {
+                        duplicateCount++;
                     }
                 }
             }
@@ -257,18 +272,67 @@ public class TilemapColliderManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Finds the TileColliderData that matches the given tile
+    /// Finds the TileColliderData that matches the given tile and sprite
     /// </summary>
-    private TileColliderData GetMatchingColliderData(TileBase tile)
+    private TileColliderData GetMatchingColliderData(TileBase tile, Sprite tileSprite)
     {
         foreach (var data in colliderData)
         {
-            if (data != null && data.tileAsset == tile)
+            if (data == null) continue;
+            
+            if (data.matchMode == MatchMode.ByTileAsset)
             {
-                return data;
+                // Match by TileBase reference
+                if (data.tileAsset == tile)
+                {
+                    return data;
+                }
+            }
+            else if (data.matchMode == MatchMode.BySprite)
+            {
+                // Match by sprite (works across different TileBase assets)
+                if (data.spriteAsset != null && tileSprite != null && data.spriteAsset == tileSprite)
+                {
+                    return data;
+                }
             }
         }
         return null;
+    }
+    
+    /// <summary>
+    /// Gets the sprite from a tile at a specific position in a Tilemap
+    /// </summary>
+    private Sprite GetTileSprite(Tilemap tilemap, Vector3Int position)
+    {
+        // Try to get sprite directly from Tilemap
+        Sprite sprite = tilemap.GetSprite(position);
+        
+        // If that doesn't work, try to get it from the TileBase
+        if (sprite == null)
+        {
+            TileBase tile = tilemap.GetTile(position);
+            if (tile != null)
+            {
+                // Try to cast to Tile (most common type)
+                if (tile is Tile)
+                {
+                    sprite = ((Tile)tile).sprite;
+                }
+                // Try other tile types if needed
+                else if (tile is UnityEngine.Tilemaps.AnimatedTile)
+                {
+                    // Animated tiles might have multiple sprites, get the first one
+                    var animatedTile = (UnityEngine.Tilemaps.AnimatedTile)tile;
+                    if (animatedTile.m_AnimatedSprites != null && animatedTile.m_AnimatedSprites.Length > 0)
+                    {
+                        sprite = animatedTile.m_AnimatedSprites[0];
+                    }
+                }
+            }
+        }
+        
+        return sprite;
     }
     
     /// <summary>
@@ -463,6 +527,107 @@ public class TilemapColliderManager : MonoBehaviour
     public void RefreshColliders()
     {
         GenerateColliders();
+    }
+    
+    /// <summary>
+    /// Auto-detects all unique sprites from Tilemaps and creates TileColliderData entries for them
+    /// This groups tiles by sprite, so tiles with the same sprite but different TileBase assets are grouped together
+    /// </summary>
+    public void AutoDetectTilesBySprite()
+    {
+        // Refresh tilemap list
+        FindAllTilemaps();
+        
+        if (foundTilemaps.Count == 0)
+        {
+            Debug.LogError("TilemapColliderManager: No Tilemap components found!");
+            return;
+        }
+        
+        // Dictionary to store unique sprites and their first tile reference
+        Dictionary<Sprite, TileBase> spriteToTileMap = new Dictionary<Sprite, TileBase>();
+        Dictionary<Sprite, int> spriteCounts = new Dictionary<Sprite, int>();
+        
+        // Scan all Tilemaps for unique sprites (optimized - only iterates over used tiles)
+        foreach (Tilemap currentTilemap in foundTilemaps)
+        {
+            if (currentTilemap == null) continue;
+            
+            // Use allPositionsWithin for cleaner iteration
+            foreach (Vector3Int tilePosition in currentTilemap.cellBounds.allPositionsWithin)
+            {
+                TileBase tile = currentTilemap.GetTile(tilePosition);
+                
+                if (tile == null) continue;
+                
+                Sprite sprite = GetTileSprite(currentTilemap, tilePosition);
+                if (sprite != null)
+                {
+                    // Track this sprite
+                    if (!spriteToTileMap.ContainsKey(sprite))
+                    {
+                        spriteToTileMap[sprite] = tile;
+                    }
+                    
+                    // Count occurrences
+                    if (spriteCounts.ContainsKey(sprite))
+                    {
+                        spriteCounts[sprite]++;
+                    }
+                    else
+                    {
+                        spriteCounts[sprite] = 1;
+                    }
+                }
+            }
+        }
+        
+        // Create new TileColliderData entries for each unique sprite
+        List<TileColliderData> newColliderData = new List<TileColliderData>(colliderData);
+        
+        foreach (var spritePair in spriteToTileMap)
+        {
+            Sprite sprite = spritePair.Key;
+            TileBase sampleTile = spritePair.Value;
+            int count = spriteCounts[sprite];
+            
+            // Check if this sprite is already in the list
+            bool alreadyExists = false;
+            foreach (var existingData in newColliderData)
+            {
+                if (existingData != null && 
+                    ((existingData.matchMode == MatchMode.BySprite && existingData.spriteAsset == sprite) ||
+                     (existingData.matchMode == MatchMode.ByTileAsset && existingData.tileAsset == sampleTile)))
+                {
+                    alreadyExists = true;
+                    break;
+                }
+            }
+            
+            if (!alreadyExists)
+            {
+                // Create new entry
+                TileColliderData newData = new TileColliderData
+                {
+                    matchMode = MatchMode.BySprite,
+                    spriteAsset = sprite,
+                    tileAsset = sampleTile, // Keep reference for reference, but matching will use sprite
+                    colliderType = ColliderType.Box,
+                    isTrigger = false
+                };
+                
+                newColliderData.Add(newData);
+            }
+        }
+        
+        // Update the array
+        colliderData = newColliderData.ToArray();
+        
+        Debug.Log($"TilemapColliderManager: Auto-detected {spriteToTileMap.Count} unique sprite(s) from {foundTilemaps.Count} Tilemap(s). Added {spriteToTileMap.Count} new TileColliderData entries.");
+        
+        #if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+        #endif
     }
 }
 
