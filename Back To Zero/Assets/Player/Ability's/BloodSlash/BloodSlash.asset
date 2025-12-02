@@ -25,3 +25,5 @@ MonoBehaviour:
   hitLayers:
     serializedVersion: 2
     m_Bits: 1
+  spawnAngleOffsetDeg: -45
+  visualRotationOffsetDeg: 300
