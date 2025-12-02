@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -74,7 +74,7 @@ TextureImporter:
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
-    textureFormat: -1
+    textureFormat: 4
     textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
@@ -104,9 +104,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 199
-        height: 1024
+        y: 992
+        width: 200
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -121,11 +121,693 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 960
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 27b95482e77805a41bebb965071a8ecc
+      internalID: -118811295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 928
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32890273ee4191640a3ea2adbc93fa3d
+      internalID: 1529679482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 896
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 28e805b2123e5bc42a81fa0661ccd276
+      internalID: 834694447
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 864
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 590ce515910eced49afa1b16e69fb3d5
+      internalID: 1207495203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 832
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3886aaddeb1c2449914417612b7933a
+      internalID: -1706475918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 800
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6df7c0451b376824793d13edd11c7c8e
+      internalID: -1073028039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 768
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 677a6d100b6be664982815b26cdbbec5
+      internalID: 1245469749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 736
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: edc40fbc9d6f34943883721bf74943fa
+      internalID: -1742637905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 704
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 47ec9f53e473f2141bc1552e2aeb6b45
+      internalID: 1484932309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 672
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6ec87c1c1f125f5439522220c45f9ec6
+      internalID: 100417420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 640
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef822cd422a00aa4d82dc60e0ba2669d
+      internalID: -1989718763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 608
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea39a7ab44ae5404d982514ce6136f94
+      internalID: 143408741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 576
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 33d7bef7f274eff4da0cf80ba9f13c4e
+      internalID: 1383892459
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 544
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec3576c32c8bf2e4bac863d33d0ee9c9
+      internalID: 1274874384
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 512
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cffaf242ec5de1648956f186c8ac6bfb
+      internalID: -1887641322
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 480
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2930588d2e9fee8449458fa56b285485
+      internalID: -175694598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 448
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fb1011b01f74a6b479687d3965106f96
+      internalID: 1663870527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 416
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3383b9df8c4c57b46aaddde55b44b40c
+      internalID: 217670596
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 384
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 20e76a0a1eaf16846bc27cc818e3c768
+      internalID: -25502988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 352
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06239fd2c403a1643926ca16cbb458f0
+      internalID: 1409624415
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 320
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec66f7a46177ab64499b6895cc05e57c
+      internalID: 59528744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_22
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 288
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7336e899cb5ca014fb09563525418361
+      internalID: -2120364170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_23
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 256
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1e73f2661a857d74e829bb3b6b12d173
+      internalID: -250441572
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 224
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cffd8971b71901a44bdfa2150f65ce35
+      internalID: 845626371
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_25
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 192
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d1b9e0efca853b4482c819b61e35feb
+      internalID: 1665141657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_26
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 160
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ad9ee19ee81ef847bbdb979010966d1
+      internalID: 794803805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_27
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 128
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dfe375469eb898544a7957d1298c0d85
+      internalID: -99878698
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_28
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 96
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d25680fb4658ae545ae5b0c37bc81b8f
+      internalID: 563075659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_29
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 64
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0212592b98faeb941890e39c85339e1f
+      internalID: -576183460
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f349bf738c3c8ca4a82adbfdce8458eb
+      internalID: 2124234973
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: generic_counter-Sheet_31
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 200
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 27fef7c4f2470764a938a720c26eebf0
+      internalID: 1476443347
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 23d320e35db69f7418fb4bdf17dd2088
     internalID: 0
     vertices: []
     indices: 
@@ -136,6 +818,37 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       generic_counter-Sheet_0: 778124368142664600
+      generic_counter-Sheet_1: -118811295
+      generic_counter-Sheet_10: 100417420
+      generic_counter-Sheet_11: -1989718763
+      generic_counter-Sheet_12: 143408741
+      generic_counter-Sheet_13: 1383892459
+      generic_counter-Sheet_14: 1274874384
+      generic_counter-Sheet_15: -1887641322
+      generic_counter-Sheet_16: -175694598
+      generic_counter-Sheet_17: 1663870527
+      generic_counter-Sheet_18: 217670596
+      generic_counter-Sheet_19: -25502988
+      generic_counter-Sheet_2: 1529679482
+      generic_counter-Sheet_20: 1409624415
+      generic_counter-Sheet_21: 59528744
+      generic_counter-Sheet_22: -2120364170
+      generic_counter-Sheet_23: -250441572
+      generic_counter-Sheet_24: 845626371
+      generic_counter-Sheet_25: 1665141657
+      generic_counter-Sheet_26: 794803805
+      generic_counter-Sheet_27: -99878698
+      generic_counter-Sheet_28: 563075659
+      generic_counter-Sheet_29: -576183460
+      generic_counter-Sheet_3: 834694447
+      generic_counter-Sheet_30: 2124234973
+      generic_counter-Sheet_31: 1476443347
+      generic_counter-Sheet_4: 1207495203
+      generic_counter-Sheet_5: -1706475918
+      generic_counter-Sheet_6: -1073028039
+      generic_counter-Sheet_7: 1245469749
+      generic_counter-Sheet_8: -1742637905
+      generic_counter-Sheet_9: 1484932309
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
