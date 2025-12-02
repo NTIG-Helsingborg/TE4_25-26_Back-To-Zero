@@ -40,9 +40,15 @@ public class IntermissionTextDisplay : MonoBehaviour
         
         public TriggerType triggerType = TriggerType.None;
         public LayerMask triggerLayer = -1; // Which layers can trigger (all by default)
+        public GameObject specificColliderObject = null; // Specific GameObject with collider to check for OnCollisionEnter/Exit
         public float triggerDelay = 0f;
         public bool triggerOnce = true; // If true, only triggers once
         public bool startDarkened = false; // If true and trigger is OnStart, starts already darkened
+        
+        [Header("Display Options")]
+        public bool enableText = true; // Show text for this entry
+        public bool enableOverlay = true; // Show dark overlay for this entry
+        public bool enableDarkening = true; // Enable darkening effects (overlay + canvas fade) for this entry
         
         public bool playAfterEntry = false; // If true, plays after another entry completes
         [HideInInspector]
@@ -76,17 +82,39 @@ public class IntermissionTextDisplay : MonoBehaviour
     
     void Start()
     {
-        // Auto-find text display if not assigned
+        InitializeTextDisplay();
+        InitializeDarkOverlay();
+        InitializeCanvas();
+        HandleStartDarkened();
+        CheckTriggers(TriggerType.OnStart, null, null);
+    }
+    
+    /// <summary>
+    /// Initializes the text display component, auto-finding it if not assigned
+    /// </summary>
+    private void InitializeTextDisplay()
+    {
         if (textDisplay == null)
         {
             textDisplay = GetComponent<TextMeshProUGUI>();
             if (textDisplay == null)
             {
                 Debug.LogWarning("IntermissionTextDisplay: No TextMeshProUGUI found. Please assign one in the inspector.");
+                return;
             }
         }
         
-        // Auto-find dark overlay if not assigned
+        textDisplay.gameObject.SetActive(true);
+        textDisplay.color = new Color(textColor.r, textColor.g, textColor.b, 0f);
+        textDisplay.fontSize = fontSize;
+        textDisplay.transform.SetAsLastSibling();
+    }
+    
+    /// <summary>
+    /// Initializes the dark overlay, auto-finding it if not assigned
+    /// </summary>
+    private void InitializeDarkOverlay()
+    {
         if (darkOverlay == null)
         {
             // Try to find it as a sibling or child of text display
@@ -111,22 +139,38 @@ public class IntermissionTextDisplay : MonoBehaviour
             }
         }
         
-        // Initialize overlay if it exists
         if (darkOverlay != null)
         {
             darkOverlay.gameObject.SetActive(true);
-            darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, 0f);
+            SetOverlayColor(0f);
             darkOverlay.transform.SetAsFirstSibling();
         }
-        
-        if (textDisplay != null)
+    }
+    
+    /// <summary>
+    /// Sets the overlay color alpha
+    /// </summary>
+    private void SetOverlayColor(float alpha)
+    {
+        if (darkOverlay != null)
         {
-            textDisplay.gameObject.SetActive(true);
-            textDisplay.color = new Color(textColor.r, textColor.g, textColor.b, 0f);
-            textDisplay.fontSize = fontSize;
-            textDisplay.transform.SetAsLastSibling();
+            darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, alpha);
         }
-        
+    }
+    
+    /// <summary>
+    /// Smooth step interpolation function for easing
+    /// </summary>
+    private float SmoothStep(float t)
+    {
+        return t * t * (3f - 2f * t);
+    }
+    
+    /// <summary>
+    /// Initializes the canvas and canvas group
+    /// </summary>
+    private void InitializeCanvas()
+    {
         if (canvas != null)
         {
             canvasGroup = canvas.GetComponent<CanvasGroup>();
@@ -137,122 +181,225 @@ public class IntermissionTextDisplay : MonoBehaviour
             canvasWasEnabled = canvas.gameObject.activeSelf;
             originalCanvasAlpha = canvasGroup.alpha;
         }
-        
-        // Check if any OnStart entry wants to start darkened
-        bool shouldStartDarkened = false;
-        if (intermissionEntries != null)
-        {
-            foreach (var entry in intermissionEntries)
-            {
-                if (entry != null && entry.triggerType == TriggerType.OnStart && entry.startDarkened)
-                {
-                    shouldStartDarkened = true;
-                    break;
-                }
-            }
-        }
+    }
+    
+    /// <summary>
+    /// Handles starting darkened if any OnStart entry requires it
+    /// </summary>
+    private void HandleStartDarkened()
+    {
+        bool shouldStartDarkened = HasStartDarkenedEntry();
         
         if (shouldStartDarkened && enableDarkening)
         {
-            if (darkOverlay != null)
-            {
-                darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, 1f);
-            }
+            SetOverlayColor(1f);
             
-            if (canvas != null)
+            if (canvas != null && canvasGroup != null)
             {
-                if (canvasGroup != null)
-                {
-                    canvasGroup.alpha = 0f;
-                }
+                canvasGroup.alpha = 0f;
                 canvas.gameObject.SetActive(false);
             }
         }
+    }
+    
+    /// <summary>
+    /// Checks if any OnStart entry wants to start darkened
+    /// </summary>
+    private bool HasStartDarkenedEntry()
+    {
+        if (intermissionEntries == null) return false;
         
-        CheckTriggers(TriggerType.OnStart, null);
+        foreach (var entry in intermissionEntries)
+        {
+            if (entry != null && entry.triggerType == TriggerType.OnStart && entry.startDarkened)
+            {
+                return true;
+            }
+        }
+        return false;
     }
     
     void OnEnable()
     {
-        CheckTriggers(TriggerType.OnEnable, null);
+        CheckTriggers(TriggerType.OnEnable, null, null);
     }
     
     void OnCollisionEnter2D(Collision2D collision)
     {
-        CheckTriggers(TriggerType.OnCollisionEnter, collision.gameObject);
+        Debug.Log($"[IntermissionTextDisplay] OnCollisionEnter2D detected: GameObject='{collision.gameObject.name}', Layer={collision.gameObject.layer}");
+        CheckTriggers(TriggerType.OnCollisionEnter, collision.gameObject, collision.collider);
     }
     
     void OnTriggerEnter2D(Collider2D other)
     {
-        CheckTriggers(TriggerType.OnTriggerEnter, other.gameObject);
+        Debug.Log($"[IntermissionTextDisplay] OnTriggerEnter2D detected: GameObject='{other.gameObject.name}', Layer={other.gameObject.layer}, Collider='{other.name}'");
+        CheckTriggers(TriggerType.OnTriggerEnter, other.gameObject, other);
     }
     
     void OnCollisionExit2D(Collision2D collision)
     {
-        CheckTriggers(TriggerType.OnCollisionExit, collision.gameObject);
+        CheckTriggers(TriggerType.OnCollisionExit, collision.gameObject, collision.collider);
     }
     
     void OnTriggerExit2D(Collider2D other)
     {
-        CheckTriggers(TriggerType.OnTriggerExit, other.gameObject);
+        CheckTriggers(TriggerType.OnTriggerExit, other.gameObject, other);
     }
     
-    private void CheckTriggers(TriggerType triggerType, GameObject other)
+    private void CheckTriggers(TriggerType triggerType, GameObject other, Collider2D collider = null)
     {
-        if (intermissionEntries == null) return;
+        if (intermissionEntries == null)
+        {
+            Debug.LogWarning($"[IntermissionTextDisplay] CheckTriggers: intermissionEntries is null for triggerType={triggerType}");
+            return;
+        }
+        
+        // Spam protection: Don't allow new triggers if a display is already active
+        if (isDisplaying)
+        {
+            Debug.Log($"[IntermissionTextDisplay] CheckTriggers: Spam protection - Already displaying, ignoring triggerType={triggerType}");
+            return;
+        }
+        
+        Debug.Log($"[IntermissionTextDisplay] CheckTriggers: Checking triggerType={triggerType}, EntryCount={intermissionEntries.Length}, Other={(other != null ? other.name : "null")}");
         
         for (int i = 0; i < intermissionEntries.Length; i++)
         {
             var entry = intermissionEntries[i];
-            if (entry == null) continue;
+            if (entry == null)
+            {
+                Debug.LogWarning($"[IntermissionTextDisplay] CheckTriggers: Entry[{i}] is null");
+                continue;
+            }
             
             // Skip if this entry plays after another entry
-            if (entry.playAfterEntry) continue;
-            
-            if (entry.triggerType != triggerType) continue;
-            
-            if (entry.triggerOnce && entryTriggered.ContainsKey(i) && entryTriggered[i])
+            if (entry.playAfterEntry)
             {
+                Debug.Log($"[IntermissionTextDisplay] CheckTriggers: Entry[{i}] skipped - plays after another entry");
                 continue;
             }
             
-            if (other != null && !ShouldTrigger(entry, other))
+            if (entry.triggerType != triggerType)
             {
+                Debug.Log($"[IntermissionTextDisplay] CheckTriggers: Entry[{i}] skipped - triggerType mismatch (entry={entry.triggerType}, checking={triggerType})");
                 continue;
             }
             
+            if (!CanTriggerEntry(i, entry))
+            {
+                Debug.Log($"[IntermissionTextDisplay] CheckTriggers: Entry[{i}] skipped - already triggered (triggerOnce={entry.triggerOnce})");
+                continue;
+            }
+            
+            if (other != null && !ShouldTrigger(entry, other, collider))
+            {
+                Debug.Log($"[IntermissionTextDisplay] CheckTriggers: Entry[{i}] skipped - ShouldTrigger returned false");
+                continue;
+            }
+            
+            Debug.Log($"[IntermissionTextDisplay] CheckTriggers: Entry[{i}] TRIGGERED! Text='{entry.text}', TriggerType={entry.triggerType}");
             StartCoroutine(TriggerEntryWithDelay(i, entry));
         }
     }
     
-    private bool ShouldTrigger(IntermissionEntry entry, GameObject other)
+    private bool ShouldTrigger(IntermissionEntry entry, GameObject other, Collider2D collider = null)
     {
-        if (entry.triggerLayer != -1 && (entry.triggerLayer.value & (1 << other.layer)) == 0)
+        // Check layer mask
+        // -1 means "Everything" (all layers allowed)
+        // 0 means "Nothing" (no layers allowed - should reject)
+        // Any other value means specific layers
+        if (entry.triggerLayer.value == 0)
         {
+            Debug.Log($"[IntermissionTextDisplay] ShouldTrigger: Layer check failed - Entry layerMask=0 (Nothing), rejecting all");
+            return false;
+        }
+        else if (entry.triggerLayer.value != -1 && (entry.triggerLayer.value & (1 << other.layer)) == 0)
+        {
+            Debug.Log($"[IntermissionTextDisplay] ShouldTrigger: Layer check failed - Entry layerMask={entry.triggerLayer.value}, Other layer={other.layer} (bit={1 << other.layer})");
             return false;
         }
         
+        // Check specific collider GameObject for OnCollisionEnter/Exit and OnTriggerEnter/Exit
+        // If specificColliderObject is set, only trigger when THAT object's collider enters/exits
+        if ((entry.triggerType == TriggerType.OnCollisionEnter || entry.triggerType == TriggerType.OnCollisionExit ||
+             entry.triggerType == TriggerType.OnTriggerEnter || entry.triggerType == TriggerType.OnTriggerExit) 
+            && entry.specificColliderObject != null)
+        {
+            Debug.Log($"[IntermissionTextDisplay] ShouldTrigger: Checking specific collider - Target='{entry.specificColliderObject.name}', Other='{other.name}'");
+            
+            // Check if the colliding GameObject IS the target GameObject (or has the collider)
+            if (other == entry.specificColliderObject)
+            {
+                Debug.Log($"[IntermissionTextDisplay] ShouldTrigger: GameObject match - Other is the target GameObject");
+                return true; // The target GameObject itself is colliding, allow it
+            }
+            
+            // Check if the collider belongs to the target GameObject
+            if (collider != null)
+            {
+                // Get all colliders from the specified GameObject
+                Collider2D[] targetColliders = entry.specificColliderObject.GetComponents<Collider2D>();
+                bool matches = false;
+                foreach (Collider2D targetCollider in targetColliders)
+                {
+                    if (collider == targetCollider)
+                    {
+                        matches = true;
+                        Debug.Log($"[IntermissionTextDisplay] ShouldTrigger: Collider match found - '{collider.name}' belongs to target GameObject");
+                        break;
+                    }
+                }
+                if (!matches)
+                {
+                    Debug.Log($"[IntermissionTextDisplay] ShouldTrigger: Collider mismatch - collider '{collider.name}' (from '{other.name}') does not belong to target GameObject '{entry.specificColliderObject.name}'. Leave Collider Object empty to trigger on any collision.");
+                    return false;
+                }
+            }
+            else
+            {
+                Debug.Log($"[IntermissionTextDisplay] ShouldTrigger: Collider is null, cannot verify match");
+                return false;
+            }
+        }
+        
+        Debug.Log($"[IntermissionTextDisplay] ShouldTrigger: All checks passed");
         return true;
     }
     
     private IEnumerator TriggerEntryWithDelay(int index, IntermissionEntry entry)
     {
+        Debug.Log($"[IntermissionTextDisplay] TriggerEntryWithDelay: Entry[{index}] - Text='{entry.text}', TriggerType={entry.triggerType}, Delay={entry.triggerDelay}, EnableText={entry.enableText}, EnableOverlay={entry.enableOverlay}, EnableDarkening={entry.enableDarkening}");
+        
         // Mark as triggered if triggerOnce is enabled
         if (entry.triggerOnce)
         {
             entryTriggered[index] = true;
+            Debug.Log($"[IntermissionTextDisplay] TriggerEntryWithDelay: Entry[{index}] marked as triggered (triggerOnce=true)");
         }
         
         if (entry.triggerDelay > 0f)
         {
+            Debug.Log($"[IntermissionTextDisplay] TriggerEntryWithDelay: Waiting {entry.triggerDelay} seconds before displaying Entry[{index}]");
             yield return new WaitForSeconds(entry.triggerDelay);
+            
+            // Check spam protection again after delay (another display might have started)
+            if (isDisplaying)
+            {
+                Debug.Log($"[IntermissionTextDisplay] TriggerEntryWithDelay: Spam protection - Display started during delay, cancelling Entry[{index}]");
+                yield break;
+            }
         }
         
         if (!string.IsNullOrEmpty(entry.text))
         {
             bool alreadyDarkened = entry.triggerType == TriggerType.OnStart && entry.startDarkened;
             bool hasMoreEntries = HasMoreEntriesAfter(index);
-            yield return StartCoroutine(DisplayEntry(index, entry.text, alreadyDarkened, hasMoreEntries));
+            Debug.Log($"[IntermissionTextDisplay] TriggerEntryWithDelay: Displaying Entry[{index}] - AlreadyDarkened={alreadyDarkened}, HasMoreEntries={hasMoreEntries}");
+            yield return StartCoroutine(DisplayEntry(index, entry, alreadyDarkened, hasMoreEntries));
+        }
+        else
+        {
+            Debug.LogWarning($"[IntermissionTextDisplay] TriggerEntryWithDelay: Entry[{index}] has empty text, skipping display");
         }
         
         entryCompleted[index] = true;
@@ -261,35 +408,15 @@ public class IntermissionTextDisplay : MonoBehaviour
     
     private bool HasMoreEntriesAfter(int currentIndex)
     {
-        if (intermissionEntries == null) return false;
-        
-        for (int i = 0; i < intermissionEntries.Length; i++)
-        {
-            var entry = intermissionEntries[i];
-            if (entry == null) continue;
-            
-            // Check if this entry should play after the current entry
-            if (entry.playAfterEntry && entry.playAfterEntryIndex == currentIndex)
-            {
-                // Check if already triggered (if triggerOnce is true)
-                if (entry.triggerOnce && entryTriggered.ContainsKey(i) && entryTriggered[i])
-                {
-                    continue;
-                }
-                
-                if (!string.IsNullOrEmpty(entry.text))
-                {
-                    return true;
-                }
-            }
-        }
-        
-        return false;
+        return FindNextEntryIndex(currentIndex) >= 0;
     }
     
-    private IEnumerator CheckPlayAfterEntries(int completedIndex)
+    /// <summary>
+    /// Finds the index of the next entry that should play after the given index, or -1 if none found
+    /// </summary>
+    private int FindNextEntryIndex(int completedIndex)
     {
-        if (intermissionEntries == null) yield break;
+        if (intermissionEntries == null) return -1;
         
         for (int i = 0; i < intermissionEntries.Length; i++)
         {
@@ -305,91 +432,74 @@ public class IntermissionTextDisplay : MonoBehaviour
                     continue;
                 }
                 
-                // Queue the entry to play after current display completes
                 if (!string.IsNullOrEmpty(entry.text))
                 {
-                    // Mark as triggered if triggerOnce is enabled
-                    if (entry.triggerOnce)
-                    {
-                        entryTriggered[i] = true;
-                    }
-                    
-                    if (entry.triggerDelay > 0f)
-                    {
-                        yield return new WaitForSecondsRealtime(entry.triggerDelay);
-                    }
-                    
-                    yield return null;
-                    
-                    if (textDisplay != null && textDisplay.color.a > 0.01f)
-                    {
-                        textDisplay.color = new Color(textDisplay.color.r, textDisplay.color.g, textDisplay.color.b, 0f);
-                    }
-                    
-                    bool alreadyDarkened = true;
-                    bool hasMoreEntries = HasMoreEntriesAfter(i);
-                    yield return StartCoroutine(DisplayEntry(i, entry.text, alreadyDarkened, hasMoreEntries));
-                    
-                    entryCompleted[i] = true;
-                    yield return StartCoroutine(CheckPlayAfterEntries(i));
+                    return i;
                 }
             }
         }
+        
+        return -1;
     }
     
-    private IEnumerator DisplayEntry(int index, string message, bool alreadyDarkened = false, bool hasMoreEntries = false)
+    /// <summary>
+    /// Checks if an entry can be triggered (not already triggered if triggerOnce is enabled)
+    /// </summary>
+    private bool CanTriggerEntry(int index, IntermissionEntry entry)
     {
-        if (textDisplay == null) yield break;
+        return !entry.triggerOnce || !entryTriggered.ContainsKey(index) || !entryTriggered[index];
+    }
+    
+    private IEnumerator CheckPlayAfterEntries(int completedIndex)
+    {
+        int nextIndex = FindNextEntryIndex(completedIndex);
         
-        // Freeze game if enabled
-        if (freezeGame)
+        while (nextIndex >= 0)
         {
-            Time.timeScale = 0f;
-        }
-        
-        textDisplay.gameObject.SetActive(true);
-        textDisplay.text = message;
-        textDisplay.color = new Color(textColor.r, textColor.g, textColor.b, 0f);
-        textDisplay.fontSize = fontSize;
-        textDisplay.transform.SetAsLastSibling();
-        
-        if (enableDarkening && !alreadyDarkened && canvas != null)
-        {
-            if (!canvasWasEnabled)
+            var entry = intermissionEntries[nextIndex];
+            
+            // Mark as triggered if triggerOnce is enabled
+            if (entry.triggerOnce)
             {
-                canvasWasEnabled = canvas.gameObject.activeSelf;
-                if (canvasGroup != null)
-                {
-                    originalCanvasAlpha = canvasGroup.alpha;
-                }
+                entryTriggered[nextIndex] = true;
             }
             
-            if (canvasGroup != null)
+            if (entry.triggerDelay > 0f)
             {
-                StartCoroutine(FadeOutCanvas());
+                yield return new WaitForSecondsRealtime(entry.triggerDelay);
             }
-            else
+            
+            yield return null;
+            
+            // Clear text if still visible
+            if (textDisplay != null && textDisplay.color.a > 0.01f)
             {
-                canvas.gameObject.SetActive(false);
+                textDisplay.color = new Color(textDisplay.color.r, textDisplay.color.g, textDisplay.color.b, 0f);
             }
+            
+            bool alreadyDarkened = true;
+            bool hasMoreEntries = HasMoreEntriesAfter(nextIndex);
+            yield return StartCoroutine(DisplayEntry(nextIndex, entry, alreadyDarkened, hasMoreEntries));
+            
+            entryCompleted[nextIndex] = true;
+            
+            // Check for next entry
+            nextIndex = FindNextEntryIndex(nextIndex);
         }
         
-        if (enableDarkening && darkOverlay != null)
-        {
-            darkOverlay.gameObject.SetActive(true);
-            darkOverlay.transform.SetAsFirstSibling();
-        }
+        // Clear displaying flag when all chained entries are complete
+        isDisplaying = false;
+        Debug.Log($"[IntermissionTextDisplay] CheckPlayAfterEntries: All chained entries complete, isDisplaying={isDisplaying}");
+    }
+    
+    private IEnumerator DisplayEntry(int index, IntermissionEntry entry, bool alreadyDarkened = false, bool hasMoreEntries = false)
+    {
+        // Use per-entry settings, fall back to global settings if not set
+        bool useText = entry.enableText;
+        bool useOverlay = entry.enableOverlay;
+        bool useDarkening = entry.enableDarkening && enableDarkening; // Both entry and global must be enabled
         
-        yield return StartCoroutine(FadeInWithOverlay(alreadyDarkened));
-        yield return new WaitForSecondsRealtime(displayDuration);
-        
-        if (freezeGame)
-        {
-            Time.timeScale = 1f;
-        }
-        
-        yield return StartCoroutine(FadeOutWithOverlay(hasMoreEntries));
-        textDisplay.gameObject.SetActive(false);
+        yield return StartCoroutine(DisplayTextInternal(entry.text, alreadyDarkened, hasMoreEntries, useText, useOverlay, useDarkening));
     }
     
     /// <summary>
@@ -427,25 +537,102 @@ public class IntermissionTextDisplay : MonoBehaviour
     
     private IEnumerator DisplayMessage(string message, bool alreadyDarkened = false)
     {
-        if (textDisplay == null) yield break;
+        // Use default settings for manual message display
+        yield return StartCoroutine(DisplayTextInternal(message, alreadyDarkened, false, true, true, enableDarkening));
+    }
+    
+    /// <summary>
+    /// Internal method that handles the actual text display logic - used by both DisplayEntry and DisplayMessage
+    /// </summary>
+    private IEnumerator DisplayTextInternal(string message, bool alreadyDarkened, bool hasMoreEntries, 
+        bool useText, bool useOverlay, bool useDarkening)
+    {
+        // Set displaying flag to prevent spam
+        isDisplaying = true;
         
-        // Freeze game if enabled
-        if (freezeGame)
+        Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: Starting - Message='{message}', UseText={useText}, UseOverlay={useOverlay}, UseDarkening={useDarkening}, AlreadyDarkened={alreadyDarkened}");
+        
+        if (textDisplay == null && useText)
         {
-            Time.timeScale = 0f;
+            Debug.LogError($"[IntermissionTextDisplay] DisplayTextInternal: textDisplay is null but useText=true! Cannot display text.");
+            isDisplaying = false;
+            yield break;
         }
         
-        textDisplay.gameObject.SetActive(true);
-        textDisplay.text = message;
-        textDisplay.color = new Color(textColor.r, textColor.g, textColor.b, 0f);
-        textDisplay.fontSize = fontSize;
-        textDisplay.transform.SetAsLastSibling();
-        
-        if (enableDarkening && !alreadyDarkened && canvas != null)
+        if (textDisplay != null)
         {
-            if (!canvasWasEnabled && canvas.gameObject.activeSelf)
+            Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: textDisplay found - Active={textDisplay.gameObject.activeSelf}, Enabled={textDisplay.enabled}");
+        }
+        
+        FreezeGame();
+        SetupTextDisplay(message, useText);
+        SetupCanvasDarkening(useDarkening, alreadyDarkened);
+        SetupOverlay(useOverlay, useDarkening);
+        
+        yield return StartCoroutine(FadeInWithOverlay(alreadyDarkened, useText, useOverlay, useDarkening));
+        Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: Fade in complete, waiting {displayDuration} seconds");
+        yield return new WaitForSecondsRealtime(displayDuration);
+        
+        UnfreezeGame();
+        yield return StartCoroutine(FadeOutWithOverlay(hasMoreEntries, useText, useOverlay, useDarkening));
+        
+        CleanupTextDisplay(useText);
+        
+        // Clear displaying flag when done (unless there are more entries queued)
+        if (!hasMoreEntries)
+        {
+            isDisplaying = false;
+        }
+        
+        Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: Complete, isDisplaying={isDisplaying}");
+    }
+    
+    /// <summary>
+    /// Sets up the text display component
+    /// </summary>
+    private void SetupTextDisplay(string message, bool useText)
+    {
+        if (useText && textDisplay != null)
+        {
+            Debug.Log($"[IntermissionTextDisplay] SetupTextDisplay: Setting up text - Message='{message}', Color={textColor}, FontSize={fontSize}");
+            textDisplay.gameObject.SetActive(true);
+            textDisplay.text = message;
+            textDisplay.color = new Color(textColor.r, textColor.g, textColor.b, 0f);
+            textDisplay.fontSize = fontSize;
+            textDisplay.transform.SetAsLastSibling();
+            Debug.Log($"[IntermissionTextDisplay] SetupTextDisplay: Text set - Active={textDisplay.gameObject.activeSelf}, CurrentAlpha={textDisplay.color.a}, Text='{textDisplay.text}'");
+        }
+        else if (useText && textDisplay == null)
+        {
+            Debug.LogError($"[IntermissionTextDisplay] SetupTextDisplay: useText=true but textDisplay is null!");
+        }
+        else
+        {
+            Debug.Log($"[IntermissionTextDisplay] SetupTextDisplay: Skipped - useText={useText}");
+        }
+    }
+    
+    /// <summary>
+    /// Cleans up the text display component
+    /// </summary>
+    private void CleanupTextDisplay(bool useText)
+    {
+        if (useText && textDisplay != null)
+        {
+            textDisplay.gameObject.SetActive(false);
+        }
+    }
+    
+    /// <summary>
+    /// Sets up canvas darkening effects
+    /// </summary>
+    private void SetupCanvasDarkening(bool useDarkening, bool alreadyDarkened)
+    {
+        if (useDarkening && !alreadyDarkened && canvas != null)
+        {
+            if (!canvasWasEnabled)
             {
-                canvasWasEnabled = true;
+                canvasWasEnabled = canvas.gameObject.activeSelf;
                 if (canvasGroup != null)
                 {
                     originalCanvasAlpha = canvasGroup.alpha;
@@ -461,23 +648,40 @@ public class IntermissionTextDisplay : MonoBehaviour
                 canvas.gameObject.SetActive(false);
             }
         }
-        
-        if (enableDarkening && darkOverlay != null)
+    }
+    
+    /// <summary>
+    /// Sets up the dark overlay
+    /// </summary>
+    private void SetupOverlay(bool useOverlay, bool useDarkening)
+    {
+        if (useOverlay && useDarkening && darkOverlay != null)
         {
             darkOverlay.gameObject.SetActive(true);
             darkOverlay.transform.SetAsFirstSibling();
         }
-        
-        yield return StartCoroutine(FadeInWithOverlay(alreadyDarkened));
-        yield return new WaitForSecondsRealtime(displayDuration);
-        
+    }
+    
+    /// <summary>
+    /// Freezes the game if enabled
+    /// </summary>
+    private void FreezeGame()
+    {
+        if (freezeGame)
+        {
+            Time.timeScale = 0f;
+        }
+    }
+    
+    /// <summary>
+    /// Unfreezes the game if it was frozen
+    /// </summary>
+    private void UnfreezeGame()
+    {
         if (freezeGame)
         {
             Time.timeScale = 1f;
         }
-        
-        yield return StartCoroutine(FadeOutWithOverlay());
-        textDisplay.gameObject.SetActive(false);
     }
     
     /// <summary>
@@ -522,23 +726,37 @@ public class IntermissionTextDisplay : MonoBehaviour
         entryCompleted.Clear();
     }
     
-    private IEnumerator FadeInWithOverlay(bool alreadyDarkened = false)
+    private IEnumerator FadeInWithOverlay(bool alreadyDarkened = false, bool useText = true, bool useOverlay = true, bool useDarkening = true)
     {
+        Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Starting - UseText={useText}, UseOverlay={useOverlay}, UseDarkening={useDarkening}, AlreadyDarkened={alreadyDarkened}, EnableTextFadeIn={enableTextFadeIn}");
+        
         // Determine which effects need to fade in
-        bool needsTextFade = enableTextFadeIn;
-        bool needsOverlayFade = enableDarkening && darkOverlay != null && !alreadyDarkened;
+        bool needsTextFade = useText && enableTextFadeIn && textDisplay != null;
+        bool needsOverlayFade = useOverlay && useDarkening && darkOverlay != null && !alreadyDarkened;
+        
+        Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: NeedsTextFade={needsTextFade}, NeedsOverlayFade={needsOverlayFade}");
+        
+        // CRITICAL FIX: If text should be shown but fade is disabled, show it immediately
+        if (useText && textDisplay != null && !enableTextFadeIn)
+        {
+            Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Text fade disabled, setting text color immediately to visible");
+            textDisplay.color = textColor;
+        }
         
         // If neither needs fading, skip the coroutine
         if (!needsTextFade && !needsOverlayFade)
         {
+            Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Early exit - no fading needed");
             // Set final values immediately
-            if (textDisplay != null)
+            if (needsTextFade && textDisplay != null)
             {
                 textDisplay.color = textColor;
+                Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Set text color immediately (needsTextFade=true)");
             }
-            if (enableDarkening && darkOverlay != null)
+            if (needsOverlayFade)
             {
-                darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, 1f);
+                SetOverlayColor(1f);
+                Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Set overlay color immediately");
             }
             yield break;
         }
@@ -550,18 +768,22 @@ public class IntermissionTextDisplay : MonoBehaviour
         if (needsTextFade) maxDuration = Mathf.Max(maxDuration, adjustedTextFadeInDuration);
         if (needsOverlayFade) maxDuration = Mathf.Max(maxDuration, adjustedOverlayFadeInDuration);
         
+        Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: MaxDuration={maxDuration}, TextFadeDuration={adjustedTextFadeInDuration}, OverlayFadeDuration={adjustedOverlayFadeInDuration}");
+        
         Color startTextColor = new Color(textColor.r, textColor.g, textColor.b, 0f);
         Color targetTextColor = textColor;
         
-        if (textDisplay != null)
+        if (needsTextFade && textDisplay != null)
         {
-            if (needsTextFade)
+            if (enableTextFadeIn)
             {
                 textDisplay.color = startTextColor;
+                Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Set start text color (alpha=0)");
             }
             else
             {
                 textDisplay.color = targetTextColor;
+                Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Set target text color immediately (fade disabled)");
             }
         }
         
@@ -573,13 +795,13 @@ public class IntermissionTextDisplay : MonoBehaviour
             startOverlayAlpha = darkOverlay.color.a;
         }
         
-        if (needsOverlayFade && darkOverlay != null)
+        if (needsOverlayFade)
         {
-            darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, startOverlayAlpha);
+            SetOverlayColor(startOverlayAlpha);
         }
-        else if (enableDarkening && darkOverlay != null)
+        else if (useOverlay && useDarkening)
         {
-            darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, targetOverlayAlpha);
+            SetOverlayColor(targetOverlayAlpha);
         }
         
         float elapsed = 0f;
@@ -591,38 +813,42 @@ public class IntermissionTextDisplay : MonoBehaviour
             if (needsTextFade && textDisplay != null)
             {
                 float rawTextT = Mathf.Clamp01(elapsed / adjustedTextFadeInDuration);
-                float textT = rawTextT * rawTextT * (3f - 2f * rawTextT);
+                float textT = SmoothStep(rawTextT);
                 textDisplay.color = Color.Lerp(startTextColor, targetTextColor, textT);
             }
             
-            if (needsOverlayFade && darkOverlay != null)
+            if (needsOverlayFade)
             {
                 float rawOverlayT = Mathf.Clamp01(elapsed / adjustedOverlayFadeInDuration);
-                float overlayT = rawOverlayT * rawOverlayT * (3f - 2f * rawOverlayT);
+                float overlayT = SmoothStep(rawOverlayT);
                 float currentAlpha = Mathf.Lerp(startOverlayAlpha, targetOverlayAlpha, overlayT);
-                darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, currentAlpha);
+                SetOverlayColor(currentAlpha);
             }
             
             yield return null;
         }
-        if (textDisplay != null)
+        if (needsTextFade && textDisplay != null)
         {
             textDisplay.color = targetTextColor;
+            Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Text fade complete - FinalAlpha={textDisplay.color.a}");
         }
         
-        if (enableDarkening && darkOverlay != null)
+        if (needsOverlayFade)
         {
-            darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, targetOverlayAlpha);
+            SetOverlayColor(targetOverlayAlpha);
+            Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Overlay fade complete");
         }
+        
+        Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Complete - TextAlpha={(textDisplay != null ? textDisplay.color.a.ToString() : "N/A")}");
     }
     
-    private IEnumerator FadeOutWithOverlay(bool keepOverlayDark = false)
+    private IEnumerator FadeOutWithOverlay(bool keepOverlayDark = false, bool useText = true, bool useOverlay = true, bool useDarkening = true)
     {
         // Calculate adjusted durations based on speed multipliers
         float adjustedTextFadeOutDuration = textFadeOutDuration / textFadeSpeed;
         float adjustedOverlayFadeOutDuration = overlayFadeOutDuration / overlayFadeSpeed;
         
-        if (textDisplay != null)
+        if (useText && textDisplay != null)
         {
             Color startTextColor = textDisplay.color;
             Color targetTextColor = new Color(startTextColor.r, startTextColor.g, startTextColor.b, 0f);
@@ -632,7 +858,7 @@ public class IntermissionTextDisplay : MonoBehaviour
             {
                 textElapsed += Time.unscaledDeltaTime;
                 float rawT = Mathf.Clamp01(textElapsed / adjustedTextFadeOutDuration);
-                float t = rawT * rawT * (3f - 2f * rawT);
+                float t = SmoothStep(rawT);
                 textDisplay.color = Color.Lerp(startTextColor, targetTextColor, t);
                 yield return null;
             }
@@ -645,7 +871,7 @@ public class IntermissionTextDisplay : MonoBehaviour
             }
         }
         
-        if (!keepOverlayDark && enableDarkening && darkOverlay != null)
+        if (!keepOverlayDark && useOverlay && useDarkening && darkOverlay != null)
         {
             float startOverlayAlpha = darkOverlay.color.a;
             float targetOverlayAlpha = 0f;
@@ -659,9 +885,9 @@ public class IntermissionTextDisplay : MonoBehaviour
             {
                 overlayElapsed += Time.unscaledDeltaTime;
                 float rawT = Mathf.Clamp01(overlayElapsed / adjustedOverlayFadeOutDuration);
-                float t = rawT * rawT * (3f - 2f * rawT);
+                float t = SmoothStep(rawT);
                 float currentAlpha = Mathf.Lerp(startOverlayAlpha, targetOverlayAlpha, t);
-                darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, currentAlpha);
+                SetOverlayColor(currentAlpha);
                 
                 if (!canvasStarted && overlayElapsed >= overlayFadeHalfway && canvas != null && (canvasWasEnabled || originalCanvasAlpha > 0f))
                 {
@@ -672,16 +898,16 @@ public class IntermissionTextDisplay : MonoBehaviour
                 yield return null;
             }
             
-            darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, targetOverlayAlpha);
+            SetOverlayColor(targetOverlayAlpha);
             
             if (canvasRestoreCoroutine != null)
             {
                 yield return canvasRestoreCoroutine;
             }
         }
-        else if (keepOverlayDark && enableDarkening && darkOverlay != null)
+        else if (keepOverlayDark && useOverlay && useDarkening)
         {
-            darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, 1f);
+            SetOverlayColor(1f);
         }
     }
     
@@ -746,9 +972,9 @@ public class IntermissionTextDisplay : MonoBehaviour
             textDisplay.gameObject.SetActive(false);
         }
         
-        if (enableDarkening && darkOverlay != null)
+        if (enableDarkening)
         {
-            darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, 0f);
+            SetOverlayColor(0f);
         }
         
         if (enableDarkening && canvas != null && canvasWasEnabled)
