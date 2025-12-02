@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: BloodCore
   m_EditorClassIdentifier: 
   itemName: Blood Core
-  itemSprite: {fileID: 0}
-  itemDescription: 
+  itemSprite: {fileID: 5435608014139152121, guid: 9b270b83e8d1cea448ea5ba1b5145b52, type: 3}
+  itemDescription: A pulsing red crystal filled with potent life-energy. Increases
+    Power py 15%
   statToChange: 2
   amountToChangeStat: 15
   itemRarity: 2
