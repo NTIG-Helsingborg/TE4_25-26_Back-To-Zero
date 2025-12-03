@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: BloodKnife
   m_EditorClassIdentifier: 
   name: Bloodknife
+  abilitySprite: {fileID: -3405186859655012684, guid: 2fb21b4fc00ad0840b6ae35c6c7c212a, type: 3}
   cooldownTime: 0.3
   activeTime: 0
   damage: 10

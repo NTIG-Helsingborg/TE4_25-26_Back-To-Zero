@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: BloodWhip
   m_EditorClassIdentifier: 
   name: BloodWhip
+  abilitySprite: {fileID: 4895402694010236284, guid: ea8b02aa146815d498b064ca711c4a25, type: 3}
   cooldownTime: 0
   activeTime: 0.32
   damage: 10
