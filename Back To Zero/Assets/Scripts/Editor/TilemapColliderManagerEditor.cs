@@ -120,9 +120,10 @@ public class TilemapColliderManagerEditor : Editor
             "• Groups tiles with the same sprite together (even if they're different TileBase assets)\n" +
             "• Perfect for tiles that look the same but have different names\n" +
             "• Deleted tiles/sprites are tracked and won't be re-added\n\n" +
-            "Controlled Auto Detect: Select specific tiles from the Sprites folder to add.\n" +
+            "Controlled Auto Detect: Select specific tiles from Sprites and Village Assets folders to add.\n" +
             "• Choose which tiles to add manually\n" +
             "• Shows previews of tiles\n" +
+            "• Searches both Sprites and Village Assets folders\n" +
             "• Respects exclusion list\n\n" +
             "Generate Colliders: Creates colliders for all tiles matching the configured TileColliderData.\n" +
             "• Automatically prevents duplicates if clicked multiple times\n" +
@@ -138,7 +139,7 @@ public class TilemapColliderManagerEditor : Editor
     }
 }
 
-// Window for controlled auto-detect - selecting tiles/sprites from Sprites folder
+// Window for controlled auto-detect - selecting tiles/sprites from Sprites and Village Assets folders
 public class ControlledAutoDetectWindow : EditorWindow
 {
     private TilemapColliderManager manager;
@@ -161,9 +162,26 @@ public class ControlledAutoDetectWindow : EditorWindow
         tileSelection.Clear();
         
         // Find all TileBase assets in the Sprites folder
-        string[] guids = AssetDatabase.FindAssets("t:TileBase", new[] { "Assets/Sprites" });
+        string[] spritesGuids = AssetDatabase.FindAssets("t:TileBase", new[] { "Assets/Sprites" });
         
-        foreach (string guid in guids)
+        // Find all TileBase assets in Village Assets folder and its subfolders
+        // AssetDatabase.FindAssets searches recursively, so it will find tiles in:
+        // - Assets/Village Assets/A Hard Day's Work/
+        // - Assets/Village Assets/Pixel Lands Village/
+        string[] villageGuids = AssetDatabase.FindAssets("t:TileBase", new[] { "Assets/Village Assets" });
+        
+        // Combine both arrays
+        string[] allGuids = new string[spritesGuids.Length + villageGuids.Length];
+        System.Array.Copy(spritesGuids, 0, allGuids, 0, spritesGuids.Length);
+        System.Array.Copy(villageGuids, 0, allGuids, spritesGuids.Length, villageGuids.Length);
+        
+        // Track tiles by folder for better logging
+        int spritesCount = 0;
+        int villageCount = 0;
+        int hardDaysWorkCount = 0;
+        int pixelLandsCount = 0;
+        
+        foreach (string guid in allGuids)
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
             TileBase tile = AssetDatabase.LoadAssetAtPath<TileBase>(path);
@@ -172,10 +190,32 @@ public class ControlledAutoDetectWindow : EditorWindow
             {
                 availableTiles.Add(tile);
                 tileSelection[tile] = false;
+                
+                // Count by folder for logging
+                if (path.Contains("Assets/Sprites"))
+                {
+                    spritesCount++;
+                }
+                else if (path.Contains("Assets/Village Assets"))
+                {
+                    villageCount++;
+                    if (path.Contains("A Hard Day's Work"))
+                    {
+                        hardDaysWorkCount++;
+                    }
+                    else if (path.Contains("Pixel Lands Village"))
+                    {
+                        pixelLandsCount++;
+                    }
+                }
             }
         }
         
-        Debug.Log($"ControlledAutoDetect: Found {availableTiles.Count} tile(s) in Sprites folder.");
+        Debug.Log($"ControlledAutoDetect: Found {availableTiles.Count} total tile(s):\n" +
+                  $"  - Sprites folder: {spritesCount}\n" +
+                  $"  - Village Assets folder: {villageCount}\n" +
+                  $"    • A Hard Day's Work: {hardDaysWorkCount}\n" +
+                  $"    • Pixel Lands Village: {pixelLandsCount}");
     }
     
     private void OnGUI()
@@ -187,7 +227,7 @@ public class ControlledAutoDetectWindow : EditorWindow
         }
         
         EditorGUILayout.LabelField("Controlled Auto Detect", EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox("Select tiles from the Sprites folder to add as TileColliderData entries.", MessageType.Info);
+        EditorGUILayout.HelpBox("Select tiles from the Sprites and Village Assets folders to add as TileColliderData entries.", MessageType.Info);
         EditorGUILayout.Space();
         
         // Search filter
