@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Dash Ability
   m_EditorClassIdentifier: 
   name: Dash
+  abilitySprite: {fileID: -3483574656620730349, guid: 54aa09fe7b515194a9425d911bf9cb4f, type: 3}
   cooldownTime: 1
   activeTime: 0.2
   dashingPower: 20

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: BloodSlash
   m_EditorClassIdentifier: 
   name: 
+  abilitySprite: {fileID: -2054530540237406577, guid: b425492b72a58f740b98bbb7b4fa797d, type: 3}
   cooldownTime: 1
   activeTime: 0.5
   damage: 10

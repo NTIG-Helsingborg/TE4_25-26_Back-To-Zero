@@ -59,6 +59,17 @@ public class CooldownDisplayManager : MonoBehaviour
         if (keybindText != null)
             keybindText.text = FormatKeybind(holder.key);
         
+        // Set ability sprite if available
+        if (holder.ability != null && holder.ability.abilitySprite != null)
+        {
+            Image abilityImage = item.GetAbilityImage();
+            if (abilityImage != null)
+            {
+                abilityImage.sprite = holder.ability.abilitySprite;
+                abilityImage.enabled = true;
+            }
+        }
+        
         Transform fillTransform = display.transform.Find("AbilityCooldown");
         if (fillTransform != null)
         {

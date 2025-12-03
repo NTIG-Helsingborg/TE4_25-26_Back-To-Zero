@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: BloodBind
   m_EditorClassIdentifier: 
   name: 
+  abilitySprite: {fileID: -4388899747337525858, guid: 729fa48583837b04c9d46833c921e1cf, type: 3}
   cooldownTime: 3
   activeTime: 2.45
   bindRadius: 6
