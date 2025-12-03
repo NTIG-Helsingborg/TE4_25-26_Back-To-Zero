@@ -11,7 +11,6 @@ public class MeleeHitbox : MonoBehaviour
     private LayerMask hitLayers;
 
     private Collider2D col;
-    private Rigidbody2D rb;
     private readonly HashSet<GameObject> alreadyHit = new HashSet<GameObject>();
 
     public void Initialize(float damage, float knockbackForce, float lifetime, GameObject owner, LayerMask layers)
@@ -23,69 +22,21 @@ public class MeleeHitbox : MonoBehaviour
         this.hitLayers = layers;
 
         if (!col) col = GetComponent<Collider2D>();
-        EnsureColliderConfigured(col);
-        col.enabled = true;
+        if (col) col.isTrigger = true;
 
-        // Immediate hit on spawn/enable
+        // Despawn after lifetime (now that ttl is set)
+        Destroy(gameObject, this.ttl);
+
+        // Immediate hit on spawn (now that hitLayers is set)
         InitialOverlapHit();
-
-        // Auto-disable after window
-        CancelInvoke(nameof(EndWindow));
-        Invoke(nameof(EndWindow), this.ttl);
-    }
-
-    // Call this from an Animation Event to open a short hit window
-    public void ActivateWindow(int dmg, float kbForce, GameObject owner, LayerMask layers, float duration)
-    {
-        damage = dmg;
-        knockback = kbForce;
-        this.owner = owner;
-        hitLayers = layers;
-        ttl = Mathf.Max(0.01f, duration);
-        alreadyHit.Clear();
-
-        if (!col) col = GetComponent<Collider2D>();
-        EnsureColliderConfigured(col);
-        col.enabled = true;
-
-        InitialOverlapHit();
-
-        CancelInvoke(nameof(EndWindow));
-        Invoke(nameof(EndWindow), ttl);
-    }
-
-    private void EndWindow()
-    {
-        if (col) col.enabled = false;
     }
 
     private void Awake()
     {
         col = GetComponent<Collider2D>();
-        EnsureColliderConfigured(col);
-
-        // Ensure at least one RB2D exists for trigger callbacks
-        rb = GetComponent<Rigidbody2D>();
-        if (!rb)
-        {
-            rb = gameObject.AddComponent<Rigidbody2D>();
-            rb.bodyType = RigidbodyType2D.Kinematic;
-            rb.gravityScale = 0f;
-            rb.simulated = true;
-        }
+        if (col) col.isTrigger = true;
     }
 
-    private static void EnsureColliderConfigured(Collider2D c)
-    {
-        if (!c) return;
-        c.isTrigger = true;
-
-        var edge = c as EdgeCollider2D;
-        if (edge != null && edge.pointCount < 2)
-        {
-            Debug.LogWarning("[MeleeHitbox] EdgeCollider2D has fewer than 2 points.");
-        }
-    }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -95,17 +46,9 @@ public class MeleeHitbox : MonoBehaviour
     private void InitialOverlapHit()
     {
         if (!col) return;
-
-        var filter = new ContactFilter2D
-        {
-            useLayerMask = true,
-            layerMask = hitLayers,
-            useTriggers = true
-        };
-
+        var filter = new ContactFilter2D { useLayerMask = true, layerMask = hitLayers, useTriggers = true };
         var results = new List<Collider2D>(16);
         col.Overlap(filter, results); // correct API
-
         foreach (var c in results) TryHit(c);
     }
 
@@ -123,12 +66,10 @@ public class MeleeHitbox : MonoBehaviour
         {
             health.TakeDamage(damage);
         }
-
         var kb = other.GetComponent<KnockbackReceiver>();
         if (kb != null)
         {
-            Vector2 origin = owner != null ? (Vector2)owner.transform.position : (Vector2)transform.position;
-            Vector2 dir = ((Vector2)other.transform.position - origin).normalized;
+            Vector2 dir = (other.transform.position - (owner != null ? owner.transform.position : transform.position)).normalized;
             kb.ApplyKnockback(dir, knockback, 0.15f);
         }
     }
