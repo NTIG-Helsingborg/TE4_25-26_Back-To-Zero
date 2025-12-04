@@ -31,8 +31,15 @@ public class BossAttack : MonoBehaviour
     public bool alternateAttacks = false; // Changed to false for random attacks
     public float globalCooldown = 2f; // New: cooldown between any attacks
     
+    [Header("Aggro Range")]
+    public float aggroRange = 15f; // Distance at which boss engages player
+    
     [Header("References")]
     public Transform playerTransform;
+    public Animator animator;
+    
+    [Header("Death Settings")]
+    public float deathAnimationDuration = 2f; // How long to wait before destroying boss
     
     // Beam attack variables
     private GameObject[] activeBeams;
@@ -64,11 +71,50 @@ public class BossAttack : MonoBehaviour
     // New: Global cooldown
     private float globalCooldownTimer = 0f;
     private bool isAttacking = false;
+    private bool isDead = false;
+    
+    // Aggro tracking
+    private bool playerInRange = false;
+    private Health healthComponent;
+
+    // Animator parameter names
+    private const string ANIM_ATTACK_BEAM = "attackBeam";
+    private const string ANIM_ATTACK_SPRAY = "attackSpray";
+    private const string ANIM_ATTACK_SLAM = "attackSlam";
+    private const string ANIM_DEATH = "Death";
+
+    // Method to reset all attack animations and return to idle
+    private void ResetToIdle()
+    {
+        if (animator != null)
+        {
+            animator.SetBool(ANIM_ATTACK_BEAM, false);
+            animator.SetBool(ANIM_ATTACK_SPRAY, false);
+            animator.SetBool(ANIM_ATTACK_SLAM, false);
+        }
+    }
 
     void Start()
     {
         originalScale = transform.localScale;
         bossCollider = GetComponent<Collider2D>();
+        
+        // Get animator if not assigned
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+            if (animator == null)
+            {
+                Debug.LogWarning("BossAttack: No Animator component found on " + gameObject.name);
+            }
+        }
+        
+        // Cache health component
+        healthComponent = GetComponent<Health>();
+        if (healthComponent == null)
+        {
+            Debug.LogWarning("BossAttack: No Health component found on " + gameObject.name);
+        }
         
         if (playerTransform == null)
         {
@@ -82,6 +128,37 @@ public class BossAttack : MonoBehaviour
 
     void Update()
     {
+        // Check for death (only trigger once)
+        if (!isDead)
+        {
+            if (healthComponent != null && healthComponent.GetCurrentHealth() <= 0)
+            {
+                isDead = true;
+                TriggerDeathAnimation();
+                return;
+            }
+        }
+        
+        // Don't do anything if dead
+        if (isDead) return;
+        
+        // Check player distance for aggro range
+        if (playerTransform != null)
+        {
+            float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
+            bool wasInRange = playerInRange;
+            playerInRange = distanceToPlayer <= aggroRange;
+            
+            // Player just left aggro range
+            if (wasInRange && !playerInRange)
+            {
+                OnPlayerLeftAggroRange();
+            }
+            
+            // Update health bar visibility
+            UpdateHealthBarVisibility();
+        }
+        
         // Handle beam attack
         if (isBeamAttacking)
         {
@@ -112,14 +189,77 @@ public class BossAttack : MonoBehaviour
             circularSprayCooldownTimer -= Time.deltaTime;
         }
         
-        // New: Handle global cooldown and try to start attacks
-        if (!isAttacking)
+        // New: Handle global cooldown and try to start attacks (only if player in range)
+        if (!isAttacking && playerInRange)
         {
             globalCooldownTimer -= Time.deltaTime;
             
             if (globalCooldownTimer <= 0f)
             {
                 TryStartAttack();
+            }
+        }
+    }
+    
+    private void OnPlayerLeftAggroRange()
+    {
+        // Reset health to max when player leaves aggro range
+        if (healthComponent != null)
+        {
+            int maxHealth = healthComponent.GetMaxHealth();
+            healthComponent.Heal(maxHealth); // Heal to full
+        }
+    }
+    
+    private void UpdateHealthBarVisibility()
+    {
+        // Hide health bar when player is out of aggro range
+        if (healthComponent != null && healthComponent.healthBar != null)
+        {
+            healthComponent.healthBar.gameObject.SetActive(playerInRange);
+            
+            // Also disable HpBarBoss and HealthBar(1) components in Canvas
+            // Try multiple approaches to find these objects
+            GameObject canvas = GameObject.Find("Canvas");
+            if (canvas != null)
+            {
+                // Find HpBarBoss
+                Transform hpBarBoss = canvas.transform.Find("HpBarBoss");
+                if (hpBarBoss != null)
+                {
+                    hpBarBoss.gameObject.SetActive(playerInRange);
+                }
+                else
+                {
+                    // Try searching in all children
+                    foreach (Transform child in canvas.transform)
+                    {
+                        if (child.name == "HpBarBoss")
+                        {
+                            child.gameObject.SetActive(playerInRange);
+                            break;
+                        }
+                    }
+                }
+                
+                // Find HealthBar(1)
+                Transform healthBar1 = canvas.transform.Find("HealthBar (1)");
+                if (healthBar1 != null)
+                {
+                    healthBar1.gameObject.SetActive(playerInRange);
+                }
+                else
+                {
+                    // Try searching in all children
+                    foreach (Transform child in canvas.transform)
+                    {
+                        if (child.name == "HealthBar (1)")
+                        {
+                            child.gameObject.SetActive(playerInRange);
+                            break;
+                        }
+                    }
+                }
             }
         }
     }
@@ -179,9 +319,17 @@ public class BossAttack : MonoBehaviour
     void StartBeamAttack()
     {
         isBeamAttacking = true;
-        isAttacking = true; // New
+        isAttacking = true;
         beamAttackTimer = beamAttackDuration;
         beamCooldownTimer = beamAttackCooldown;
+        
+        // Reset all other animations first, then set this one
+        if (animator != null)
+        {
+            animator.SetBool(ANIM_ATTACK_SPRAY, false);
+            animator.SetBool(ANIM_ATTACK_SLAM, false);
+            animator.SetBool(ANIM_ATTACK_BEAM, true);
+        }
         
         FireBeams();
     }
@@ -234,6 +382,9 @@ public class BossAttack : MonoBehaviour
         isAttacking = false; // New
         globalCooldownTimer = globalCooldown; // New: Start global cooldown
         
+        // Reset to idle animation
+        ResetToIdle();
+        
         if (activeBeams != null)
         {
             foreach (GameObject beam in activeBeams)
@@ -258,12 +409,20 @@ public class BossAttack : MonoBehaviour
         if (playerTransform == null) return;
         
         isJumpAttacking = true;
-        isAttacking = true; // New
+        isAttacking = true;
         currentJumpState = JumpState.JumpingUp;
         jumpTimer = 0f;
         jumpCooldownTimer = jumpAttackCooldown;
         
         targetPosition = playerTransform.position;
+        
+        // Reset all other animations first, then set this one
+        if (animator != null)
+        {
+            animator.SetBool(ANIM_ATTACK_BEAM, false);
+            animator.SetBool(ANIM_ATTACK_SPRAY, false);
+            animator.SetBool(ANIM_ATTACK_SLAM, true);
+        }
         
         // Disable collider at the start of jump
         if (bossCollider != null) bossCollider.enabled = false;
@@ -359,6 +518,9 @@ public class BossAttack : MonoBehaviour
             currentJumpState = JumpState.Idle;
             damageTriggered = false;
 
+            // Reset to idle animation
+            ResetToIdle();
+
             if (activeAOE != null)
             {
                 Destroy(activeAOE);
@@ -414,6 +576,14 @@ public class BossAttack : MonoBehaviour
         currentProjectileIndex = 0;
         projectileTimer = 0f;
         circularSprayCooldownTimer = circularSprayAttackCooldown;
+        
+        // Reset all other animations first, then set this one
+        if (animator != null)
+        {
+            animator.SetBool(ANIM_ATTACK_BEAM, false);
+            animator.SetBool(ANIM_ATTACK_SLAM, false);
+            animator.SetBool(ANIM_ATTACK_SPRAY, true);
+        }
         
         Debug.Log("Boss starting circular spray attack!");
     }
@@ -473,6 +643,9 @@ public class BossAttack : MonoBehaviour
         isAttacking = false;
         globalCooldownTimer = globalCooldown;
         
+        // Reset to idle animation
+        ResetToIdle();
+        
         Debug.Log("Circular spray attack ended!");
     }
     
@@ -486,5 +659,41 @@ public class BossAttack : MonoBehaviour
         {
             Destroy(activeAOE);
         }
+    }
+
+    private void TriggerDeathAnimation()
+    {
+        if (animator != null)
+        {
+            // Reset all attack animations
+            ResetToIdle();
+            // Trigger death animation
+            animator.SetBool(ANIM_DEATH, true);
+            Debug.Log("Boss death animation triggered!");
+        }
+        
+        // Make boss invincible so Health component doesn't destroy it
+        Health health = GetComponent<Health>();
+        if (health != null)
+        {
+            health.isInvincible = true;
+        }
+        
+        // Disable collider
+        if (bossCollider != null)
+        {
+            bossCollider.enabled = false;
+        }
+        
+        // Stop all attacks
+        EndBeamAttack();
+        if (activeAOE != null)
+        {
+            Destroy(activeAOE);
+            activeAOE = null;
+        }
+        
+        // Destroy after animation finishes
+        Destroy(gameObject, deathAnimationDuration);
     }
 }

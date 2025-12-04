@@ -68,6 +68,12 @@ public class EntityDamage : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+        // Ignore boss and other enemies
+        if (other.gameObject.CompareTag("Boss") || other.gameObject.CompareTag("Enemy"))
+        {
+            return;
+        }
+
         Health targetHealth = other.gameObject.GetComponent<Health>();
 
         if (targetHealth != null && !targetHealth.isInvincible)
@@ -162,6 +168,12 @@ public class EntityDamage : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        // Ignore boss and other enemies
+        if (other.gameObject.CompareTag("Boss") || other.gameObject.CompareTag("Enemy"))
+        {
+            return;
+        }
+
         Health targetHealth = other.gameObject.GetComponent<Health>();
 
         if (targetHealth != null && !targetHealth.isInvincible)
@@ -232,6 +244,12 @@ public class EntityDamage : MonoBehaviour
     private void OnCollisionStay2D(Collision2D other)
     {
         if (!isContinuousDamage) return;
+
+        // Ignore boss and other enemies
+        if (other.gameObject.CompareTag("Boss") || other.gameObject.CompareTag("Enemy"))
+        {
+            return;
+        }
 
         Health targetHealth = other.gameObject.GetComponent<Health>();
 
