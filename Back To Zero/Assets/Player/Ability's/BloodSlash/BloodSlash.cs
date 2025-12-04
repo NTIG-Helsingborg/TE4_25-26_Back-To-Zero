@@ -15,7 +15,11 @@ public class BloodSlash : Ability
     [Header("References")]
     public GameObject slashPrefab;
     [SerializeField] private string firePointChildName = "SpellTransform";
+    [SerializeField] private string pivotChildName = "RotationPoint"; // child used as rotation center
     [SerializeField] private LayerMask hitLayers; // set to Enemy layer(s)
+
+    [Header("Visual")]
+    [SerializeField] private float visualRotationOffsetDeg = 0f; // adjust to match sprite forward
 
     public override void Activate()
     {
@@ -27,28 +31,31 @@ public class BloodSlash : Ability
         }
 
         var firePoint = FindChildByName(player.transform, firePointChildName);
+        var pivot = FindChildByName(player.transform, pivotChildName) ?? player.transform;
         if (!firePoint)
         {
             Debug.LogError($"[BloodSlash] Could not find child '{firePointChildName}' under Player hierarchy.");
             return;
         }
-
         if (!slashPrefab)
         {
             Debug.LogError("[BloodSlash] No slash prefab assigned.");
             return;
         }
 
-        // Spawn unparented so scale isn't inherited from SpellTransform
+        // Spawn and parent to pivot so it follows movement, but keep world pose
         var go = Object.Instantiate(slashPrefab, firePoint.position, firePoint.rotation);
+        // Apply visual offset so sprite faces correctly
+        go.transform.rotation = firePoint.rotation * Quaternion.Euler(0f, 0f, visualRotationOffsetDeg);
 
         var motion = go.GetComponent<SlashingMotion>();
         if (motion)
         {
-            // Use firePoint aim as base angle, set desired reach (radius) and lifetime
             float baseAngle = firePoint.eulerAngles.z;
-            float reach = 1.0f; // tune this to match your sprite/collider size
-            motion.Initialize(player.transform, baseAngle, reach, lifetime);
+            float reach = 1.0f;
+            motion.Initialize(pivot, baseAngle, reach, lifetime);
+            
+            motion.SnapToStart();
         }
 
         var hitbox = go.GetComponent<MeleeHitbox>();
@@ -65,9 +72,7 @@ public class BloodSlash : Ability
 
         var playerHealth = player.GetComponent<Health>();
         if (playerHealth != null && HpCost > 0f)
-        {
             playerHealth.SpendHealth(Mathf.RoundToInt(HpCost));
-        }
     }
 
     private static Transform FindChildByName(Transform root, string name)

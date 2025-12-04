@@ -22,5 +22,9 @@ MonoBehaviour:
   speed: 7
   HpCost: 10
   IsAbility: 1
+  knockbackForce: 2
+  damageLayers:
+    serializedVersion: 2
+    m_Bits: 1
   BloodExplosionPrefab: {fileID: 5673562273337915689, guid: 26907b846aee91749a1acbfcf8c68559, type: 3}
   firePointChildName: SpellTransform

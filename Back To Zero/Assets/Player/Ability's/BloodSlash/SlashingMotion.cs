@@ -3,17 +3,25 @@ using UnityEngine;
 public class SlashingMotion : MonoBehaviour
 {
     [Header("Arc")]
-    public float arcDegrees = 120f;          // total sweep
-    public float startAngleOffset = -60f;    // where to begin relative to aim
-    public float lifetime = 0.15f;
+    [Tooltip("Total sweep of the slash in degrees.")]
+    [SerializeField] private float arcDegrees = 120f;          // total sweep
+    [Tooltip("Starting angle offset relative to the current aim (degrees).")]
+    [SerializeField] private float startAngleOffset = -60f;    // where to begin relative to aim
+    [Tooltip("Time to complete the sweep.")]
+    [SerializeField] private float lifetime = 0.15f;
 
     [Header("Radius")]
-    public float radius = 1f;                // distance from pivot (reach)
+    [Tooltip("Distance from pivot (reach) in world units.")]
+    [SerializeField] private float radius = 1f;                // distance from pivot (reach)
 
     private Transform pivotTransform;        // usually the player
     private Vector3 pivotPos;                // cached if no transform
     private float baseAngleDeg;              // from firePoint
     private float t;
+
+    [Header("Visual")]
+    [Tooltip("Extra rotation to align the sprite's forward with the slash direction. Common values: 0, 90, -90, 180.")]
+    [SerializeField] private float visualRotationOffsetDeg = 0f;
 
     // Call this right after Instantiate
     public void Initialize(Transform pivot, float baseAngleDeg, float radius, float lifetime)
@@ -23,9 +31,20 @@ public class SlashingMotion : MonoBehaviour
         this.baseAngleDeg = baseAngleDeg;
         this.radius = radius;
         this.lifetime = Mathf.Max(0.01f, lifetime);
+        t = 0f;
     }
 
     public void SetLifetime(float v) => lifetime = Mathf.Max(0.01f, v);
+
+    public void SnapToStart()
+    {
+        var pivot = pivotTransform ? pivotTransform.position : pivotPos;
+        float angle = baseAngleDeg + startAngleOffset; // start of arc
+        Vector2 dir = Quaternion.Euler(0, 0, angle) * Vector2.right;
+
+        transform.position = pivot + (Vector3)(dir * radius);
+        transform.rotation = Quaternion.Euler(0f, 0f, angle + visualRotationOffsetDeg);
+    }
 
     void Update()
     {
@@ -33,14 +52,13 @@ public class SlashingMotion : MonoBehaviour
         float p = Mathf.Clamp01(t / lifetime);
         float eased = 1f - (1f - p) * (1f - p);
 
-        // Keep pivot up to date if we track a transform
         var pivot = pivotTransform ? pivotTransform.position : pivotPos;
-
         float angle = baseAngleDeg + startAngleOffset + arcDegrees * eased;
-        Vector2 dir = Quaternion.Euler(0, 0, angle) * Vector2.right;
 
-        // Move the slash along the arc and face its travel direction
-        transform.position = pivot + (Vector3)(dir * radius);
-        transform.rotation = Quaternion.Euler(0f, 0f, angle);
+        Vector2 dir = Quaternion.Euler(0, 0, angle) * Vector2.right;
+        Vector3 pos = pivot + (Vector3)(dir * radius);
+
+        transform.position = pos;
+        transform.rotation = Quaternion.Euler(0f, 0f, angle + visualRotationOffsetDeg);
     }
 }

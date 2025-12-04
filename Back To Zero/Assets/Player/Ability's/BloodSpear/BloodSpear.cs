@@ -10,11 +10,14 @@ public class BloodSpear : Ability
     public float HpCost;
     public bool IsAbility = true;
     
-
     [Header("References")]
     public GameObject spearPrefab;
     [SerializeField] private string firePointChildName = "SpellTransform";
     [SerializeField] private LayerMask hitLayers; // set to Enemy layer(s)
+
+    // Add a small visual rotation tweak (clockwise is negative)
+    [SerializeField, Tooltip("Clockwise is negative. E.g. -10 rotates a bit clockwise.")]
+    private float spawnAngleOffsetDeg = -10f;
 
     public override void Activate()
     {
@@ -38,8 +41,9 @@ public class BloodSpear : Ability
             return;
         }
 
-        // Spawn unparented so scale isn't inherited from SpellTransform
-        var go = Object.Instantiate(spearPrefab, firePoint.position, firePoint.rotation, player.transform);
+        // Apply a small Z rotation offset for better visuals
+        Quaternion spawnRot = firePoint.rotation * Quaternion.Euler(0f, 0f, spawnAngleOffsetDeg);
+        var go = Object.Instantiate(spearPrefab, firePoint.position, spawnRot, player.transform);
 
         var hitbox = go.GetComponent<MeleeHitbox>();
         if (hitbox != null)

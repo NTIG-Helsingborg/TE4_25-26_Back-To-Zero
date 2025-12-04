@@ -23,5 +23,5 @@ MonoBehaviour:
   damageLayers:
     serializedVersion: 2
     m_Bits: 1
-  explosionVfxPrefab: {fileID: 7737874149003893034, guid: 44f9ec1d5f02e6c42aab9b32edc9a4e5, type: 3}
+  explosionVfxPrefab: {fileID: 5589411983520114153, guid: 93339b546154898438b2b5a0751857fd, type: 3}
   harvestHealPercentage: 0.5

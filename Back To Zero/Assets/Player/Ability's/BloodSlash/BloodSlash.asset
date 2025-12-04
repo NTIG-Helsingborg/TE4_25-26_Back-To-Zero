@@ -23,6 +23,8 @@ MonoBehaviour:
   IsAbility: 1
   slashPrefab: {fileID: 9040097098050866608, guid: a090cbda3bc275341a39faf62c279367, type: 3}
   firePointChildName: SpellTransform
+  pivotChildName: RotationPoint
   hitLayers:
     serializedVersion: 2
     m_Bits: 1
+  visualRotationOffsetDeg: -90

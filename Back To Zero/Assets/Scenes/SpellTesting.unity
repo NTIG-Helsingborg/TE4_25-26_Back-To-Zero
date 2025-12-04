@@ -1027,6 +1027,10 @@ PrefabInstance:
       propertyPath: 'activeEquipmentSlots.Array.data[2]'
       value: 
       objectReference: {fileID: 1907997740}
+    - target: {fileID: 5307987928695524702, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
+      propertyPath: m_Name
+      value: RotationPoint
+      objectReference: {fileID: 0}
     - target: {fileID: 5631687449377463173, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
       propertyPath: m_Name
       value: Player
