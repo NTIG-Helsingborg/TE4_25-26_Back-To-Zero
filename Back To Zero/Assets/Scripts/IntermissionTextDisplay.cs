@@ -59,7 +59,6 @@ public class IntermissionTextDisplay : MonoBehaviour
     [SerializeField] private IntermissionEntry[] intermissionEntries = new IntermissionEntry[0];
     
     [Header("Background Darkening")]
-    [SerializeField] private bool enableDarkening = true;
     [SerializeField] private Image darkOverlay; // Full-screen UI Image overlay for darkening
         [SerializeField] private Color overlayColor = Color.black;
         [SerializeField] private float overlayFadeInDuration = 1f;
@@ -190,7 +189,7 @@ public class IntermissionTextDisplay : MonoBehaviour
     {
         bool shouldStartDarkened = HasStartDarkenedEntry();
         
-        if (shouldStartDarkened && enableDarkening)
+        if (shouldStartDarkened)
         {
             SetOverlayColor(1f);
             
@@ -390,6 +389,13 @@ public class IntermissionTextDisplay : MonoBehaviour
             }
         }
         
+        // Notify tutorial manager that intermission entry is starting
+        SimpleTutorialManager tutorialManager = FindObjectOfType<SimpleTutorialManager>();
+        if (tutorialManager != null)
+        {
+            tutorialManager.OnIntermissionEntryStart(index);
+        }
+        
         if (!string.IsNullOrEmpty(entry.text))
         {
             bool alreadyDarkened = entry.triggerType == TriggerType.OnStart && entry.startDarkened;
@@ -400,6 +406,12 @@ public class IntermissionTextDisplay : MonoBehaviour
         else
         {
             Debug.LogWarning($"[IntermissionTextDisplay] TriggerEntryWithDelay: Entry[{index}] has empty text, skipping display");
+        }
+        
+        // Notify tutorial manager that intermission entry is ending
+        if (tutorialManager != null)
+        {
+            tutorialManager.OnIntermissionEntryEnd(index);
         }
         
         entryCompleted[index] = true;
@@ -494,10 +506,10 @@ public class IntermissionTextDisplay : MonoBehaviour
     
     private IEnumerator DisplayEntry(int index, IntermissionEntry entry, bool alreadyDarkened = false, bool hasMoreEntries = false)
     {
-        // Use per-entry settings, fall back to global settings if not set
+        // Use per-entry settings
         bool useText = entry.enableText;
         bool useOverlay = entry.enableOverlay;
-        bool useDarkening = entry.enableDarkening && enableDarkening; // Both entry and global must be enabled
+        bool useDarkening = entry.enableDarkening; // Only the per-entry setting matters now
         
         yield return StartCoroutine(DisplayTextInternal(entry.text, alreadyDarkened, hasMoreEntries, useText, useOverlay, useDarkening));
     }
@@ -537,8 +549,8 @@ public class IntermissionTextDisplay : MonoBehaviour
     
     private IEnumerator DisplayMessage(string message, bool alreadyDarkened = false)
     {
-        // Use default settings for manual message display
-        yield return StartCoroutine(DisplayTextInternal(message, alreadyDarkened, false, true, true, enableDarkening));
+        // Use default settings for manual message display (darkening enabled by default)
+        yield return StartCoroutine(DisplayTextInternal(message, alreadyDarkened, false, true, true, true));
     }
     
     /// <summary>
@@ -567,7 +579,7 @@ public class IntermissionTextDisplay : MonoBehaviour
         FreezeGame();
         SetupTextDisplay(message, useText);
         SetupCanvasDarkening(useDarkening, alreadyDarkened);
-        SetupOverlay(useOverlay, useDarkening);
+        SetupOverlay(useOverlay, useDarkening, alreadyDarkened);
         
         yield return StartCoroutine(FadeInWithOverlay(alreadyDarkened, useText, useOverlay, useDarkening));
         Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: Fade in complete, waiting {displayDuration} seconds");
@@ -648,18 +660,61 @@ public class IntermissionTextDisplay : MonoBehaviour
                 canvas.gameObject.SetActive(false);
             }
         }
+        else if (!useDarkening && alreadyDarkened && canvas != null)
+        {
+            // If we're already darkened but this entry doesn't want darkening,
+            // restore the canvas
+            Debug.Log($"[IntermissionTextDisplay] SetupCanvasDarkening: Entry doesn't want darkening but canvas is hidden, restoring");
+            StartCoroutine(FadeInCanvas());
+        }
     }
     
     /// <summary>
     /// Sets up the dark overlay
     /// </summary>
-    private void SetupOverlay(bool useOverlay, bool useDarkening)
+    private void SetupOverlay(bool useOverlay, bool useDarkening, bool alreadyDarkened)
     {
-        if (useOverlay && useDarkening && darkOverlay != null)
+        if (darkOverlay == null) return;
+        
+        if (useOverlay && useDarkening)
         {
             darkOverlay.gameObject.SetActive(true);
             darkOverlay.transform.SetAsFirstSibling();
+            Debug.Log($"[IntermissionTextDisplay] SetupOverlay: Overlay enabled for this entry");
         }
+        else if (alreadyDarkened && (!useOverlay || !useDarkening))
+        {
+            // If we're already darkened but this entry doesn't want overlay/darkening,
+            // fade out the existing overlay immediately
+            Debug.Log($"[IntermissionTextDisplay] SetupOverlay: Entry doesn't want darkening but overlay is active, fading out");
+            StartCoroutine(FadeOutExistingOverlay());
+        }
+    }
+    
+    /// <summary>
+    /// Fades out an existing overlay when transitioning to an entry that doesn't want it
+    /// </summary>
+    private IEnumerator FadeOutExistingOverlay()
+    {
+        if (darkOverlay == null) yield break;
+        
+        float startAlpha = darkOverlay.color.a;
+        float targetAlpha = 0f;
+        float adjustedDuration = overlayFadeOutDuration / overlayFadeSpeed;
+        float elapsed = 0f;
+        
+        while (elapsed < adjustedDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float rawT = Mathf.Clamp01(elapsed / adjustedDuration);
+            float t = SmoothStep(rawT);
+            float currentAlpha = Mathf.Lerp(startAlpha, targetAlpha, t);
+            SetOverlayColor(currentAlpha);
+            yield return null;
+        }
+        
+        SetOverlayColor(targetAlpha);
+        Debug.Log($"[IntermissionTextDisplay] FadeOutExistingOverlay: Complete");
     }
     
     /// <summary>
@@ -972,12 +1027,9 @@ public class IntermissionTextDisplay : MonoBehaviour
             textDisplay.gameObject.SetActive(false);
         }
         
-        if (enableDarkening)
-        {
-            SetOverlayColor(0f);
-        }
+        SetOverlayColor(0f);
         
-        if (enableDarkening && canvas != null && canvasWasEnabled)
+        if (canvas != null && canvasWasEnabled)
         {
             canvas.gameObject.SetActive(true);
         }
