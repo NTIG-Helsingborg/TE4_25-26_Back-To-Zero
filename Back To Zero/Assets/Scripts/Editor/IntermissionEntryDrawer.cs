@@ -29,8 +29,22 @@ public class IntermissionEntryDrawer : PropertyDrawer
         SerializedProperty specificColliderProp = property.FindPropertyRelative("specificColliderObject");
         SerializedProperty delayProp = property.FindPropertyRelative("triggerDelay");
         SerializedProperty triggerOnceProp = property.FindPropertyRelative("triggerOnce");
+        SerializedProperty forceStartProp = property.FindPropertyRelative("forceStart");
+        SerializedProperty startDarkenedProp = property.FindPropertyRelative("startDarkened");
         SerializedProperty playAfterProp = property.FindPropertyRelative("playAfterEntry");
         SerializedProperty playAfterIndexProp = property.FindPropertyRelative("playAfterEntryIndex");
+        
+        // Timing properties
+        SerializedProperty customDurationProp = property.FindPropertyRelative("customDisplayDuration");
+        SerializedProperty waitForInputProp = property.FindPropertyRelative("waitForInput");
+        SerializedProperty dismissKeyProp = property.FindPropertyRelative("dismissKey");
+        
+        // Display properties
+        SerializedProperty enableTextProp = property.FindPropertyRelative("enableText");
+        SerializedProperty enableOverlayProp = property.FindPropertyRelative("enableOverlay");
+        SerializedProperty enableDarkeningProp = property.FindPropertyRelative("enableDarkening");
+        SerializedProperty overlayOpacityProp = property.FindPropertyRelative("overlayOpacity");
+        SerializedProperty snappyCanvasProp = property.FindPropertyRelative("snappyCanvas");
         
         // Start drawing
         Rect rect = position;
@@ -48,106 +62,107 @@ public class IntermissionEntryDrawer : PropertyDrawer
         
         EditorGUI.indentLevel++;
         
-        // Header: Text
+        // ===== TEXT =====
         EditorGUI.LabelField(rect, "Text", EditorStyles.boldLabel);
         rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         
-        // Text field (TextArea)
         rect.height = EditorGUIUtility.singleLineHeight * 3;
         textProp.stringValue = EditorGUI.TextArea(rect, textProp.stringValue);
         rect.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
         rect.height = EditorGUIUtility.singleLineHeight;
         
-        // Header: Trigger Settings
+        // ===== TRIGGER SETTINGS =====
         EditorGUI.LabelField(rect, "Trigger Settings", EditorStyles.boldLabel);
         rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         
-        // Trigger Type
-        EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), "Trigger Type");
-        Rect triggerTypeRect = new Rect(rect.x + EditorGUIUtility.labelWidth, rect.y, rect.width - EditorGUIUtility.labelWidth, rect.height);
-        triggerTypeProp.enumValueIndex = EditorGUI.Popup(triggerTypeRect, triggerTypeProp.enumValueIndex, triggerTypeProp.enumDisplayNames);
+        EditorGUI.PropertyField(rect, triggerTypeProp);
         rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         
-        // Only show trigger settings if not "None" or "AfterEntry"
         IntermissionTextDisplay.TriggerType triggerType = (IntermissionTextDisplay.TriggerType)triggerTypeProp.enumValueIndex;
         
         if (triggerType != IntermissionTextDisplay.TriggerType.None && triggerType != IntermissionTextDisplay.TriggerType.AfterEntry)
         {
-            // Trigger Layer
-            EditorGUI.PropertyField(rect, layerProp, new GUIContent("Trigger Layer"));
+            EditorGUI.PropertyField(rect, layerProp);
             rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         }
         
-        // Show specific collider GameObject field for OnCollisionEnter/Exit and OnTriggerEnter/Exit
         if (triggerType == IntermissionTextDisplay.TriggerType.OnCollisionEnter || 
             triggerType == IntermissionTextDisplay.TriggerType.OnCollisionExit ||
             triggerType == IntermissionTextDisplay.TriggerType.OnTriggerEnter ||
             triggerType == IntermissionTextDisplay.TriggerType.OnTriggerExit)
         {
-            EditorGUI.PropertyField(rect, specificColliderProp, new GUIContent("Collider Object"));
+            EditorGUI.PropertyField(rect, specificColliderProp);
             rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         }
         
-        // Trigger Delay
-        EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), "Trigger Delay");
-        Rect delayRect = new Rect(rect.x + EditorGUIUtility.labelWidth, rect.y, rect.width - EditorGUIUtility.labelWidth, rect.height);
-        delayProp.floatValue = EditorGUI.FloatField(delayRect, delayProp.floatValue);
+        EditorGUI.PropertyField(rect, delayProp);
         rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         
-        // Trigger Once
-        EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), "Trigger Once");
-        Rect triggerOnceRect = new Rect(rect.x + EditorGUIUtility.labelWidth, rect.y, rect.width - EditorGUIUtility.labelWidth, rect.height);
-        triggerOnceProp.boolValue = EditorGUI.Toggle(triggerOnceRect, triggerOnceProp.boolValue);
+        EditorGUI.PropertyField(rect, triggerOnceProp);
         rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         
-        // Start Darkened (only show if trigger type is OnStart)
+        EditorGUI.PropertyField(rect, forceStartProp);
+        rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+        
         if (triggerType == IntermissionTextDisplay.TriggerType.OnStart)
         {
-            SerializedProperty startDarkenedProp = property.FindPropertyRelative("startDarkened");
-            EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), "Start Darkened");
-            Rect startDarkenedRect = new Rect(rect.x + EditorGUIUtility.labelWidth, rect.y, rect.width - EditorGUIUtility.labelWidth, rect.height);
-            startDarkenedProp.boolValue = EditorGUI.Toggle(startDarkenedRect, startDarkenedProp.boolValue);
+            EditorGUI.PropertyField(rect, startDarkenedProp);
             rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         }
         
-        // Header: Display Options
+        // ===== TIMING SETTINGS =====
+        EditorGUI.LabelField(rect, "Timing Settings", EditorStyles.boldLabel);
+        rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+        
+        EditorGUI.PropertyField(rect, customDurationProp, new GUIContent("Display Duration (-1 = Global)"));
+        rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+        
+        EditorGUI.PropertyField(rect, waitForInputProp, new GUIContent("Wait For Input"));
+        rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+        
+        if (waitForInputProp.boolValue)
+        {
+            EditorGUI.indentLevel++;
+            EditorGUI.PropertyField(rect, dismissKeyProp, new GUIContent("Dismiss Key"));
+            rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+            EditorGUI.indentLevel--;
+        }
+        
+        // ===== DISPLAY OPTIONS =====
         EditorGUI.LabelField(rect, "Display Options", EditorStyles.boldLabel);
         rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         
-        // Enable Text
-        SerializedProperty enableTextProp = property.FindPropertyRelative("enableText");
-        EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), "Enable Text");
-        Rect enableTextRect = new Rect(rect.x + EditorGUIUtility.labelWidth, rect.y, rect.width - EditorGUIUtility.labelWidth, rect.height);
-        enableTextProp.boolValue = EditorGUI.Toggle(enableTextRect, enableTextProp.boolValue);
+        EditorGUI.PropertyField(rect, enableTextProp);
         rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         
-        // Enable Overlay
-        SerializedProperty enableOverlayProp = property.FindPropertyRelative("enableOverlay");
-        EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), "Enable Overlay");
-        Rect enableOverlayRect = new Rect(rect.x + EditorGUIUtility.labelWidth, rect.y, rect.width - EditorGUIUtility.labelWidth, rect.height);
-        enableOverlayProp.boolValue = EditorGUI.Toggle(enableOverlayRect, enableOverlayProp.boolValue);
+        EditorGUI.PropertyField(rect, enableOverlayProp);
         rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         
-        // Enable Darkening
-        SerializedProperty enableDarkeningProp = property.FindPropertyRelative("enableDarkening");
-        EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), "Enable Darkening");
-        Rect enableDarkeningRect = new Rect(rect.x + EditorGUIUtility.labelWidth, rect.y, rect.width - EditorGUIUtility.labelWidth, rect.height);
-        enableDarkeningProp.boolValue = EditorGUI.Toggle(enableDarkeningRect, enableDarkeningProp.boolValue);
+        EditorGUI.PropertyField(rect, enableDarkeningProp);
         rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         
-        // Header: Play After Entry
+        if (enableDarkeningProp.boolValue)
+        {
+            EditorGUI.indentLevel++;
+            overlayOpacityProp.floatValue = EditorGUI.Slider(rect, "Overlay Opacity", overlayOpacityProp.floatValue, 0f, 1f);
+            rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+            EditorGUI.indentLevel--;
+        }
+        
+        EditorGUI.PropertyField(rect, snappyCanvasProp, new GUIContent("Snappy Canvas"));
+        rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+        
+        // ===== PLAY AFTER ENTRY =====
         EditorGUI.LabelField(rect, "Play After Entry", EditorStyles.boldLabel);
         rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         
-        // Play After Entry checkbox
-        playAfterProp.boolValue = EditorGUI.Toggle(rect, new GUIContent("Play After Entry"), playAfterProp.boolValue);
+        EditorGUI.PropertyField(rect, playAfterProp);
         rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         
         if (playAfterProp.boolValue)
         {
             EditorGUI.indentLevel++;
             
-            // Create dropdown options
             string[] options = new string[arraySize];
             for (int i = 0; i < arraySize; i++)
             {
@@ -172,11 +187,9 @@ public class IntermissionEntryDrawer : PropertyDrawer
                 }
             }
             
-            // Clamp the index to valid range
             int currentValue = playAfterIndexProp.intValue;
             if (currentValue < 0 || currentValue >= arraySize || currentValue == currentIndex)
             {
-                // Find first valid index
                 currentValue = 0;
                 for (int i = 0; i < arraySize; i++)
                 {
@@ -192,21 +205,12 @@ public class IntermissionEntryDrawer : PropertyDrawer
                 }
             }
             
-            // Show dropdown
-            int selectedIndex = EditorGUI.Popup(rect, "  Entry", currentValue, options);
-            if (selectedIndex != currentValue)
+            int selectedIndex = EditorGUI.Popup(rect, "Entry", currentValue, options);
+            if (selectedIndex != currentValue && selectedIndex >= 0 && selectedIndex < arraySize && selectedIndex != currentIndex)
             {
-                if (selectedIndex == currentIndex)
-                {
-                    // Prevent selecting self
-                    rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-                    EditorGUI.HelpBox(rect, "Cannot play after itself!", MessageType.Warning);
-                }
-                else if (selectedIndex >= 0 && selectedIndex < arraySize)
-                {
-                    playAfterIndexProp.intValue = selectedIndex;
-                }
+                playAfterIndexProp.intValue = selectedIndex;
             }
+            rect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             
             EditorGUI.indentLevel--;
         }
@@ -226,25 +230,30 @@ public class IntermissionEntryDrawer : PropertyDrawer
         IntermissionTextDisplay.TriggerType triggerType = (IntermissionTextDisplay.TriggerType)triggerTypeProp.enumValueIndex;
         
         SerializedProperty playAfterProp = property.FindPropertyRelative("playAfterEntry");
-        SerializedProperty playAfterIndexProp = property.FindPropertyRelative("playAfterEntryIndex");
+        SerializedProperty enableDarkeningProp = property.FindPropertyRelative("enableDarkening");
+        SerializedProperty waitForInputProp = property.FindPropertyRelative("waitForInput");
         
         float height = EditorGUIUtility.singleLineHeight; // Foldout
-        height += EditorGUIUtility.singleLineHeight; // "Text" header
-        height += EditorGUIUtility.singleLineHeight * 3; // TextArea (3 lines)
-        height += EditorGUIUtility.singleLineHeight; // "Trigger Settings" header
+        
+        // Text section
+        height += EditorGUIUtility.singleLineHeight; // Header
+        height += EditorGUIUtility.singleLineHeight * 3; // TextArea
+        height += EditorGUIUtility.standardVerticalSpacing * 2;
+        
+        // Trigger Settings section
+        height += EditorGUIUtility.singleLineHeight; // Header
         height += EditorGUIUtility.singleLineHeight; // Trigger Type
         height += EditorGUIUtility.singleLineHeight; // Trigger Delay
         height += EditorGUIUtility.singleLineHeight; // Trigger Once
-        height += EditorGUIUtility.standardVerticalSpacing * 7;
+        height += EditorGUIUtility.singleLineHeight; // Force Start
+        height += EditorGUIUtility.standardVerticalSpacing * 5;
         
-        // Add height for Start Darkened if trigger type is OnStart
-        if (triggerType == IntermissionTextDisplay.TriggerType.OnStart)
+        if (triggerType != IntermissionTextDisplay.TriggerType.None && triggerType != IntermissionTextDisplay.TriggerType.AfterEntry)
         {
-            height += EditorGUIUtility.singleLineHeight; // Start Darkened
+            height += EditorGUIUtility.singleLineHeight; // Layer
             height += EditorGUIUtility.standardVerticalSpacing;
         }
         
-        // Add height for specific collider if trigger type is OnCollisionEnter/Exit or OnTriggerEnter/Exit
         if (triggerType == IntermissionTextDisplay.TriggerType.OnCollisionEnter || 
             triggerType == IntermissionTextDisplay.TriggerType.OnCollisionExit ||
             triggerType == IntermissionTextDisplay.TriggerType.OnTriggerEnter ||
@@ -254,49 +263,49 @@ public class IntermissionEntryDrawer : PropertyDrawer
             height += EditorGUIUtility.standardVerticalSpacing;
         }
         
-        // Add height for Display Options section
-        height += EditorGUIUtility.singleLineHeight; // "Display Options" header
-        height += EditorGUIUtility.singleLineHeight; // Enable Text
-        height += EditorGUIUtility.singleLineHeight; // Enable Overlay
-        height += EditorGUIUtility.singleLineHeight; // Enable Darkening
-        height += EditorGUIUtility.standardVerticalSpacing * 4;
-        
-        height += EditorGUIUtility.singleLineHeight; // "Play After Entry" header
-        height += EditorGUIUtility.singleLineHeight; // Play After Entry checkbox
-        height += EditorGUIUtility.standardVerticalSpacing * 2;
-        
-        // Add height for trigger settings if needed
-        if (triggerType != IntermissionTextDisplay.TriggerType.None && triggerType != IntermissionTextDisplay.TriggerType.AfterEntry)
+        if (triggerType == IntermissionTextDisplay.TriggerType.OnStart)
         {
-            height += EditorGUIUtility.singleLineHeight; // layer
+            height += EditorGUIUtility.singleLineHeight; // Start Darkened
             height += EditorGUIUtility.standardVerticalSpacing;
         }
         
-        // Add height for play after dropdown if enabled
+        // Timing Settings section
+        height += EditorGUIUtility.singleLineHeight; // Header
+        height += EditorGUIUtility.singleLineHeight; // Custom Duration
+        height += EditorGUIUtility.singleLineHeight; // Wait For Input
+        height += EditorGUIUtility.standardVerticalSpacing * 3;
+        
+        if (waitForInputProp.boolValue)
+        {
+            height += EditorGUIUtility.singleLineHeight; // Dismiss Key
+            height += EditorGUIUtility.standardVerticalSpacing;
+        }
+        
+        // Display Options section
+        height += EditorGUIUtility.singleLineHeight; // Header
+        height += EditorGUIUtility.singleLineHeight; // Enable Text
+        height += EditorGUIUtility.singleLineHeight; // Enable Overlay
+        height += EditorGUIUtility.singleLineHeight; // Enable Darkening
+        height += EditorGUIUtility.singleLineHeight; // Snappy Canvas
+        height += EditorGUIUtility.standardVerticalSpacing * 5;
+        
+        if (enableDarkeningProp.boolValue)
+        {
+            height += EditorGUIUtility.singleLineHeight; // Overlay Opacity
+            height += EditorGUIUtility.standardVerticalSpacing;
+        }
+        
+        // Play After Entry section
+        height += EditorGUIUtility.singleLineHeight; // Header
+        height += EditorGUIUtility.singleLineHeight; // Play After checkbox
+        height += EditorGUIUtility.standardVerticalSpacing * 2;
+        
         if (playAfterProp.boolValue)
         {
-            height += EditorGUIUtility.singleLineHeight; // dropdown
+            height += EditorGUIUtility.singleLineHeight; // Entry dropdown
             height += EditorGUIUtility.standardVerticalSpacing;
-            
-            // Add height for warning if selecting self
-            SerializedProperty arrayProperty = property.serializedObject.FindProperty("intermissionEntries");
-            int currentIndex = -1;
-            if (arrayProperty != null)
-            {
-                string propertyPath = property.propertyPath;
-                string indexString = propertyPath.Substring(propertyPath.IndexOf('[') + 1);
-                indexString = indexString.Substring(0, indexString.IndexOf(']'));
-                int.TryParse(indexString, out currentIndex);
-            }
-            
-            if (playAfterIndexProp.intValue == currentIndex)
-            {
-                height += EditorGUIUtility.singleLineHeight; // warning box
-                height += EditorGUIUtility.standardVerticalSpacing;
-            }
         }
         
         return height;
     }
 }
-
