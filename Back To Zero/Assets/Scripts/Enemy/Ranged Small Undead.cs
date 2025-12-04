@@ -54,6 +54,8 @@ public class RangedSmallUndead : MonoBehaviour
     private bool isBound;
     private float boundUntilTime;
 
+    private static readonly List<Collider2D> AllEnemyColliders = new();
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -78,6 +80,70 @@ public class RangedSmallUndead : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        // Register this enemy's colliders and ignore collision with other enemies
+        RegisterEnemyColliders();
+        UpdateIgnoredEnemyCollisions();
+    }
+
+    private void OnDisable()
+    {
+        // Optional: remove registration and re-enable collisions (safe if enemies despawn)
+        UnregisterEnemyColliders();
+    }
+
+    private void RegisterEnemyColliders()
+    {
+        if (!CompareTag("Enemy")) return;
+        if (colliders == null || colliders.Length == 0) colliders = GetComponentsInChildren<Collider2D>();
+
+        foreach (var col in colliders)
+        {
+            if (col == null || col.isTrigger) continue;
+            if (!AllEnemyColliders.Contains(col))
+            {
+                AllEnemyColliders.Add(col);
+            }
+        }
+    }
+
+    private void UnregisterEnemyColliders()
+    {
+        if (colliders == null) return;
+        foreach (var col in colliders)
+        {
+            if (col == null) continue;
+            AllEnemyColliders.Remove(col);
+        }
+        // Note: Physics2D doesn't have an "unignore all" API; if you need to re-enable collisions,
+        // you must call Physics2D.IgnoreCollision(colA, colB, false) for each pair you previously ignored.
+        // Typically not needed if enemies are destroyed.
+    }
+
+    private void UpdateIgnoredEnemyCollisions()
+    {
+        // Ignore collisions between this enemy's colliders and every other enemy collider
+        if (!CompareTag("Enemy") || colliders == null) return;
+
+        foreach (var myCol in colliders)
+        {
+            if (myCol == null || myCol.isTrigger) continue;
+
+            foreach (var otherCol in AllEnemyColliders)
+            {
+                if (otherCol == null || otherCol == myCol) continue;
+
+                // Ensure other collider belongs to an object tagged Enemy
+                var otherRoot = otherCol.attachedRigidbody ? otherCol.attachedRigidbody.gameObject : otherCol.gameObject;
+                if (!otherRoot.CompareTag("Enemy")) continue;
+
+                Physics2D.IgnoreCollision(myCol, otherCol, true);
+            }
+        }
+    }
+
+    // If enemies can spawn/despawn at runtime, call UpdateIgnoredEnemyCollisions() from Start() too:
     private void Start()
     {
         startingPosition = transform.position;
@@ -105,6 +171,8 @@ public class RangedSmallUndead : MonoBehaviour
         {
             Debug.LogWarning($"[{nameof(RangedSmallUndead)}] DashAbility not assigned. Using fallback dash settings.");
         }
+
+        UpdateIgnoredEnemyCollisions();
     }
 
     private void Update()

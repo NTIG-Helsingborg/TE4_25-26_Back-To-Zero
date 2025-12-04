@@ -66,8 +66,21 @@ public class EntityDamage : MonoBehaviour
     public bool isContinuousDamage = false;
     public float continuousDamageInterval = 0.5f;
 
+    private bool CanDamage(GameObject target)
+    {
+        // Prevent enemy-on-enemy damage
+        if (gameObject.CompareTag("Enemy") && target.CompareTag("Enemy"))
+        {
+            // Debug.Log($"[{gameObject.name}] Skipping damage: Enemy cannot damage Enemy ({target.name})");
+            return false;
+        }
+        return true;
+    }
+
     private void OnCollisionEnter2D(Collision2D other)
     {
+        if (!CanDamage(other.gameObject)) return;
+
         Health targetHealth = other.gameObject.GetComponent<Health>();
 
         if (targetHealth != null && !targetHealth.isInvincible)
@@ -162,6 +175,8 @@ public class EntityDamage : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (!CanDamage(other.gameObject)) return;
+
         Health targetHealth = other.gameObject.GetComponent<Health>();
 
         if (targetHealth != null && !targetHealth.isInvincible)
@@ -232,6 +247,7 @@ public class EntityDamage : MonoBehaviour
     private void OnCollisionStay2D(Collision2D other)
     {
         if (!isContinuousDamage) return;
+        if (!CanDamage(other.gameObject)) return;
 
         Health targetHealth = other.gameObject.GetComponent<Health>();
 
@@ -271,6 +287,7 @@ public class EntityDamage : MonoBehaviour
     private void OnTriggerStay2D(Collider2D other)
     {
         if (!isContinuousDamage) return;
+        if (!CanDamage(other.gameObject)) return;
 
         Health targetHealth = other.gameObject.GetComponent<Health>();
 
