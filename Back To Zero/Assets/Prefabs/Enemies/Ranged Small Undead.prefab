@@ -192,7 +192,6 @@ GameObject:
   - component: {fileID: 3176860124648325873}
   - component: {fileID: 7388793556195610433}
   - component: {fileID: 6403468814579708209}
-  - component: {fileID: 5181785966975560894}
   - component: {fileID: 496068825363218631}
   - component: {fileID: 8310446765950172450}
   - component: {fileID: 7675895200104629711}
@@ -435,23 +434,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 1
   target: {fileID: 6576621383432750835, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
---- !u!114 &5181785966975560894
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7070631386663217413}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82d110f14e2efd44c96e2f8b775e9d03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 6576621383432750835, guid: 13f50c2284174469c95fc6dc903c26af, type: 3}
-  aggroRange: 10
-  obstacleMask:
-    serializedVersion: 2
-    m_Bits: 64
 --- !u!114 &496068825363218631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -468,6 +450,9 @@ MonoBehaviour:
   currentHealth: 0
   isInvincible: 0
   healthBar: {fileID: 3740044683486148573}
+  shieldBar: {fileID: 0}
+  currentShield: 0
+  shieldTimer: 0
   grantsExperienceOnDeath: 1
   experienceReward: 50
   enableHarvestFeedback: 1
@@ -652,7 +637,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   assignOnStart: 1
-  assignToSpawnedEnemies: 1
 --- !u!114 &-5291049819331750387
 MonoBehaviour:
   m_ObjectHideFlags: 0
