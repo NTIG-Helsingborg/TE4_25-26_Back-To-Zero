@@ -21,16 +21,25 @@ public class Health : MonoBehaviour
     [Header("Harvest Feedback")]
     [SerializeField] private bool enableHarvestFeedback = true;
 
+    [Header("Visuals")]
+    [SerializeField] private SpriteRenderer flashSpriteRenderer; // assign child SpriteRenderer in Inspector
+    private Coroutine flashCoroutine;
+
+    [Header("Animation")]
+    [SerializeField] private Animator animator;                 // assign if Animator is on a child
+    private string deathBoolParam = "Dead";    // Animator bool that triggers death anim
+    private string deathStateTag = "Death";    // Tag your death state with this
+    [SerializeField] private float destroyAfterDeathDelay = 0.1f;
+
     private RectTransform healthBarRect;
     private Vector3 healthBarOriginalLocalPosition;
     private Coroutine harvestShakeCoroutine;
     private bool isHarvestable;
-    private Animator animator;
 
     private void OnEnable()
     {
         CacheHealthBarRect();
-        animator = GetComponent<Animator>();
+        if (!animator) animator = GetComponentInChildren<Animator>(); // find child animator too
         HarvestAbility.HarvestSettingsChanged += OnHarvestSettingsChanged;
         healthBarOriginalLocalPosition = healthBarRect != null ? healthBarRect.localPosition : Vector3.zero;
         EvaluateHarvestability();
@@ -339,61 +348,78 @@ public class Health : MonoBehaviour
 
     private void Die()
     {
-        // Set animation parameter if animator exists
-        if (animator != null)
+        // Trigger death animation if animator exists
+        if (animator != null && HasAnimatorParam(animator, deathBoolParam))
         {
-            animator.SetBool("IsBreaking", true);
+            animator.SetBool(deathBoolParam, true);
         }
 
         LootBag lootBag = GetComponent<LootBag>();
-        if (lootBag != null)
-        {
-            lootBag.InstantiateLoot(transform.position);
-        }
-        else
-        {
-            Debug.Log(gameObject.name + " died but has no LootBag component.");
-        }
+        if (lootBag != null) lootBag.InstantiateLoot(transform.position);
 
         StopHarvestShake();
         Debug.Log(gameObject.name + " died");
 
         if (gameObject.CompareTag("Player"))
-        {
             return;
-        }
 
-        // Don't destroy pots immediately - let animation play first
-        // Check by name or layer instead of tag to avoid tag not defined error
+        // Special pot handling (kept as-is)
         if (gameObject.name.ToLower().Contains("pot"))
         {
-            // Disable health bar if it exists
-            if (healthBar != null)
-            {
-                healthBar.gameObject.SetActive(false);
-            }
-            
-            // Disable collider to prevent further damage
+            if (healthBar != null) healthBar.gameObject.SetActive(false);
             Collider2D col = GetComponent<Collider2D>();
-            if (col != null)
-            {
-                col.enabled = false;
-            }
-            
-            // Start coroutine to handle animation and destruction
+            if (col != null) col.enabled = false;
             StartCoroutine(HandlePotDestruction());
             return;
         }
 
-        // Notify WaveManager that an enemy died
+        // Notify wave manager immediately (optional)
         if (WaveManager.Instance != null)
-        {
             WaveManager.Instance.OnEnemyKilled();
-        }
 
         GrantExperience();
 
+        // Disable collider and movement so the corpse doesn't interfere
+        var col2d = GetComponent<Collider2D>();
+        if (col2d) col2d.enabled = false;
+        var rb2d = GetComponent<Rigidbody2D>();
+        if (rb2d) { rb2d.linearVelocity = Vector2.zero; rb2d.isKinematic = true; }
+
+        // Wait for death animation to finish, then destroy
+        StartCoroutine(WaitAndDestroyAfterDeath());
+    }
+
+    private IEnumerator WaitAndDestroyAfterDeath()
+    {
+        if (animator != null)
+        {
+            // allow transition to start
+            yield return null;
+
+            float timeout = 5f; // safety
+            while (timeout > 0f)
+            {
+                var s = animator.GetCurrentAnimatorStateInfo(0);
+                // Wait until the state tagged "Death" finishes
+                if (s.IsTag(deathStateTag) && s.normalizedTime >= 0.99f && !animator.IsInTransition(0))
+                    break;
+
+                timeout -= Time.deltaTime;
+                yield return null;
+            }
+
+            if (destroyAfterDeathDelay > 0f)
+                yield return new WaitForSeconds(destroyAfterDeathDelay);
+        }
+
         Destroy(gameObject);
+    }
+
+    private static bool HasAnimatorParam(Animator anim, string name)
+    {
+        foreach (var p in anim.parameters)
+            if (p.name == name) return true;
+        return false;
     }
 
     private void GrantExperience()
@@ -423,5 +449,28 @@ public class Health : MonoBehaviour
         }
 
         ExperienceManager.Instance.AddExperience(experienceReward);
+    }
+
+    public void Flash(Color flashColor, float duration)
+    {
+        if (flashSpriteRenderer == null || duration <= 0f) return;
+        if (flashCoroutine != null) { StopCoroutine(flashCoroutine); flashCoroutine = null; }
+        flashCoroutine = StartCoroutine(FlashRoutine(flashSpriteRenderer, flashColor, duration));
+    }
+
+    private IEnumerator FlashRoutine(SpriteRenderer sr, Color flashColor, float duration)
+    {
+        if (sr == null) yield break;
+        Color originalColor = sr.color;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            sr.color = Color.Lerp(originalColor, flashColor, Mathf.PingPong(elapsed / duration * 16f, 1f));
+            yield return null;
+        }
+
+        sr.color = originalColor;
     }
 }

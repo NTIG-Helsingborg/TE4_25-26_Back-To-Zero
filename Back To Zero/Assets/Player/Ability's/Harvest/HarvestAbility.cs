@@ -34,10 +34,14 @@ public class HarvestAbility : Ability
     
     [Header("Visual Effects")]
     public Color harvestColor = new Color(1f, 0.2f, 0.2f, 0.5f);
+
+    [Header("Visuals")]
+    [SerializeField] private SpriteRenderer spriteRendererOverride;
     
     private GameObject playerObject;
     private Health playerHealth;
-    
+    private MonoBehaviour coroutineHost; // host to run coroutines
+
     private void OnEnable()
     {
         SyncGlobalSettings();
@@ -68,12 +72,16 @@ public class HarvestAbility : Ability
             Debug.LogError("Player Health not found!");
             return;
         }
-        
-        MonoBehaviour monoBehaviour = playerObject.GetComponent<MonoBehaviour>();
-        if (monoBehaviour != null)
+
+        // Pick a host MonoBehaviour to run coroutines (any MB on player works)
+        coroutineHost = playerObject.GetComponent<MonoBehaviour>();
+        if (coroutineHost == null)
         {
-            monoBehaviour.StartCoroutine(PerformHarvest());
+            Debug.LogError("No MonoBehaviour found on Player to run coroutines.");
+            return;
         }
+
+        coroutineHost.StartCoroutine(PerformHarvest());
     }
     
     private IEnumerator PerformHarvest()
@@ -89,7 +97,6 @@ public class HarvestAbility : Ability
         List<GameObject> harvestedEntities = new List<GameObject>();
         int totalHealAmount = 0;
 
-        // Calculate heal amount based on player's max health, not enemy's
         int playerMaxHealth = playerHealth.GetMaxHealth();
         int healAmountPerEnemy = Mathf.RoundToInt(playerMaxHealth * healPercentage);
 
@@ -115,9 +122,6 @@ public class HarvestAbility : Ability
 
                 totalHealAmount += healAmountPerEnemy;
                 harvestedEntities.Add(collider.gameObject);
-
-
-                
             }
         }
         
@@ -126,7 +130,6 @@ public class HarvestAbility : Ability
             Debug.Log($"Harvesting {harvestedEntities.Count} entities for {totalHealAmount} HP");
 
             FreezeEntities(harvestedEntities, true);
-            
             StartHarvestVisuals(harvestedEntities);
             yield return new WaitForSeconds(harvestDuration);
             
@@ -145,7 +148,6 @@ public class HarvestAbility : Ability
                 
             if (playerHandler != null)
             {
-                //adds charge to ultimate
                 for (int i = 0; i < harvestedEntities.Count; i++)
                     playerHandler.AddHarvestCharge();
             }
@@ -168,17 +170,21 @@ public class HarvestAbility : Ability
     
     private void StartHarvestVisuals(List<GameObject> entities)
     {
-        MonoBehaviour monoBehaviour = playerObject.GetComponent<MonoBehaviour>();
-        if (monoBehaviour == null) return;
-        
         foreach (GameObject entity in entities)
         {
-            if (entity != null)
+            if (entity == null) continue;
+
+            var h = entity.GetComponent<Health>();
+            if (h != null)
             {
-                SpriteRenderer spriteRenderer = entity.GetComponent<SpriteRenderer>();
-                if (spriteRenderer != null)
-                    monoBehaviour.StartCoroutine(FlashSprite(spriteRenderer, harvestColor, harvestDuration));
+                h.Flash(harvestColor, harvestDuration); // uses renderer set in Health
+                continue;
             }
+
+            // Fallback: flash the first SpriteRenderer found using the coroutine host
+            var sr = entity.GetComponentInChildren<SpriteRenderer>();
+            if (sr != null && coroutineHost != null)
+                coroutineHost.StartCoroutine(FlashSprite(sr, harvestColor, harvestDuration));
         }
     }
     
@@ -224,4 +230,6 @@ public class HarvestAbility : Ability
         }
     }
 }
+
+
 

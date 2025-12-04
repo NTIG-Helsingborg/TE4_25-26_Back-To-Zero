@@ -468,9 +468,15 @@ MonoBehaviour:
   currentHealth: 0
   isInvincible: 0
   healthBar: {fileID: 3740044683486148573}
+  shieldBar: {fileID: 0}
+  currentShield: 0
+  shieldTimer: 0
   grantsExperienceOnDeath: 1
   experienceReward: 50
   enableHarvestFeedback: 1
+  flashSpriteRenderer: {fileID: 8606660193777328662}
+  animator: {fileID: 0}
+  destroyAfterDeathDelay: 0.1
 --- !u!114 &8310446765950172450
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -652,7 +658,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   assignOnStart: 1
-  assignToSpawnedEnemies: 1
 --- !u!114 &-5291049819331750387
 MonoBehaviour:
   m_ObjectHideFlags: 0
