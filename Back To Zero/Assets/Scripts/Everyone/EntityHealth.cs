@@ -30,6 +30,8 @@ public class Health : MonoBehaviour
     private string deathBoolParam = "Dead";    // Animator bool that triggers death anim
     private string deathStateTag = "Death";    // Tag your death state with this
     [SerializeField] private float destroyAfterDeathDelay = 0.1f;
+    private string hurtBoolParam = "Hurt"; // Animator bool for hurt
+    [SerializeField] private float hurtResetDelay = 0.2f;
 
     private RectTransform healthBarRect;
     private Vector3 healthBarOriginalLocalPosition;
@@ -84,6 +86,9 @@ public class Health : MonoBehaviour
         // ignore isInvincible on purpose
         currentHealth -= amount;
 
+        // Hurt feedback
+        PlayHurt();
+
         RefreshHealthBarFill();
         EvaluateHarvestability();
 
@@ -104,6 +109,10 @@ public class Health : MonoBehaviour
             }
             
             currentHealth -= damage;
+
+            // Hurt feedback
+            PlayHurt();
+
             RefreshHealthBarFill();
             EvaluateHarvestability();
         }
@@ -117,7 +126,7 @@ public class Health : MonoBehaviour
     {
         currentHealth += amount;
         if (currentHealth > maxHealth)
-        {
+        {   
             currentHealth = maxHealth;
         }
         RefreshHealthBarFill();
@@ -472,5 +481,24 @@ public class Health : MonoBehaviour
         }
 
         sr.color = originalColor;
+    }
+
+    private void PlayHurt()
+    {
+        if (animator == null) return;
+        if (HasAnimatorParam(animator, hurtBoolParam))
+        {
+            animator.SetBool(hurtBoolParam, true);
+            StopCoroutine(nameof(ResetHurtBool));
+            StartCoroutine(ResetHurtBool());
+        }
+        // Optional: quick flash on hit
+        // Flash(Color.red, 0.1f);
+    }
+
+    private IEnumerator ResetHurtBool()
+    {
+        yield return new WaitForSeconds(hurtResetDelay);
+        animator.SetBool(hurtBoolParam, false);
     }
 }
