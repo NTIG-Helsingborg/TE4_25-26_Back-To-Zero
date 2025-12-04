@@ -86,6 +86,15 @@ public class Projectiles : MonoBehaviour
     {
         if (destroyed) return;
 
+        // Ignore boss and other enemies if this is a boss projectile
+        if (owner != null && (owner.CompareTag("Boss") || owner.CompareTag("Enemy")))
+        {
+            if (hit.CompareTag("Boss") || hit.CompareTag("Enemy"))
+            {
+                return;
+            }
+        }
+
         if (explodeOnImpact && explosionRadius > 0f)
         {
             DoExplosion();
@@ -127,6 +136,15 @@ public class Projectiles : MonoBehaviour
         foreach (var h in hits)
         {
             if (!includeOwnerInExplosion && IsOwner(h)) continue;
+
+            // Ignore boss and other enemies if this is a boss projectile
+            if (owner != null && (owner.CompareTag("Boss") || owner.CompareTag("Enemy")))
+            {
+                if (h.CompareTag("Boss") || h.CompareTag("Enemy"))
+                {
+                    continue;
+                }
+            }
 
             var health = h.GetComponent<Health>();
             if (health != null && !health.isInvincible)

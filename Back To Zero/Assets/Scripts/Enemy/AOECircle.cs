@@ -3,9 +3,16 @@ using UnityEngine;
 public class AOECircle : MonoBehaviour
 {
     [Header("Visual Settings")]
+    public bool useCustomSprite = false;
+    public Sprite customAOESprite;
+    public bool useCustomDamageSprite = false;
+    public Sprite customDamageSprite;
     public int resolution = 256; public bool useGradient = true; public float gradientWidth = 0.1f; public int sortingOrder = -10;
     [Header("Color Settings")]
-    public Color warningColor = new Color(1f, 0f, 0f, 0.3f); public Color damageColor = new Color(0.8f, 0f, 0f, 0.6f);
+    public bool useCustomDamageColor = false;
+    public Color customDamageColor = Color.white;
+    public Color warningColor = new Color(1f, 0f, 0f, 0.3f); 
+    public Color damageColor = new Color(0.8f, 0f, 0f, 0.6f);
 
     private SpriteRenderer spriteRenderer;
     private CircleCollider2D circleCollider;
@@ -30,8 +37,18 @@ public class AOECircle : MonoBehaviour
         if (spriteRenderer == null)
         {
             spriteRenderer = gameObject.AddComponent<SpriteRenderer>();
+        }
+        
+        // Use custom sprite or create procedural circle
+        if (useCustomSprite && customAOESprite != null)
+        {
+            spriteRenderer.sprite = customAOESprite;
+        }
+        else if (spriteRenderer.sprite == null)
+        {
             CreateCircleSprite(spriteRenderer);
         }
+        
         spriteRenderer.sortingOrder = sortingOrder;
 
         // Damage
@@ -50,7 +67,17 @@ public class AOECircle : MonoBehaviour
 
     public void SetDamageMode()
     {
-        if (spriteRenderer != null) spriteRenderer.color = damageColor;
+        if (spriteRenderer != null)
+        {
+            // Change sprite if custom damage sprite is provided
+            if (useCustomDamageSprite && customDamageSprite != null)
+            {
+                spriteRenderer.sprite = customDamageSprite;
+            }
+            
+            // Change color
+            spriteRenderer.color = useCustomDamageColor ? customDamageColor : damageColor;
+        }
         if (entityDamage != null) entityDamage.enabled = true;
         if (circleCollider != null) circleCollider.enabled = true;
     }

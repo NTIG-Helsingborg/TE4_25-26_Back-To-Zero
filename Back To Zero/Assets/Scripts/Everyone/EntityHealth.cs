@@ -363,6 +363,13 @@ public class Health : MonoBehaviour
             return;
         }
 
+        // Don't destroy boss immediately - let BossAttack script handle it
+        if (gameObject.CompareTag("Boss"))
+        {
+            Debug.Log("Boss died - letting BossAttack script handle destruction");
+            return;
+        }
+
         // Don't destroy pots immediately - let animation play first
         // Check by name or layer instead of tag to avoid tag not defined error
         if (gameObject.name.ToLower().Contains("pot"))

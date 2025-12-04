@@ -7,6 +7,12 @@ public class BossBeam : MonoBehaviour
     public float beamLength = 20f;
     public float beamWidth = 0.5f;
     
+    [Header("Collider Settings")]
+    [Tooltip("If true, collider will use different size than visual sprite")]
+    public bool useCustomColliderSize = false;
+    public float colliderLength = 20f;
+    public float colliderWidth = 0.5f;
+    
     [Header("Damage Settings")]
     public int damage = 10;
     public float damageInterval = 0.5f; // Tick damage every 0.5 seconds
@@ -31,10 +37,18 @@ public class BossBeam : MonoBehaviour
     public Color normalHealthColor = Color.red;
     
     [Header("Visual")]
+    public bool useCustomSprite = false; // Toggle between sprite and solid color
+    public Sprite customBeamSprite; // Assign a sprite in Inspector
     public Color beamColor = Color.red;
+    [Tooltip("Enable color pulse effect (disable if using Animator)")]
+    public bool usePulseEffect = true;
     public float pulseSpeed = 2f;
     public string sortingLayerName = "Default"; // Add sorting layer control
     public int sortingOrder = -5; // Lower number = render behind
+    
+    [Header("Animation")]
+    [Tooltip("Optional: Assign an Animator for custom beam animations")]
+    public Animator beamAnimator;
     
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D beamCollider;
@@ -64,11 +78,57 @@ public class BossBeam : MonoBehaviour
             spriteRenderer = gameObject.AddComponent<SpriteRenderer>();
         }
         
-        // Create a simple beam sprite
-        CreateBeamSprite();
-        spriteRenderer.color = beamColor;
+        // Use custom sprite or create a simple beam sprite
+        if (beamAnimator != null && beamAnimator.runtimeAnimatorController != null)
+        {
+            // If using animator, let the animation control the sprite
+            // But set a fallback sprite if provided
+            if (useCustomSprite && customBeamSprite != null)
+            {
+                spriteRenderer.sprite = customBeamSprite; // Fallback sprite
+                Debug.Log($"Beam: Set fallback sprite '{customBeamSprite.name}' for animator");
+            }
+            else
+            {
+                Debug.LogWarning("Beam: Animator is assigned but no custom sprite provided as fallback!");
+            }
+            spriteRenderer.color = beamColor;
+            // Scale to desired size
+            transform.localScale = new Vector3(beamLength, beamWidth, 1);
+        }
+        else if (useCustomSprite && customBeamSprite != null)
+        {
+            // Use static custom sprite if there's no animator
+            spriteRenderer.sprite = customBeamSprite;
+            Debug.Log($"Beam: Set static sprite '{customBeamSprite.name}'");
+            spriteRenderer.color = beamColor;
+            // Scale to desired size
+            transform.localScale = new Vector3(beamLength, beamWidth, 1);
+        }
+        else
+        {
+            CreateBeamSprite();
+            Debug.Log("Beam: Created procedural sprite");
+            spriteRenderer.color = beamColor;
+            // Scale to desired size
+            transform.localScale = new Vector3(beamLength, beamWidth, 1);
+        }
+        
         spriteRenderer.sortingLayerName = sortingLayerName; // Set sorting layer
         spriteRenderer.sortingOrder = sortingOrder; // Set sorting order
+        
+        // Setup Animator if not assigned
+        if (beamAnimator == null)
+        {
+            beamAnimator = GetComponent<Animator>();
+        }
+        
+        // Enable animator if present
+        if (beamAnimator != null)
+        {
+            beamAnimator.enabled = true;
+            Debug.Log($"Beam animator enabled. Controller: {beamAnimator.runtimeAnimatorController?.name}");
+        }
         
         // Setup Collider
         beamCollider = GetComponent<BoxCollider2D>();
@@ -77,8 +137,18 @@ public class BossBeam : MonoBehaviour
             beamCollider = gameObject.AddComponent<BoxCollider2D>();
         }
         beamCollider.isTrigger = true; // Changed to true so player passes through
-        beamCollider.size = new Vector2(beamLength, beamWidth);
-        beamCollider.offset = new Vector2(beamLength / 2f, 0);
+        
+        // Use custom collider size or match visual size
+        if (useCustomColliderSize)
+        {
+            beamCollider.size = new Vector2(colliderLength, colliderWidth);
+            beamCollider.offset = new Vector2(colliderLength / 2f, 0);
+        }
+        else
+        {
+            beamCollider.size = new Vector2(beamLength, beamWidth);
+            beamCollider.offset = new Vector2(beamLength / 2f, 0);
+        }
     }
 
     void CreateBeamSprite()
@@ -96,16 +166,16 @@ public class BossBeam : MonoBehaviour
         
         Sprite sprite = Sprite.Create(texture, new Rect(0, 0, 2, 2), new Vector2(0, 0.5f), 1f);
         spriteRenderer.sprite = sprite;
-        
-        // Scale to desired size
-        transform.localScale = new Vector3(beamLength, beamWidth, 1);
     }
 
     void Update()
     {
-        // Optional: pulse effect
-        float pulse = Mathf.PingPong(Time.time * pulseSpeed, 0.3f) + 0.7f;
-        spriteRenderer.color = beamColor * pulse;
+        // Only use pulse effect if enabled and no animator is controlling the beam
+        if (usePulseEffect && (beamAnimator == null || !beamAnimator.enabled))
+        {
+            float pulse = Mathf.PingPong(Time.time * pulseSpeed, 0.3f) + 0.7f;
+            spriteRenderer.color = beamColor * pulse;
+        }
     }
 
     void OnTriggerStay2D(Collider2D other)

@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 20, y: 20, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -45,6 +45,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fefbac897636a64cbfe597e64ed0d1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useCustomSprite: 0
+  customAOESprite: {fileID: 0}
+  useCustomDamageSprite: 1
+  customDamageSprite: {fileID: 4614275265102887311, guid: 24d6435d7db954f428c9e129f385f1da, type: 3}
+  resolution: 258
+  useGradient: 1
+  gradientWidth: 0.1
+  sortingOrder: 0
+  useCustomDamageColor: 0
+  customDamageColor: {r: 1, g: 1, b: 1, a: 1}
+  warningColor: {r: 0, g: 0, b: 0, a: 0.5372549}
+  damageColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &-6212125378687279713
 MonoBehaviour:
   m_ObjectHideFlags: 0
