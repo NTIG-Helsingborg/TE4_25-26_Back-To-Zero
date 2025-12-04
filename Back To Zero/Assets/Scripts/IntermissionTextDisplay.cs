@@ -1219,23 +1219,15 @@ public class IntermissionTextDisplay : MonoBehaviour
     {
         Debug.Log("[IntermissionTextDisplay] ForceHideInstant: Instant cleanup requested");
         
-        // Hide text immediately
+        // Hide text immediately - but ONLY the text GameObject itself, not parents
         if (textDisplay != null)
         {
             textDisplay.color = new Color(textColor.r, textColor.g, textColor.b, 0f);
             textDisplay.gameObject.SetActive(false);
-            
-            // Also hide ALL parents up the hierarchy
-            Transform parent = textDisplay.transform.parent;
-            while (parent != null && parent.GetComponent<Canvas>() == null)
-            {
-                parent.gameObject.SetActive(false);
-                Debug.Log($"[IntermissionTextDisplay] Hiding text parent: {parent.name}");
-                parent = parent.parent;
-            }
+            Debug.Log($"[IntermissionTextDisplay] Hidden textDisplay: {textDisplay.name}");
         }
         
-        // Hide overlay immediately - be VERY aggressive
+        // Hide overlay immediately - but ONLY the overlay GameObject itself, not parents
         if (darkOverlay != null)
         {
             // Set alpha to 0
@@ -1249,16 +1241,7 @@ public class IntermissionTextDisplay : MonoBehaviour
             // Hide the GameObject
             darkOverlay.gameObject.SetActive(false);
             
-            // Hide ALL parents up to the canvas
-            Transform parent = darkOverlay.transform.parent;
-            while (parent != null && parent.GetComponent<Canvas>() == null)
-            {
-                parent.gameObject.SetActive(false);
-                Debug.Log($"[IntermissionTextDisplay] Hiding overlay parent: {parent.name}");
-                parent = parent.parent;
-            }
-            
-            Debug.Log("[IntermissionTextDisplay] Overlay hidden completely");
+            Debug.Log($"[IntermissionTextDisplay] Hidden darkOverlay: {darkOverlay.name}");
         }
         
         // Restore canvas immediately

@@ -49,6 +49,8 @@ public class SimpleTutorialManager : MonoBehaviour
     private Coroutine currentStepCoroutine;
     private Dictionary<GameObject, bool> originalUIStates = new Dictionary<GameObject, bool>(); // Track original active states
     private Dictionary<GameObject, Transform> originalParents = new Dictionary<GameObject, Transform>(); // Track original parents
+    private Dictionary<GameObject, CanvasGroup> tutorialUICanvasGroups = new Dictionary<GameObject, CanvasGroup>(); // Track CanvasGroups added to tutorial UI
+    private Dictionary<GameObject, float> originalUIAlphas = new Dictionary<GameObject, float>(); // Track original CanvasGroup alphas
     
     // Dedicated tutorial canvas - separate from game canvas, never touched by intermission
     private Canvas tutorialCanvas;
@@ -151,7 +153,7 @@ public class SimpleTutorialManager : MonoBehaviour
                 
                 currentStep = step;
                 // Apply step with delay so intermission overlay appears first
-                currentStepCoroutine = StartCoroutine(ApplyStepWithDelay(step, 0.1f));
+                currentStepCoroutine = StartCoroutine(ApplyStepWithDelay(step, 0.5f));
                 break;
             }
         }
@@ -176,7 +178,7 @@ public class SimpleTutorialManager : MonoBehaviour
                 currentStepCoroutine = null;
                 currentStep = null;
                 
-                // Still force-hide intermission
+                // Still force-hide intermission (early exit case only)
                 if (intermissionDisplay != null)
                 {
                     intermissionDisplay.ForceHideInstant();
@@ -184,29 +186,33 @@ public class SimpleTutorialManager : MonoBehaviour
                 return;
             }
             
-            // CRITICAL 3-STEP ORDER:
-            // 1. Hide tutorial UI instantly (on TutorialCanvas)
-            // 2. Restore canvas alpha to full (so UI will be visible)
-            // 3. Move UI back and show it (now visible because canvas alpha is restored)
-            
-            // Step 1: Hide UI on TutorialCanvas
-            HideUIOnTutorialCanvas();
-            
-            // Step 2: Restore canvas FIRST so UI will be visible when moved
-            if (intermissionDisplay != null)
-            {
-                Debug.Log($"[SimpleTutorialManager] Restoring canvas BEFORE showing UI");
-                intermissionDisplay.ForceHideInstant();
-            }
-            
-            // Step 3: Move UI back and restore visibility
-            MoveUIBackAndRestore(currentStep);
+            // Start async cleanup to coordinate with IntermissionTextDisplay fade-out
+            StartCoroutine(CleanupStepAsync(currentStep));
             currentStep = null;
         }
         else
         {
-            Debug.Log($"[SimpleTutorialManager] No matching step to revert (currentStep={(currentStep != null ? currentStep.intermissionEntryIndex.ToString() : "null")})");
+            Debug.Log($"[SimpleTutorialManager] No matching step to revert (currentStep={(currentStep != null ? currentStep.intermissionEntryIndex.ToString() : "null")})" );
         }
+    }
+    
+    /// <summary>
+    /// Async cleanup that coordinates with IntermissionTextDisplay fade-out
+    /// </summary>
+    private System.Collections.IEnumerator CleanupStepAsync(TutorialStep step)
+    {
+        Debug.Log($"[SimpleTutorialManager] CleanupStepAsync: Starting async cleanup");
+        
+        // Step 1: Fade out UI on TutorialCanvas (synchronized with overlay fade-out)
+        yield return StartCoroutine(FadeOutTutorialUI(0.5f));
+        
+        // Step 2: Move UI back to original parents and restore visibility
+        MoveUIBackAndRestore(step);
+        
+        // Step 3: Cleanup CanvasGroups
+        CleanupCanvasGroups();
+        
+        Debug.Log($"[SimpleTutorialManager] CleanupStepAsync: Complete");
     }
     
     /// <summary>
@@ -262,7 +268,8 @@ public class SimpleTutorialManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Apply step with a small delay to ensure intermission overlay appears first
+    /// Apply step with a delay to ensure intermission overlay appears first
+    /// Increased from 0.1s to 0.5s to give overlay time to fade in
     /// </summary>
     private System.Collections.IEnumerator ApplyStepWithDelay(TutorialStep step, float delay)
     {
@@ -295,7 +302,7 @@ public class SimpleTutorialManager : MonoBehaviour
             }
         }
         
-        // Show UI elements - move to tutorial canvas
+        // Show UI elements - move to tutorial canvas and fade in
         if (step.uiToShow != null)
         {
             foreach (var ui in step.uiToShow)
@@ -312,12 +319,39 @@ public class SimpleTutorialManager : MonoBehaviour
                     // Move to tutorial canvas
                     ui.transform.SetParent(tutorialCanvas.transform, true);
                     
+                    // Add or get CanvasGroup for fading
+                    CanvasGroup canvasGroup = ui.GetComponent<CanvasGroup>();
+                    bool addedCanvasGroup = false;
+                    if (canvasGroup == null)
+                    {
+                        canvasGroup = ui.AddComponent<CanvasGroup>();
+                        addedCanvasGroup = true;
+                    }
+                    else
+                    {
+                        // Store original alpha if CanvasGroup already existed
+                        if (!originalUIAlphas.ContainsKey(ui))
+                        {
+                            originalUIAlphas[ui] = canvasGroup.alpha;
+                        }
+                    }
+                    
+                    // Track the CanvasGroup
+                    tutorialUICanvasGroups[ui] = canvasGroup;
+                    
+                    // Set alpha to 0 initially
+                    canvasGroup.alpha = 0f;
+                    
+                    // Activate UI (will be invisible due to alpha 0)
                     if (!ui.activeSelf)
                     {
                         ui.SetActive(true);
                     }
                     
-                    Debug.Log($"[SimpleTutorialManager] Moved {ui.name} to TutorialCanvas and showed");
+                    // Start fade-in coroutine (0.5s duration to sync with overlay)
+                    StartCoroutine(FadeInUI(canvasGroup, 0.5f));
+                    
+                    Debug.Log($"[SimpleTutorialManager] Moved {ui.name} to TutorialCanvas and started fade-in (CanvasGroup added: {addedCanvasGroup})");
                 }
             }
         }
@@ -360,7 +394,7 @@ public class SimpleTutorialManager : MonoBehaviour
             }
         }
         
-        // Highlight UI elements - move to tutorial canvas
+        // Highlight UI elements - move to tutorial canvas and fade in
         if (step.uiToHighlight != null)
         {
             foreach (var ui in step.uiToHighlight)
@@ -376,8 +410,36 @@ public class SimpleTutorialManager : MonoBehaviour
                     // Move to tutorial canvas
                     ui.transform.SetParent(tutorialCanvas.transform, true);
                     
+                    // Add or get CanvasGroup for fading
+                    CanvasGroup canvasGroup = ui.GetComponent<CanvasGroup>();
+                    bool addedCanvasGroup = false;
+                    if (canvasGroup == null)
+                    {
+                        canvasGroup = ui.AddComponent<CanvasGroup>();
+                        addedCanvasGroup = true;
+                    }
+                    else
+                    {
+                        // Store original alpha if CanvasGroup already existed
+                        if (!originalUIAlphas.ContainsKey(ui))
+                        {
+                            originalUIAlphas[ui] = canvasGroup.alpha;
+                        }
+                    }
+                    
+                    // Track the CanvasGroup
+                    tutorialUICanvasGroups[ui] = canvasGroup;
+                    
+                    // Set alpha to 0 initially
+                    canvasGroup.alpha = 0f;
+                    
+                    // Highlight the object (adds outline, etc.)
                     HighlightObject(ui);
-                    Debug.Log($"[SimpleTutorialManager] Moved {ui.name} to TutorialCanvas and highlighted");
+                    
+                    // Start fade-in coroutine
+                    StartCoroutine(FadeInUI(canvasGroup, 0.5f));
+                    
+                    Debug.Log($"[SimpleTutorialManager] Moved {ui.name} to TutorialCanvas, highlighted, and started fade-in (CanvasGroup added: {addedCanvasGroup})");
                 }
             }
         }
@@ -488,5 +550,110 @@ public class SimpleTutorialManager : MonoBehaviour
         
         activeHighlights.Clear();
         Debug.Log("[SimpleTutorialManager] Removed all highlights");
+    }
+    
+    /// <summary>
+    /// Fade in tutorial UI using CanvasGroup alpha
+    /// </summary>
+    private System.Collections.IEnumerator FadeInUI(CanvasGroup canvasGroup, float duration)
+    {
+        float elapsed = 0f;
+        float startAlpha = canvasGroup.alpha;
+        
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            canvasGroup.alpha = Mathf.Lerp(startAlpha, 1f, t);
+            yield return null;
+        }
+        
+        canvasGroup.alpha = 1f;
+    }
+    
+    /// <summary>
+    /// Fade out all tutorial UI using CanvasGroup alpha
+    /// </summary>
+    private System.Collections.IEnumerator FadeOutTutorialUI(float duration)
+    {
+        // Start fade-out for all tutorial UI elements
+        foreach (var kvp in originalParents)
+        {
+            GameObject ui = kvp.Key;
+            if (ui != null && tutorialUICanvasGroups.ContainsKey(ui))
+            {
+                CanvasGroup cg = tutorialUICanvasGroups[ui];
+                if (cg != null)
+                {
+                    StartCoroutine(FadeOutUI(cg, duration));
+                }
+            }
+        }
+        
+        // Wait for all fades to complete
+        yield return new WaitForSecondsRealtime(duration);
+        
+        // Now hide the UI elements
+        foreach (var kvp in originalParents)
+        {
+            GameObject ui = kvp.Key;
+            if (ui != null && ui.activeSelf)
+            {
+                ui.SetActive(false);
+            }
+        }
+        
+        RemoveAllHighlights();
+    }
+    
+    /// <summary>
+    /// Fade out single UI element using CanvasGroup alpha
+    /// </summary>
+    private System.Collections.IEnumerator FadeOutUI(CanvasGroup canvasGroup, float duration)
+    {
+        if (canvasGroup == null) yield break;
+        
+        float elapsed = 0f;
+        float startAlpha = canvasGroup.alpha;
+        
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, t);
+            yield return null;
+        }
+        
+        canvasGroup.alpha = 0f;
+    }
+    
+    /// <summary>
+    /// Cleanup CanvasGroups after tutorial ends
+    /// </summary>
+    private void CleanupCanvasGroups()
+    {
+        foreach (var kvp in tutorialUICanvasGroups)
+        {
+            GameObject ui = kvp.Key;
+            CanvasGroup cg = kvp.Value;
+            
+            if (ui != null && cg != null)
+            {
+                // Check if we added this CanvasGroup or if it was already there
+                if (originalUIAlphas.ContainsKey(ui))
+                {
+                    // Restore original alpha
+                    cg.alpha = originalUIAlphas[ui];
+                }
+                else
+                {
+                    // We added this CanvasGroup, remove it
+                    Destroy(cg);
+                }
+            }
+        }
+        
+        tutorialUICanvasGroups.Clear();
+        originalUIAlphas.Clear();
     }
 }
