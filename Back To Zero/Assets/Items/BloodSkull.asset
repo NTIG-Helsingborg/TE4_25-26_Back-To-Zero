@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: BloodSkull
   m_EditorClassIdentifier: 
   itemName: BloodSkull
-  itemSprite: {fileID: 0}
-  itemDescription: 
+  itemSprite: {fileID: -1603291472181913768, guid: 3cb724c6ebeff174eb652fe52743dc10, type: 3}
+  itemDescription: A anicent skull from a creature that does not want to leave this
+    earth. Increas Hp by 25.
   statToChange: 6
   amountToChangeStat: 25
   itemRarity: 2

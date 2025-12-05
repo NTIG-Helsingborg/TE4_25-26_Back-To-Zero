@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: PowerStone
   m_EditorClassIdentifier: 
   itemName: Power Stone
-  itemSprite: {fileID: 0}
-  itemDescription: 
+  itemSprite: {fileID: 2373183141213679312, guid: 86461c8c801e2e24a83143f5195560fa, type: 3}
+  itemDescription: A pulsing red crystal filled with a small amount of potent life-energy.
+    Increases Power py 10%
   statToChange: 2
   amountToChangeStat: 10
   itemRarity: 1
-  dropChance: 10
+  dropChance: 5
   isArtifact: 1
   isAbility: 0

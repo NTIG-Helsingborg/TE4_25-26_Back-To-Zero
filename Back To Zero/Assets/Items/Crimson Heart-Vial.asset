@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Crimson Heart-Vial
   m_EditorClassIdentifier: 
   itemName: Crimson Heart-Vial
-  itemSprite: {fileID: 0}
+  itemSprite: {fileID: -6888756438569675735, guid: 30063e5ad266fc746a3b8df85158bced, type: 3}
   itemDescription: "A floating glass vial filled with ever-circulating red liquid.
     When worn, it synchronizes with the user\u2019s pulse and accelerates natural
     healing. Increase Hp by 100"

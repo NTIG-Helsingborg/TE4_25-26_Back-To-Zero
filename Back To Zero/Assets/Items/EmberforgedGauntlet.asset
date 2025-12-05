@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: EmberforgedGauntlet
   m_EditorClassIdentifier: 
   itemName: Emberforged Gauntlet
-  itemSprite: {fileID: 0}
-  itemDescription: 
+  itemSprite: {fileID: 1248784056254802929, guid: 629498c617c193248ad92210e35e54fe, type: 3}
+  itemDescription: "molten-metal gauntlet that ignites the user\u2019s attacks with
+    searing heat. Increases Power py 50%"
   statToChange: 2
   amountToChangeStat: 50
   itemRarity: 4

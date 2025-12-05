@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: WeakBloodRing
   m_EditorClassIdentifier: 
   itemName: Weak Blood Ring
-  itemSprite: {fileID: 0}
-  itemDescription: 
+  itemSprite: {fileID: 3763752930381237044, guid: 25da1a8cda3b93347aacd0c467f73a85, type: 3}
+  itemDescription: A Really shitty ring that stores blood. Increas Hp by 10.
   statToChange: 6
   amountToChangeStat: 10
   itemRarity: 1

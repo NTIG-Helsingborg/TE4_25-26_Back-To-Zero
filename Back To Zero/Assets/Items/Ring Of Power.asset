@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Ring Of Power
   m_EditorClassIdentifier: 
   itemName: Ring Of Power
-  itemSprite: {fileID: 0}
-  itemDescription: 
+  itemSprite: {fileID: -8527442550737655860, guid: cc7398700b67b244fb2e59e531325a03, type: 3}
+  itemDescription: A ring contaning the power of a dead warrior. Increases Power
+    py 30%
   statToChange: 2
   amountToChangeStat: 30
   itemRarity: 3
