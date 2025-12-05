@@ -420,8 +420,8 @@ MonoBehaviour:
   grantsExperienceOnDeath: 1
   experienceReward: 50
   enableHarvestFeedback: 1
-  flashSpriteRenderer: {fileID: 5084497151282675369}
-  animator: {fileID: 3540979855057314769}
+  flashSpriteRenderer: {fileID: 0}
+  animator: {fileID: 0}
   destroyAfterDeathDelay: 0.1
   hurtResetDelay: 0.2
 --- !u!114 &8310446765950172450
@@ -458,7 +458,7 @@ MonoBehaviour:
   fallbackDashPower: 8
   fallbackDashDuration: 0.25
   dashTrail: {fileID: 6468367130193239637}
-  animator: {fileID: 3540979855057314769}
+  animator: {fileID: 0}
 --- !u!50 &7675895200104629711
 Rigidbody2D:
   serializedVersion: 5
@@ -485,7 +485,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!96 &6468367130193239637
 TrailRenderer:
   serializedVersion: 3
