@@ -166,6 +166,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1632603695573977246}
+  - {fileID: 6446704798804766238}
   m_Father: {fileID: 2456634959879106942}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4981941992080421250
@@ -178,6 +179,7 @@ GameObject:
   m_Component:
   - component: {fileID: 564629500231923690}
   - component: {fileID: 2969118431303851006}
+  - component: {fileID: 4023226608813840427}
   m_Layer: 0
   m_Name: Start_1
   m_TagString: Untagged
@@ -216,10 +218,10 @@ MonoBehaviour:
   textColor: {r: 1, g: 1, b: 1, a: 1}
   fontSize: 80
   enableTextFadeIn: 1
-  textFadeInDuration: 2
-  textFadeOutDuration: 2
+  textFadeInDuration: 1
+  textFadeOutDuration: 1
   textFadeSpeed: 1
-  displayDuration: 4
+  displayDuration: 2
   intermissionEntries:
   - text: Before The Shift...
     triggerType: 1
@@ -230,20 +232,82 @@ MonoBehaviour:
     triggerDelay: 0
     triggerOnce: 1
     startDarkened: 1
+    customDisplayDuration: -1
+    waitForInput: 0
+    dismissKey: 32
     enableText: 1
     enableOverlay: 1
     enableDarkening: 1
+    overlayOpacity: 1
+    forceStart: 0
+    snappyCanvas: 0
     playAfterEntry: 0
     playAfterEntryIndex: 0
-  enableDarkening: 1
+  - text: Healthbar
+    triggerType: 3
+    triggerLayer:
+      serializedVersion: 2
+      m_Bits: 32
+    specificColliderObject: {fileID: 7525528889888961300}
+    triggerDelay: 0
+    triggerOnce: 0
+    startDarkened: 0
+    customDisplayDuration: 4
+    waitForInput: 0
+    dismissKey: 32
+    enableText: 0
+    enableOverlay: 1
+    enableDarkening: 1
+    overlayOpacity: 0.9
+    forceStart: 0
+    snappyCanvas: 0
+    playAfterEntry: 0
+    playAfterEntryIndex: 0
   darkOverlay: {fileID: 7365254057710989158}
   overlayColor: {r: 0, g: 0, b: 0, a: 1}
-  overlayFadeInDuration: 1
-  overlayFadeOutDuration: 1
+  overlayFadeInDuration: 2
+  overlayFadeOutDuration: 2
   overlayFadeSpeed: 0.2
   canvas: {fileID: 0}
   canvasFadeDuration: 2
   freezeGame: 1
+--- !u!114 &4023226608813840427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4981941992080421250}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3ca70b9628cc4e74a7f857634977fb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  intermissionDisplay: {fileID: 2969118431303851006}
+  inventoryCanvas: {fileID: 0}
+  tutorialSteps:
+  - intermissionEntryIndex: 1
+    uiToShow:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    uiToHide:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    uiToHighlight: []
+    openInventory: 0
+  highlightOutlineColor: {r: 1, g: 0.6121864, b: 0.015686274, a: 1}
+  highlightOutlineSize: {x: 5, y: 5}
 --- !u!1 &5111226025959776656
 GameObject:
   m_ObjectHideFlags: 0
@@ -488,6 +552,100 @@ Transform:
   - {fileID: 6634753920949723154}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7525528889888961300
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6446704798804766238}
+  - component: {fileID: 2636135163615380708}
+  - component: {fileID: 4136992489003655140}
+  m_Layer: 0
+  m_Name: Tutorial-Trigger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6446704798804766238
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7525528889888961300}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -40.55, y: 98.54, z: -0.9016297}
+  m_LocalScale: {x: 5, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6634753920949723154}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!68 &2636135163615380708
+EdgeCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7525528889888961300}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_EdgeRadius: 0
+  m_Points:
+  - {x: 1.2621925, y: 6.0234833}
+  - {x: -0.755471, y: 5.99527}
+  - {x: -0.73211825, y: -0.88705444}
+  - {x: 1.2660607, y: -0.84199524}
+  - {x: 1.2605033, y: 6.0799866}
+  m_AdjacentStartPoint: {x: 0, y: 0}
+  m_AdjacentEndPoint: {x: 0, y: 0}
+  m_UseAdjacentStartPoint: 0
+  m_UseAdjacentEndPoint: 0
+--- !u!114 &4136992489003655140
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7525528889888961300}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72bf4d069dff4a54db6486e9c1dc2792, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  manager: {fileID: 2969118431303851006}
+  targetTag: Player
+  entryIndex: 1
 --- !u!1 &7663541739251040487
 GameObject:
   m_ObjectHideFlags: 0
@@ -653,12 +811,17 @@ MonoBehaviour:
     triggerDelay: 0
     triggerOnce: 0
     startDarkened: 0
+    customDisplayDuration: -1
+    waitForInput: 0
+    dismissKey: 32
     enableText: 1
     enableOverlay: 0
     enableDarkening: 0
+    overlayOpacity: 1
+    forceStart: 0
+    snappyCanvas: 0
     playAfterEntry: 0
     playAfterEntryIndex: 0
-  enableDarkening: 0
   darkOverlay: {fileID: 7365254057710989158}
   overlayColor: {r: 0, g: 0, b: 0, a: 1}
   overlayFadeInDuration: 1

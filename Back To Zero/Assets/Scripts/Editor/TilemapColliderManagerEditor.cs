@@ -6,6 +6,30 @@ using System.Collections.Generic;
 [CustomEditor(typeof(TilemapColliderManager))]
 public class TilemapColliderManagerEditor : Editor
 {
+    private void ShowControlledAutoDetectWindow(TilemapColliderManager manager)
+    {
+        ControlledAutoDetectWindow.ShowWindow(manager);
+    }
+
+    // Visual Editor State
+    private bool showVisualEditor = false;
+    private int selectedLayerIndex = 0;
+    private string[] availableLayers;
+    private string[] displayLayers; // Includes "All" option
+
+    private void OnEnable()
+    {
+        // Ensure we have the tool enabled if it was saved
+        showVisualEditor = EditorPrefs.GetBool("TilemapColliderManager_ShowVisualEditor", false);
+        selectedLayerIndex = EditorPrefs.GetInt("TilemapColliderManager_SelectedLayerIndex", 0);
+    }
+
+    private void OnDisable()
+    {
+        EditorPrefs.SetBool("TilemapColliderManager_ShowVisualEditor", showVisualEditor);
+        EditorPrefs.SetInt("TilemapColliderManager_SelectedLayerIndex", selectedLayerIndex);
+    }
+
     public override void OnInspectorGUI()
     {
         // Draw default inspector
@@ -16,6 +40,40 @@ public class TilemapColliderManagerEditor : Editor
         
         TilemapColliderManager manager = (TilemapColliderManager)target;
         
+        // Visual Editor Toggle
+        GUI.backgroundColor = showVisualEditor ? Color.green : Color.white;
+        if (GUILayout.Button(showVisualEditor ? "Disable Visual Editor" : "Enable Visual Editor", GUILayout.Height(30)))
+        {
+            showVisualEditor = !showVisualEditor;
+            SceneView.RepaintAll();
+        }
+        GUI.backgroundColor = Color.white;
+
+        if (showVisualEditor)
+        {
+            // Layer Filter Dropdown
+            UpdateLayerList(manager);
+            
+            if (displayLayers != null && displayLayers.Length > 0)
+            {
+                EditorGUI.BeginChangeCheck();
+                selectedLayerIndex = EditorGUILayout.Popup("Filter Layer", selectedLayerIndex, displayLayers);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    SceneView.RepaintAll();
+                }
+            }
+
+            EditorGUILayout.HelpBox(
+                "VISUAL EDITOR ENABLED\n\n" +
+                "• Red boxes appear over all generated colliders in the Scene View.\n" +
+                "• CLICK a red box to delete that collider.\n" +
+                "• Hold SHIFT to see the boxes but disable clicking (if they get in the way).", 
+                MessageType.Warning);
+        }
+        
+        EditorGUILayout.Space();
+
         // Bulk delete selected elements
         SerializedProperty colliderDataProp = serializedObject.FindProperty("colliderData");
         if (colliderDataProp != null && colliderDataProp.isArray)
@@ -113,6 +171,78 @@ public class TilemapColliderManagerEditor : Editor
             EditorUtility.SetDirty(manager);
             UnityEditor.SceneView.RepaintAll();
         }
+
+        // Remove Unwanted Colliders button
+        if (GUILayout.Button("Remove Unwanted Colliders", GUILayout.Height(25)))
+        {
+            if (EditorUtility.DisplayDialog(
+                "Remove Unwanted Colliders",
+                "This will remove any colliders that do not match the current collider data rules.\n\n" +
+                "Use this if you have changed tiles to non-colliding ones and want to clean up old colliders without regenerating everything.",
+                "Yes", "No"))
+            {
+                manager.RemoveUnwantedColliders();
+                EditorUtility.SetDirty(manager);
+                UnityEditor.SceneView.RepaintAll();
+            }
+        }
+        
+        // Rebuild All Colliders button (The "Direct Approach")
+        GUI.backgroundColor = new Color(1f, 0.8f, 0.8f); // Light red warning color
+        if (GUILayout.Button("Rebuild All Colliders", GUILayout.Height(30)))
+        {
+            if (EditorUtility.DisplayDialog(
+                "Rebuild All Colliders",
+                "This will DELETE ALL generated colliders and regenerate them from scratch.\n\n" +
+                "This is the safest way to ensure everything is correct, but might be slower on huge maps.",
+                "Rebuild", "Cancel"))
+            {
+                manager.RebuildColliders();
+                EditorUtility.SetDirty(manager);
+                UnityEditor.SceneView.RepaintAll();
+            }
+        }
+        GUI.backgroundColor = Color.white;
+        
+        EditorGUILayout.Space();
+        
+        // Bake Colliders button
+        GUI.backgroundColor = new Color(1f, 0.7f, 0.3f); // Orange
+        if (GUILayout.Button("🔥 Bake Colliders for Git", GUILayout.Height(30)))
+        {
+            if (EditorUtility.DisplayDialog(
+                "Bake Colliders for Git?",
+                "This will remove all individual collider components and keep only the CompositeCollider2D.\n\n" +
+                "✅ File size will shrink dramatically (great for Git)\n" +
+                "❌ Visual Editor won't work until you Rebuild\n\n" +
+                "You can always regenerate individual colliders by clicking 'Rebuild All Colliders'.",
+                "Bake It!",
+                "Cancel"))
+            {
+                manager.BakeColliders();
+                EditorUtility.SetDirty(manager);
+                
+                // Mark the scene as dirty so Unity saves it
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+                    UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+                
+                // Force save the scene
+                UnityEditor.SceneManagement.EditorSceneManager.SaveOpenScenes();
+                
+                UnityEditor.SceneView.RepaintAll();
+                
+                EditorUtility.DisplayDialog("Bake Complete!", 
+                    "Colliders baked successfully!\n\nScene has been saved. Check the file size now - it should be much smaller!", 
+                    "OK");
+            }
+        }
+        GUI.backgroundColor = Color.white;
+        
+        // Log Configuration button
+        if (GUILayout.Button("Log Configuration to Console", GUILayout.Height(25)))
+        {
+            manager.LogConfiguration();
+        }
         
         EditorGUILayout.Space();
         EditorGUILayout.HelpBox(
@@ -120,25 +250,174 @@ public class TilemapColliderManagerEditor : Editor
             "• Groups tiles with the same sprite together (even if they're different TileBase assets)\n" +
             "• Perfect for tiles that look the same but have different names\n" +
             "• Deleted tiles/sprites are tracked and won't be re-added\n\n" +
-            "Controlled Auto Detect: Select specific tiles from the Sprites folder to add.\n" +
+            "Controlled Auto Detect: Select specific tiles from Sprites and Village Assets folders to add.\n" +
             "• Choose which tiles to add manually\n" +
             "• Shows previews of tiles\n" +
+            "• Searches both Sprites and Village Assets folders\n" +
             "• Respects exclusion list\n\n" +
             "Generate Colliders: Creates colliders for all tiles matching the configured TileColliderData.\n" +
             "• Automatically prevents duplicates if clicked multiple times\n" +
             "• Organizes colliders in folders (Tilemap Colliders > Colliders_[TilemapName])\n\n" +
             "Clear Colliders: Removes all generated colliders.\n\n" +
-            "Refresh Colliders: Regenerates colliders (clears and generates again).",
+            "Refresh Colliders: Regenerates colliders (clears and generates again).\n\n" +
+            "Remove Unwanted Colliders: Removes colliders that no longer match any valid rule.\n\n" +
+            "Rebuild All Colliders: Completely deletes and regenerates all colliders (safest option).",
             MessageType.Info);
     }
-    
-    private void ShowControlledAutoDetectWindow(TilemapColliderManager manager)
+
+    private void UpdateLayerList(TilemapColliderManager manager)
     {
-        ControlledAutoDetectWindow.ShowWindow(manager);
+        Transform container = manager.CollidersContainer;
+        if (container == null)
+        {
+            availableLayers = new string[0];
+            displayLayers = new string[] { "All Layers" };
+            return;
+        }
+
+        int childCount = container.childCount;
+        if (availableLayers == null || availableLayers.Length != childCount)
+        {
+            availableLayers = new string[childCount];
+            displayLayers = new string[childCount + 1];
+            displayLayers[0] = "All Layers";
+            
+            for (int i = 0; i < childCount; i++)
+            {
+                string name = container.GetChild(i).name.Replace("Colliders_", "");
+                availableLayers[i] = name;
+                displayLayers[i + 1] = name;
+            }
+        }
+    }
+
+    private void OnSceneGUI()
+    {
+        if (!showVisualEditor) return;
+
+        TilemapColliderManager manager = (TilemapColliderManager)target;
+        Transform container = manager.CollidersContainer;
+
+        if (container == null)
+        {
+             // Try to find it again
+             manager.EnsureCollidersContainer();
+             container = manager.CollidersContainer;
+             if (container == null) 
+             {
+                 Debug.LogWarning("VisualEditor: Container is null!");
+                 return;
+             }
+        }
+
+        // Update layers to ensure index is valid
+        UpdateLayerList(manager);
+        if (selectedLayerIndex >= displayLayers.Length) selectedLayerIndex = 0;
+
+        // Iterate through all colliders
+        // We do this manually to avoid GC allocs if possible, but for Editor tools it's less critical
+        // However, modifying the list while iterating is tricky, so we'll collect actions
+        
+        // GameObject colliderToDelete = null; // No longer used
+        Event currentEvent = Event.current;
+        bool isClick = currentEvent.type == EventType.MouseDown && currentEvent.button == 0 && !currentEvent.shift;
+        int colliderCount = 0;
+
+        // Ensure handles are drawn on top of everything
+        UnityEngine.Rendering.CompareFunction originalZTest = Handles.zTest;
+        Handles.zTest = UnityEngine.Rendering.CompareFunction.Always;
+
+        // Iterate subfolders
+        for (int i = 0; i < container.childCount; i++)
+        {
+            Transform tilemapContainer = container.GetChild(i);
+            if (tilemapContainer == null) continue;
+
+            // FILTER: Check if this layer should be shown
+            // selectedLayerIndex 0 is "All", 1 is first layer (index 0 in container)
+            if (selectedLayerIndex != 0 && (selectedLayerIndex - 1) != i) continue;
+            
+            // Iterate colliders (Components now)
+            Collider2D[] colliders = tilemapContainer.GetComponents<Collider2D>();
+            
+            foreach (Collider2D col in colliders)
+            {
+                if (col == null) continue;
+                if (col is CompositeCollider2D) continue; // Skip the composite itself
+
+                colliderCount++;
+                Bounds bounds = col.bounds;
+                Vector3 center = bounds.center;
+                Vector3 size = bounds.size;
+
+                // Draw handle - Make it more visible (Solid Red)
+                Handles.color = new Color(1f, 0f, 0f, 0.5f); // 50% transparent red
+                Handles.DrawSolidRectangleWithOutline(
+                    new Rect(center.x - size.x/2, center.y - size.y/2, size.x, size.y), 
+                    new Color(1f, 0f, 0f, 0.4f), 
+                    Color.yellow); // Yellow outline for better contrast
+
+                // Check for click
+                Handles.color = Color.clear; // Invisible button over the area
+                if (Handles.Button(center, Quaternion.identity, size.x, size.y, Handles.RectangleHandleCap))
+                {
+                    if (!currentEvent.shift) // Allow Shift to bypass deletion (select underneath)
+                    {
+                        Undo.RegisterCompleteObjectUndo(manager, "Delete Collider");
+                        manager.RemoveCollider(col);
+                        EditorUtility.SetDirty(manager);
+                        
+                        // Consume event
+                        currentEvent.Use();
+                    }
+                }
+            }
+        }
+
+        // Restore ZTest
+        Handles.zTest = originalZTest;
+
+        // Debug Log to confirm it ran
+        if (Event.current.type == EventType.Repaint)
+        {
+            // Only log occasionally to avoid spam, or just once per interaction
+            // For now, let's print if count is 0
+            if (colliderCount == 0)
+            {
+                 Debug.LogWarning($"VisualEditor: Found 0 colliders to draw. Container children: {container.childCount}");
+            }
+        }
+
+        // Show feedback if no colliders found
+        if (colliderCount == 0)
+        {
+            Handles.BeginGUI();
+            GUI.color = Color.yellow;
+            GUILayout.BeginArea(new Rect(10, 10, 300, 100));
+            GUILayout.Label("VISUAL EDITOR: No colliders found.\nTry 'Generate Colliders' first.", EditorStyles.boldLabel);
+            GUILayout.EndArea();
+            Handles.EndGUI();
+        }
+        else
+        {
+            // Show instructions in Scene View
+            Handles.BeginGUI();
+            GUI.color = Color.white;
+            GUILayout.BeginArea(new Rect(10, 10, 300, 100));
+            GUILayout.Label($"VISUAL EDITOR: {colliderCount} colliders shown.\nClick Red Box to Delete.\nHold Shift to Select.", EditorStyles.boldLabel);
+            GUILayout.EndArea();
+            Handles.EndGUI();
+        }
+        
+        // Force repaint to show updates
+        if (Event.current.type == EventType.MouseMove)
+        {
+            SceneView.RepaintAll();
+        }
     }
 }
 
-// Window for controlled auto-detect - selecting tiles/sprites from Sprites folder
+// Window for controlled auto-detect - selecting tiles/sprites from Sprites and Village Assets folders
 public class ControlledAutoDetectWindow : EditorWindow
 {
     private TilemapColliderManager manager;
@@ -161,9 +440,26 @@ public class ControlledAutoDetectWindow : EditorWindow
         tileSelection.Clear();
         
         // Find all TileBase assets in the Sprites folder
-        string[] guids = AssetDatabase.FindAssets("t:TileBase", new[] { "Assets/Sprites" });
+        string[] spritesGuids = AssetDatabase.FindAssets("t:TileBase", new[] { "Assets/Sprites" });
         
-        foreach (string guid in guids)
+        // Find all TileBase assets in Village Assets folder and its subfolders
+        // AssetDatabase.FindAssets searches recursively, so it will find tiles in:
+        // - Assets/Village Assets/A Hard Day's Work/
+        // - Assets/Village Assets/Pixel Lands Village/
+        string[] villageGuids = AssetDatabase.FindAssets("t:TileBase", new[] { "Assets/Village Assets" });
+        
+        // Combine both arrays
+        string[] allGuids = new string[spritesGuids.Length + villageGuids.Length];
+        System.Array.Copy(spritesGuids, 0, allGuids, 0, spritesGuids.Length);
+        System.Array.Copy(villageGuids, 0, allGuids, spritesGuids.Length, villageGuids.Length);
+        
+        // Track tiles by folder for better logging
+        int spritesCount = 0;
+        int villageCount = 0;
+        int hardDaysWorkCount = 0;
+        int pixelLandsCount = 0;
+        
+        foreach (string guid in allGuids)
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
             TileBase tile = AssetDatabase.LoadAssetAtPath<TileBase>(path);
@@ -172,10 +468,32 @@ public class ControlledAutoDetectWindow : EditorWindow
             {
                 availableTiles.Add(tile);
                 tileSelection[tile] = false;
+                
+                // Count by folder for logging
+                if (path.Contains("Assets/Sprites"))
+                {
+                    spritesCount++;
+                }
+                else if (path.Contains("Assets/Village Assets"))
+                {
+                    villageCount++;
+                    if (path.Contains("A Hard Day's Work"))
+                    {
+                        hardDaysWorkCount++;
+                    }
+                    else if (path.Contains("Pixel Lands Village"))
+                    {
+                        pixelLandsCount++;
+                    }
+                }
             }
         }
         
-        Debug.Log($"ControlledAutoDetect: Found {availableTiles.Count} tile(s) in Sprites folder.");
+        Debug.Log($"ControlledAutoDetect: Found {availableTiles.Count} total tile(s):\n" +
+                  $"  - Sprites folder: {spritesCount}\n" +
+                  $"  - Village Assets folder: {villageCount}\n" +
+                  $"    • A Hard Day's Work: {hardDaysWorkCount}\n" +
+                  $"    • Pixel Lands Village: {pixelLandsCount}");
     }
     
     private void OnGUI()
@@ -187,7 +505,7 @@ public class ControlledAutoDetectWindow : EditorWindow
         }
         
         EditorGUILayout.LabelField("Controlled Auto Detect", EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox("Select tiles from the Sprites folder to add as TileColliderData entries.", MessageType.Info);
+        EditorGUILayout.HelpBox("Select tiles from the Sprites and Village Assets folders to add as TileColliderData entries.", MessageType.Info);
         EditorGUILayout.Space();
         
         // Search filter
