@@ -116,4 +116,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cooldownShowcasePanel: {fileID: 402724777481444262}
-  cooldownHolderPrefab: {fileID: 1850212979453792512, guid: 791825a980bbb434ebfb19810e734b3d, type: 3}
+  cooldownHolderPrefab: {fileID: 3644865920420937517}
