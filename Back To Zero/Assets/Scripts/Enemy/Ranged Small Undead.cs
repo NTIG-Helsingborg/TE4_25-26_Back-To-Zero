@@ -35,6 +35,9 @@ public class RangedSmallUndead : MonoBehaviour
     [Header("Visuals")]
     [SerializeField] private TrailRenderer dashTrail;
 
+    [Header("Animation")]
+    [SerializeField] private Animator animator;
+
     private Transform firePoint;
     private Vector3 startingPosition;
     private float nextAttackTime;
@@ -55,6 +58,7 @@ public class RangedSmallUndead : MonoBehaviour
     private float boundUntilTime;
 
     private static readonly List<Collider2D> AllEnemyColliders = new();
+    private static readonly int DashHash = Animator.StringToHash("Dash");
 
     private void Awake()
     {
@@ -67,6 +71,7 @@ public class RangedSmallUndead : MonoBehaviour
         {
             dashTrail = GetComponentInChildren<TrailRenderer>();
         }
+        if (!animator) animator = GetComponentInChildren<Animator>(); // get child animator
 
         if (destinationSetter != null)
         {
@@ -258,6 +263,9 @@ public class RangedSmallUndead : MonoBehaviour
             StopCoroutine(dashRoutine);
         }
 
+        // Trigger dash animation
+        if (animator) animator.SetBool(DashHash, true);
+
         dashRoutine = StartCoroutine(DashRoutine());
     }
 
@@ -341,6 +349,10 @@ public class RangedSmallUndead : MonoBehaviour
         SetTrailEmitting(false);
 
         isDashing = false;
+
+        // End dash animation
+        if (animator) animator.SetBool(DashHash, false);
+
         dashRoutine = null;
     }
 
@@ -384,6 +396,9 @@ public class RangedSmallUndead : MonoBehaviour
         SetTrailEmitting(false);
 
         isDashing = false;
+
+        // Ensure dash anim resets
+        if (animator) animator.SetBool(DashHash, false);
     }
 
     private void SetPhysicsCollidersEnabled(bool enabled)
