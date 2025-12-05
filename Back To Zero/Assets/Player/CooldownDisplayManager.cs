@@ -16,6 +16,13 @@ public class CooldownDisplayManager : MonoBehaviour
         abilitySetter = FindFirstObjectByType<AbilitySetter>();
         if (cooldownShowcasePanel == null)
             cooldownShowcasePanel = GameObject.Find("CooldownShowcase")?.transform;
+        
+        // Ensure cooldownShowcasePanel is a scene object, not a prefab
+        if (cooldownShowcasePanel != null && !cooldownShowcasePanel.gameObject.scene.IsValid())
+        {
+            Debug.LogError("CooldownDisplayManager: cooldownShowcasePanel is a prefab asset, not a scene object! Please assign a scene GameObject.");
+            cooldownShowcasePanel = null;
+        }
     }
     
     void Update()
