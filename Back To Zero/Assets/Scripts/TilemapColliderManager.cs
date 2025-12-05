@@ -82,7 +82,8 @@ public class TilemapColliderManager : MonoBehaviour
     
     [Header("Generation Settings")]
     [SerializeField] private bool generateOnStart = true;
-    [SerializeField] private bool useCompositeCollider = false;
+    [Tooltip("Merges all colliders on a layer into a single CompositeCollider2D. Drastically reduces scene size and improves performance.")]
+    [SerializeField] private bool useCompositeCollider = true;
     [SerializeField] private bool combineAdjacentTiles = false;
     
     [Header("Generated Colliders Container")]
@@ -127,7 +128,10 @@ public class TilemapColliderManager : MonoBehaviour
     /// <summary>
     /// Ensures the colliders container exists with proper folder structure
     /// </summary>
-    private void EnsureCollidersContainer()
+    /// <summary>
+    /// Ensures the colliders container exists with proper folder structure
+    /// </summary>
+    public void EnsureCollidersContainer()
     {
         if (collidersContainer == null)
         {
@@ -205,6 +209,9 @@ public class TilemapColliderManager : MonoBehaviour
         // This allows clicking "Generate" multiple times without creating duplicates
         existingColliderKeys.Clear();
         ScanExistingColliders();
+        
+        // Remove colliders that shouldn't exist anymore
+        RemoveUnwantedColliders();
         
         int totalColliderCount = 0;
         int duplicateCount = 0;
@@ -373,42 +380,61 @@ public class TilemapColliderManager : MonoBehaviour
             string containerName = tilemapContainer.name;
             if (!containerName.StartsWith("Colliders_")) continue;
             
-            // Scan all colliders in this container
-            foreach (Transform colliderTransform in tilemapContainer)
+            string tilemapName = containerName.Replace("Colliders_", "");
+            
+            // Find the tilemap to convert positions
+            Tilemap currentTilemap = null;
+            foreach (var tm in foundTilemaps)
             {
-                // Extract position from collider name (format: "Collider_x_y")
-                string colliderName = colliderTransform.name;
-                if (colliderName.StartsWith("Collider_"))
+                if (tm != null && tm.name == tilemapName)
                 {
-                    // Try to parse the position from the name
-                    string[] parts = colliderName.Split('_');
-                    if (parts.Length >= 3)
-                    {
-                        if (int.TryParse(parts[1], out int x) && int.TryParse(parts[2], out int y))
-                        {
-                            string tilemapName = containerName.Replace("Colliders_", "");
-                            string key = $"{tilemapName}_{x}_{y}_0";
-                            existingColliderKeys.Add(key);
-                        }
-                    }
+                    currentTilemap = tm;
+                    break;
                 }
+            }
+            
+            if (currentTilemap == null) continue;
+            
+            // Scan all Collider2D components in this container
+            Collider2D[] colliders = tilemapContainer.GetComponents<Collider2D>();
+            foreach (Collider2D col in colliders)
+            {
+                // Ignore CompositeCollider2D itself
+                if (col is CompositeCollider2D) continue;
+                
+                // Calculate tile position from collider offset
+                // offset is relative to container. container is at (0,0,0) usually.
+                // So offset ~ world position of center.
+                // We need to reverse the CreateCollider logic:
+                // finalOffset = localPos + data.offset
+                // This is tricky because data.offset is unknown here.
+                // However, usually data.offset is small (within the tile).
+                // So if we take the center of the collider, and find the cell it belongs to, that should be enough.
+                
+                Vector3 worldPos = tilemapContainer.TransformPoint(col.offset);
+                Vector3Int cellPos = currentTilemap.WorldToCell(worldPos);
+                
+                string key = GetColliderKey(currentTilemap, cellPos);
+                existingColliderKeys.Add(key);
             }
         }
     }
     
     /// <summary>
-    /// Creates a collider GameObject for a specific tile position
+    /// Creates a collider Component for a specific tile position on the parent container
     /// </summary>
     private void CreateColliderForTile(Tilemap targetTilemap, Vector3Int tilePosition, TileColliderData data, Transform parent)
     {
-        // Get world position of the tile
-        Vector3 worldPosition = targetTilemap.CellToWorld(tilePosition);
-        Vector3 tileCenter = targetTilemap.GetCellCenterWorld(tilePosition);
+        // Get world position of the tile center
+        Vector3 tileCenterWorld = targetTilemap.GetCellCenterWorld(tilePosition);
         
-        // Create GameObject for this collider
-        GameObject colliderObj = new GameObject($"Collider_{tilePosition.x}_{tilePosition.y}");
-        colliderObj.transform.SetParent(parent);
-        colliderObj.transform.position = tileCenter + (Vector3)data.offset;
+        // Convert world position to local position relative to the parent container
+        // Since parent is usually at (0,0,0) world space (if it's a root or child of zeroed root), 
+        // local position is effectively world position. But let's be safe.
+        Vector3 localPos = parent.InverseTransformPoint(tileCenterWorld);
+        
+        // Apply data offset
+        Vector2 finalOffset = (Vector2)localPos + data.offset;
         
         // Get tile size
         Vector3 tileSize = targetTilemap.cellSize;
@@ -416,25 +442,43 @@ public class TilemapColliderManager : MonoBehaviour
         
         // Create appropriate collider based on type
         Collider2D collider = null;
+        GameObject parentObj = parent.gameObject;
         
         switch (data.colliderType)
         {
             case ColliderType.Box:
-                BoxCollider2D boxCollider = colliderObj.AddComponent<BoxCollider2D>();
+                BoxCollider2D boxCollider = parentObj.AddComponent<BoxCollider2D>();
                 boxCollider.size = colliderSize;
+                boxCollider.offset = finalOffset;
                 collider = boxCollider;
                 break;
                 
             case ColliderType.Circle:
-                CircleCollider2D circleCollider = colliderObj.AddComponent<CircleCollider2D>();
+                CircleCollider2D circleCollider = parentObj.AddComponent<CircleCollider2D>();
                 circleCollider.radius = data.circleRadius;
+                circleCollider.offset = finalOffset;
                 collider = circleCollider;
                 break;
                 
             case ColliderType.Polygon:
-                PolygonCollider2D polygonCollider = colliderObj.AddComponent<PolygonCollider2D>();
-                // Scale polygon points by tile size
+                PolygonCollider2D polygonCollider = parentObj.AddComponent<PolygonCollider2D>();
+                // Scale polygon points by tile size and shift by offset
                 Vector2[] scaledPoints = new Vector2[data.polygonPoints.Length];
+                for (int i = 0; i < data.polygonPoints.Length; i++)
+                {
+                    scaledPoints[i] = new Vector2(
+                        data.polygonPoints[i].x * colliderSize.x,
+                        data.polygonPoints[i].y * colliderSize.y
+                    ) + finalOffset;
+                }
+                polygonCollider.points = scaledPoints;
+                // PolygonCollider2D doesn't have a simple 'offset' that moves points, 
+                // but it does have 'offset' property which shifts the whole shape.
+                // However, setting points relative to (0,0) and then setting offset is cleaner.
+                // Wait, if we set points relative to finalOffset, we don't need to set .offset.
+                // But .offset is more efficient for physics engine updates? 
+                // Actually, let's stick to setting .offset = finalOffset and points relative to 0.
+                // Re-calculating points:
                 for (int i = 0; i < data.polygonPoints.Length; i++)
                 {
                     scaledPoints[i] = new Vector2(
@@ -443,11 +487,12 @@ public class TilemapColliderManager : MonoBehaviour
                     );
                 }
                 polygonCollider.points = scaledPoints;
+                polygonCollider.offset = finalOffset;
                 collider = polygonCollider;
                 break;
                 
             case ColliderType.Edge:
-                EdgeCollider2D edgeCollider = colliderObj.AddComponent<EdgeCollider2D>();
+                EdgeCollider2D edgeCollider = parentObj.AddComponent<EdgeCollider2D>();
                 // Scale edge points by tile size
                 Vector2[] scaledEdgePoints = new Vector2[data.edgePoints.Length];
                 for (int i = 0; i < data.edgePoints.Length; i++)
@@ -458,6 +503,7 @@ public class TilemapColliderManager : MonoBehaviour
                     );
                 }
                 edgeCollider.points = scaledEdgePoints;
+                edgeCollider.offset = finalOffset;
                 collider = edgeCollider;
                 break;
         }
@@ -470,11 +516,228 @@ public class TilemapColliderManager : MonoBehaviour
             {
                 collider.sharedMaterial = data.physicsMaterial;
             }
+            
+            // Enable Composite Collider usage
+            if (useCompositeCollider)
+            {
+                collider.usedByComposite = true;
+            }
         }
         
         // Collider key is already added to existingColliderKeys in GenerateColliders()
     }
+
+    /// <summary>
+    /// Removes colliders that no longer match any valid collider data or are on empty tiles
+    /// </summary>
+    public void RemoveUnwantedColliders()
+    {
+        FindAllTilemaps();
+        EnsureCollidersContainer();
+        
+        if (collidersContainer == null) return;
+        
+        int removedCount = 0;
+        
+        // Iterate BACKWARDS so we can destroy containers if needed
+        for (int i = collidersContainer.childCount - 1; i >= 0; i--)
+        {
+            Transform tilemapContainer = collidersContainer.GetChild(i);
+            if (tilemapContainer == null) continue;
+
+            // Get the corresponding Tilemap
+            string containerName = tilemapContainer.name;
+            if (!containerName.StartsWith("Colliders_")) continue;
+            
+            string tilemapName = containerName.Replace("Colliders_", "");
+            
+            // Find the tilemap by name
+            Tilemap currentTilemap = null;
+            foreach (var tm in foundTilemaps)
+            {
+                if (tm != null && tm.name == tilemapName)
+                {
+                    currentTilemap = tm;
+                    break;
+                }
+            }
+            
+            // If tilemap is missing, this is an ORPHANED container. Delete it.
+            if (currentTilemap == null)
+            {
+                int childCount = tilemapContainer.childCount;
+                if (Application.isPlaying)
+                {
+                    Destroy(tilemapContainer.gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(tilemapContainer.gameObject);
+                }
+                removedCount += childCount; // Count all the colliders we just nuked
+                Debug.Log($"TilemapColliderManager: Removed orphaned container '{containerName}'");
+                continue;
+            }
+
+            // We need to store components to destroy to avoid modifying collection while iterating
+            List<Collider2D> collidersToRemove = new List<Collider2D>();
+            
+            Collider2D[] colliders = tilemapContainer.GetComponents<Collider2D>();
+
+            foreach (Collider2D col in colliders)
+            {
+                // Ignore CompositeCollider2D
+                if (col is CompositeCollider2D) continue;
+                
+                // Calculate tile position
+                Vector3 worldPos = tilemapContainer.TransformPoint(col.offset);
+                Vector3Int tilePos = currentTilemap.WorldToCell(worldPos);
+                
+                TileBase tile = currentTilemap.GetTile(tilePos);
+                
+                // Check if this position SHOULD have a collider
+                bool shouldHaveCollider = false;
+                
+                if (tile != null)
+                {
+                    Sprite tileSprite = GetTileSprite(currentTilemap, tilePos);
+                    TileColliderData matchingData = GetMatchingColliderData(tile, tileSprite);
+                    if (matchingData != null)
+                    {
+                        shouldHaveCollider = true;
+                    }
+                }
+
+                if (!shouldHaveCollider)
+                {
+                    collidersToRemove.Add(col);
+                    
+                    // Remove from existing keys
+                    string key = GetColliderKey(currentTilemap, tilePos);
+                    if (existingColliderKeys.Contains(key))
+                    {
+                        existingColliderKeys.Remove(key);
+                    }
+                }
+            }
+
+            // Destroy identified colliders
+            foreach (Collider2D col in collidersToRemove)
+            {
+                if (Application.isPlaying)
+                {
+                    Destroy(col);
+                }
+                else
+                {
+                    DestroyImmediate(col);
+                }
+                removedCount++;
+            }
+            
+            // If container is now empty, we could delete it, but let's keep it for now as the tilemap still exists
+        }
+
+        if (removedCount > 0)
+        {
+            Debug.Log($"TilemapColliderManager: Removed {removedCount} unwanted colliders.");
+        }
+    }
+
+    /// <summary>
+    /// Completely clears and regenerates all colliders
+    /// </summary>
+    public void RebuildColliders()
+    {
+        ClearColliders();
+        GenerateColliders();
+    }
     
+    /// <summary>
+    /// Removes a specific collider component and updates the internal key tracking
+    /// </summary>
+    public void RemoveCollider(Collider2D col)
+    {
+        if (col == null) return;
+        
+        // We need to find the tilemap and position to remove the key
+        Transform container = col.transform;
+        string containerName = container.name;
+        
+        if (containerName.StartsWith("Colliders_"))
+        {
+            string tilemapName = containerName.Replace("Colliders_", "");
+            
+            // Find the tilemap
+            Tilemap currentTilemap = null;
+            foreach (var tm in foundTilemaps)
+            {
+                if (tm != null && tm.name == tilemapName)
+                {
+                    currentTilemap = tm;
+                    break;
+                }
+            }
+            
+            if (currentTilemap != null)
+            {
+                // Calculate tile position
+                Vector3 worldPos = container.TransformPoint(col.offset);
+                Vector3Int tilePos = currentTilemap.WorldToCell(worldPos);
+                
+                string key = GetColliderKey(currentTilemap, tilePos);
+                if (existingColliderKeys.Contains(key))
+                {
+                    existingColliderKeys.Remove(key);
+                }
+            }
+        }
+        
+        if (Application.isPlaying)
+        {
+            Destroy(col);
+        }
+        else
+        {
+            DestroyImmediate(col);
+        }
+    }
+    
+    /// <summary>
+    /// Logs all configured collider rules to the console
+    /// </summary>
+    public void LogConfiguration()
+    {
+        if (colliderData == null || colliderData.Length == 0)
+        {
+            Debug.Log("TilemapColliderManager: No collider rules configured.");
+            return;
+        }
+
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine($"TilemapColliderManager: Found {colliderData.Length} collider rules:");
+        
+        for (int i = 0; i < colliderData.Length; i++)
+        {
+            var data = colliderData[i];
+            if (data == null) continue;
+            
+            string name = "Unknown";
+            if (data.matchMode == MatchMode.ByTileAsset && data.tileAsset != null)
+            {
+                name = $"Tile: {data.tileAsset.name}";
+            }
+            else if (data.matchMode == MatchMode.BySprite && data.spriteAsset != null)
+            {
+                name = $"Sprite: {data.spriteAsset.name}";
+            }
+            
+            sb.AppendLine($"  {i+1}. {name} ({data.colliderType})");
+        }
+        
+        Debug.Log(sb.ToString());
+    }
+
     /// <summary>
     /// Clears all generated colliders
     /// </summary>
@@ -504,35 +767,134 @@ public class TilemapColliderManager : MonoBehaviour
         
         existingColliderKeys.Clear();
     }
+
+    /// <summary>
+    /// Public accessor for the colliders container
+    /// </summary>
+    public Transform CollidersContainer
+    {
+        get
+        {
+            EnsureCollidersContainer();
+            return collidersContainer;
+        }
+    }
+    
+    /// <summary>
+    /// Bakes colliders for Git/Push by removing all individual collider components
+    /// and keeping only the CompositeCollider2D. This drastically reduces file size.
+    /// Use "Rebuild Colliders" to regenerate individual colliders for editing.
+    /// </summary>
+    public void BakeColliders()
+    {
+        if (collidersContainer == null)
+        {
+            Debug.LogWarning("TilemapColliderManager: No colliders container found. Nothing to bake.");
+            return;
+        }
+        
+        int removedCount = 0;
+        
+        foreach (Transform layerContainer in collidersContainer)
+        {
+            if (layerContainer == null) continue;
+            
+            // Get all Collider2D components
+            Collider2D[] colliders = layerContainer.GetComponents<Collider2D>();
+            
+            foreach (Collider2D col in colliders)
+            {
+                // Keep CompositeCollider2D, remove everything else
+                if (col is CompositeCollider2D) continue;
+                
+                if (Application.isPlaying)
+                {
+                    Destroy(col);
+                }
+                else
+                {
+                    DestroyImmediate(col);
+                }
+                removedCount++;
+            }
+        }
+        
+        // Clear the internal tracking since individual colliders are gone
+        existingColliderKeys.Clear();
+        
+        Debug.Log($"TilemapColliderManager: Baked colliders for Git! Removed {removedCount} individual collider components. Only CompositeCollider2D remains. File size should be much smaller now. Use 'Rebuild Colliders' to restore individual colliders for editing.");
+    }
+
+    /// <summary>
+    /// Removes a specific collider GameObject and updates the internal registry
+    /// </summary>
+    public void RemoveCollider(GameObject colliderObj)
+    {
+        if (colliderObj == null) return;
+
+        // Try to remove from keys
+        // We need to reconstruct the key
+        // Parent should be Colliders_MapName
+        Transform parent = colliderObj.transform.parent;
+        if (parent != null && parent.name.StartsWith("Colliders_"))
+        {
+            string tilemapName = parent.name.Replace("Colliders_", "");
+            
+            // Name is Collider_x_y
+            string[] parts = colliderObj.name.Split('_');
+            if (parts.Length >= 3 && int.TryParse(parts[1], out int x) && int.TryParse(parts[2], out int y))
+            {
+                // Assuming Z is 0 as per ScanExistingColliders
+                string key = $"{tilemapName}_{x}_{y}_0";
+                if (existingColliderKeys.Contains(key))
+                {
+                    existingColliderKeys.Remove(key);
+                }
+            }
+        }
+
+        if (Application.isPlaying)
+        {
+            Destroy(colliderObj);
+        }
+        else
+        {
+            DestroyImmediate(colliderObj);
+        }
+    }
     
     /// <summary>
     /// Applies CompositeCollider2D optimization to combine colliders
     /// Note: CompositeCollider2D works best with BoxCollider2D and PolygonCollider2D
     /// </summary>
+    /// <summary>
+    /// Applies CompositeCollider2D optimization to combine colliders per layer
+    /// </summary>
     private void ApplyCompositeCollider()
     {
         if (collidersContainer == null) return;
         
-        // Add Rigidbody2D and CompositeCollider2D to container
-        Rigidbody2D rb = collidersContainer.GetComponent<Rigidbody2D>();
-        if (rb == null)
+        foreach (Transform layerContainer in collidersContainer)
         {
-            rb = collidersContainer.gameObject.AddComponent<Rigidbody2D>();
-            rb.bodyType = RigidbodyType2D.Static;
-            rb.simulated = false; // Static colliders don't need simulation
+            if (layerContainer == null) continue;
+            
+            // Add Rigidbody2D and CompositeCollider2D to the LAYER container
+            Rigidbody2D rb = layerContainer.GetComponent<Rigidbody2D>();
+            if (rb == null)
+            {
+                rb = layerContainer.gameObject.AddComponent<Rigidbody2D>();
+                rb.bodyType = RigidbodyType2D.Static;
+                rb.simulated = false; // Static colliders don't need simulation
+            }
+            
+            CompositeCollider2D composite = layerContainer.GetComponent<CompositeCollider2D>();
+            if (composite == null)
+            {
+                composite = layerContainer.gameObject.AddComponent<CompositeCollider2D>();
+                composite.geometryType = CompositeCollider2D.GeometryType.Polygons;
+                composite.generationType = CompositeCollider2D.GenerationType.Synchronous; // Force immediate generation
+            }
         }
-        
-        CompositeCollider2D composite = collidersContainer.GetComponent<CompositeCollider2D>();
-        if (composite == null)
-        {
-            composite = collidersContainer.gameObject.AddComponent<CompositeCollider2D>();
-            composite.geometryType = CompositeCollider2D.GeometryType.Polygons;
-        }
-        
-        // Unity automatically uses child colliders with CompositeCollider2D
-        // The colliders will be combined into the composite collider
-        // Note: Only BoxCollider2D and PolygonCollider2D are supported by CompositeCollider2D
-        // CircleCollider2D and EdgeCollider2D will be ignored
     }
     
     /// <summary>
