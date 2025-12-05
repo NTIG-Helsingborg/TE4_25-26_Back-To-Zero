@@ -48,6 +48,7 @@ public class Health : MonoBehaviour
         
         // Reset to max health when enabled (e.g., after respawn)
         currentHealth = maxHealth;
+        isInvincible = false; // Reset invincibility on respawn
         RefreshHealthBarFill();
     }
 
@@ -98,6 +99,7 @@ public class Health : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            isInvincible = true;
             Die();
         }
     }
@@ -122,6 +124,7 @@ public class Health : MonoBehaviour
         }
         if (currentHealth <= 0)
         {
+            isInvincible = true;
             Die();
         }
     }
@@ -133,6 +136,13 @@ public class Health : MonoBehaviour
         {   
             currentHealth = maxHealth;
         }
+        
+        // Remove invincibility if health is restored above 0
+        if (currentHealth > 0 && isInvincible)
+        {
+            isInvincible = false;
+        }
+        
         RefreshHealthBarFill();
         EvaluateHarvestability();
     }

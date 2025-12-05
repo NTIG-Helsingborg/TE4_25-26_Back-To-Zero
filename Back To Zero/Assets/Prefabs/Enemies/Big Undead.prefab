@@ -303,6 +303,8 @@ MonoBehaviour:
   animator: {fileID: 3184237354266647445}
   aiPath: {fileID: 6514771158002808050}
   idleThreshold: 0.01
+  player: {fileID: 0}
+  facePlayerWhenIdle: 1
 --- !u!1 &7656383667565696335
 GameObject:
   m_ObjectHideFlags: 0
@@ -320,6 +322,7 @@ GameObject:
   - component: {fileID: 6301170696653799269}
   - component: {fileID: 1124137958566066153}
   - component: {fileID: 1792388255038845749}
+  - component: {fileID: 3439214215697392983}
   m_Layer: 0
   m_Name: Big Undead
   m_TagString: Enemy
@@ -544,6 +547,7 @@ MonoBehaviour:
   flashSpriteRenderer: {fileID: 8463646950514356660}
   animator: {fileID: 3184237354266647445}
   destroyAfterDeathDelay: 0.1
+  hurtResetDelay: 0.2
 --- !u!114 &1792388255038845749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -558,3 +562,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   resistance: 1
   defaultDuration: 0.15
+--- !u!114 &3439214215697392983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7656383667565696335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6de1aafb03154142926ac2e23a04378, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  droppedItemPrefab: {fileID: 2412890604946423907, guid: e8f0a8d530a7ce94aab606f74fd65ddf, type: 3}
+  lootlist:
+  - {fileID: 11400000, guid: 346716a69a6dff84cbfbd8f3faf9e29b, type: 2}
+  - {fileID: 11400000, guid: 7c64497ce766bc94e90b74ebe0703b2e, type: 2}
+  - {fileID: 11400000, guid: 5e899d7ef3777164cbfe49e7c4d4dbc4, type: 2}
+  - {fileID: 11400000, guid: c9234329ac5cabc49b062ef9fc7f5808, type: 2}
+  - {fileID: 11400000, guid: 2a3e2a8c7d5e62945b9fb95a9fed7150, type: 2}
+  - {fileID: 11400000, guid: 84f03799a04185343a656e150250d138, type: 2}
+  numberOfItemsToDrop: 3
+  coinAnimatorController: {fileID: 9100000, guid: c59391e5a9e437f419eb0d0f6f8acbdf, type: 2}
+  hpPotAnimatorController: {fileID: 0}
+  gemAnimatorController: {fileID: 9100000, guid: 623c374f991833e4caf64c6cff4ca808, type: 2}
+  powerStoneAnimatorController: {fileID: 9100000, guid: f1435e3c32df2f648b779c5ef5caea91, type: 2}
+  ringOfHealthAnimatorController: {fileID: 9100000, guid: 8dc706a9d786b9845bc639f686612f4c, type: 2}
+  emberForgedGauntletAnimatorController: {fileID: 9100000, guid: 3dc012ca39848d440b411b56b6a0f69a, type: 2}
+  bloodSkullAnimatorController: {fileID: 9100000, guid: 5b2eda896205b874f9f54ca3981a99d7, type: 2}

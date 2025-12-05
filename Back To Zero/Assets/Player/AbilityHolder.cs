@@ -16,9 +16,12 @@ public class AbilityHolder : MonoBehaviour
     public KeyCode key;
     [SerializeField] private Animator animator;
     private const string IsAttackingParam = "IsAttacking";
+    private Health playerHealth;
+    
     void Awake()
     {
         key = KeyCode.None;
+        playerHealth = GetComponent<Health>();
     }
 
     // Allow AbilitySetter to inject the player's Animator
@@ -40,6 +43,10 @@ public class AbilityHolder : MonoBehaviour
         switch (state){
             case AbilityState.ready:
                 if (Input.GetKeyDown(key)){
+                    // Don't allow ability use if player is dead (0 or less HP)
+                    if (playerHealth != null && playerHealth.GetCurrentHealth() <= 0)
+                        break;
+                        
                     if (ability != null && ability.CanActivate())
                     {
                         TriggerAbility();
@@ -73,6 +80,10 @@ public class AbilityHolder : MonoBehaviour
     // Public method to manually trigger the ability
     public void TriggerAbility()
     {
+        // Don't allow ability use if player is dead (0 or less HP)
+        if (playerHealth != null && playerHealth.GetCurrentHealth() <= 0)
+            return;
+            
         if (state == AbilityState.ready && ability != null)
         {
             ability.Activate();

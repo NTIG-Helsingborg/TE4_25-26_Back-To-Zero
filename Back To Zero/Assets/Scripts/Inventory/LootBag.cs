@@ -20,6 +20,18 @@ public class LootBag : MonoBehaviour
     
     [Tooltip("Animator controller for gems")]
     public RuntimeAnimatorController gemAnimatorController;
+    
+    [Tooltip("Animator controller for PowerStone")]
+    public RuntimeAnimatorController powerStoneAnimatorController;
+    
+    [Tooltip("Animator controller for Ring of Health")]
+    public RuntimeAnimatorController ringOfHealthAnimatorController;
+    
+    [Tooltip("Animator controller for EmberForgedGauntlet")]
+    public RuntimeAnimatorController emberForgedGauntletAnimatorController;
+    
+    [Tooltip("Animator controller for BloodSkull")]
+    public RuntimeAnimatorController bloodSkullAnimatorController;
 
     List<ItemSO> GetDroppedItems()
     {
@@ -89,7 +101,7 @@ public class LootBag : MonoBehaviour
                     animator = droppedItem.AddComponent<Animator>();
                 }
                 
-                // Assign the appropriate animator controller based on item type
+                // Assign the appropriate animator controller based on item type or name
                 if (item.statToChange == ItemSO.StatToChange.Coin && coinAnimatorController != null)
                 {
                     animator.runtimeAnimatorController = coinAnimatorController;
@@ -101,6 +113,22 @@ public class LootBag : MonoBehaviour
                 else if (item.statToChange == ItemSO.StatToChange.Gem && gemAnimatorController != null)
                 {
                     animator.runtimeAnimatorController = gemAnimatorController;
+                }
+                else if (item.itemName.Contains("PowerStone") && powerStoneAnimatorController != null)
+                {
+                    animator.runtimeAnimatorController = powerStoneAnimatorController;
+                }
+                else if (item.itemName.Contains("Ring of Health") && ringOfHealthAnimatorController != null)
+                {
+                    animator.runtimeAnimatorController = ringOfHealthAnimatorController;
+                }
+                else if (item.itemName.Contains("EmberForgedGauntlet") && emberForgedGauntletAnimatorController != null)
+                {
+                    animator.runtimeAnimatorController = emberForgedGauntletAnimatorController;
+                }
+                else if (item.itemName.Contains("BloodSkull") && bloodSkullAnimatorController != null)
+                {
+                    animator.runtimeAnimatorController = bloodSkullAnimatorController;
                 }
 
                 // Configure the Item component with data from ItemSO
