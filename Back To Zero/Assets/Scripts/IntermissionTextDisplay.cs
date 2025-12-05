@@ -45,10 +45,20 @@ public class IntermissionTextDisplay : MonoBehaviour
         public bool triggerOnce = true; // If true, only triggers once
         public bool startDarkened = false; // If true and trigger is OnStart, starts already darkened
         
-        [Header("Display Options")]
+        public float customDisplayDuration = -1f; // Custom duration for this entry (-1 = use global setting)
+        public bool waitForInput = false; // If true, wait for key press instead of auto-dismissing
+        public KeyCode dismissKey = KeyCode.Space; // Key to dismiss intermission (only if waitForInput is true)
+        
         public bool enableText = true; // Show text for this entry
         public bool enableOverlay = true; // Show dark overlay for this entry
         public bool enableDarkening = true; // Enable darkening effects (overlay + canvas fade) for this entry
+        
+        [Range(0f, 1f)]
+        public float overlayOpacity = 1f; // Target opacity for the overlay
+        
+        public bool forceStart = false; // If true, interrupts any currently playing intermission
+        
+        public bool snappyCanvas = false; // If true, skips fade-in animations
         
         public bool playAfterEntry = false; // If true, plays after another entry completes
         [HideInInspector]
@@ -59,7 +69,6 @@ public class IntermissionTextDisplay : MonoBehaviour
     [SerializeField] private IntermissionEntry[] intermissionEntries = new IntermissionEntry[0];
     
     [Header("Background Darkening")]
-    [SerializeField] private bool enableDarkening = true;
     [SerializeField] private Image darkOverlay; // Full-screen UI Image overlay for darkening
         [SerializeField] private Color overlayColor = Color.black;
         [SerializeField] private float overlayFadeInDuration = 1f;
@@ -74,6 +83,8 @@ public class IntermissionTextDisplay : MonoBehaviour
     private Queue<string> messageQueue = new Queue<string>();
     private bool isDisplaying = false;
     private Coroutine currentDisplayCoroutine;
+    private Coroutine activeTriggerCoroutine; // Track the active trigger coroutine
+    private int currentActiveEntryIndex = -1; // Track the currently active entry index
     private Dictionary<int, bool> entryTriggered = new Dictionary<int, bool>(); // Track which entries have triggered
     private Dictionary<int, bool> entryCompleted = new Dictionary<int, bool>(); // Track which entries have completed
     private bool canvasWasEnabled = false;
@@ -188,11 +199,11 @@ public class IntermissionTextDisplay : MonoBehaviour
     /// </summary>
     private void HandleStartDarkened()
     {
-        bool shouldStartDarkened = HasStartDarkenedEntry();
+        IntermissionEntry startEntry = GetStartDarkenedEntry();
         
-        if (shouldStartDarkened && enableDarkening)
+        if (startEntry != null)
         {
-            SetOverlayColor(1f);
+            SetOverlayColor(startEntry.overlayOpacity);
             
             if (canvas != null && canvasGroup != null)
             {
@@ -203,20 +214,20 @@ public class IntermissionTextDisplay : MonoBehaviour
     }
     
     /// <summary>
-    /// Checks if any OnStart entry wants to start darkened
+    /// Checks if any OnStart entry wants to start darkened and returns it
     /// </summary>
-    private bool HasStartDarkenedEntry()
+    private IntermissionEntry GetStartDarkenedEntry()
     {
-        if (intermissionEntries == null) return false;
+        if (intermissionEntries == null) return null;
         
         foreach (var entry in intermissionEntries)
         {
             if (entry != null && entry.triggerType == TriggerType.OnStart && entry.startDarkened)
             {
-                return true;
+                return entry;
             }
         }
-        return false;
+        return null;
     }
     
     void OnEnable()
@@ -255,7 +266,20 @@ public class IntermissionTextDisplay : MonoBehaviour
         }
         
         // Spam protection: Don't allow new triggers if a display is already active
-        if (isDisplaying)
+        // UNLESS forceStart is enabled for any of the triggered entries
+        bool isForced = false;
+        for (int i = 0; i < intermissionEntries.Length; i++)
+        {
+            var entry = intermissionEntries[i];
+            if (entry != null && entry.triggerType == triggerType && entry.forceStart)
+            {
+                // Basic check - doesn't verify all conditions yet, but good enough to bypass the early spam check
+                isForced = true;
+                break;
+            }
+        }
+        
+        if (isDisplaying && !isForced)
         {
             Debug.Log($"[IntermissionTextDisplay] CheckTriggers: Spam protection - Already displaying, ignoring triggerType={triggerType}");
             return;
@@ -298,7 +322,9 @@ public class IntermissionTextDisplay : MonoBehaviour
             }
             
             Debug.Log($"[IntermissionTextDisplay] CheckTriggers: Entry[{i}] TRIGGERED! Text='{entry.text}', TriggerType={entry.triggerType}");
-            StartCoroutine(TriggerEntryWithDelay(i, entry));
+            
+            // Store the coroutine so we can track it
+            activeTriggerCoroutine = StartCoroutine(TriggerEntryWithDelay(i, entry));
         }
     }
     
@@ -368,7 +394,14 @@ public class IntermissionTextDisplay : MonoBehaviour
     
     private IEnumerator TriggerEntryWithDelay(int index, IntermissionEntry entry)
     {
-        Debug.Log($"[IntermissionTextDisplay] TriggerEntryWithDelay: Entry[{index}] - Text='{entry.text}', TriggerType={entry.triggerType}, Delay={entry.triggerDelay}, EnableText={entry.enableText}, EnableOverlay={entry.enableOverlay}, EnableDarkening={entry.enableDarkening}");
+        Debug.Log($"[IntermissionTextDisplay] TriggerEntryWithDelay: Entry[{index}] - Text='{entry.text}', TriggerType={entry.triggerType}, Delay={entry.triggerDelay}, EnableText={entry.enableText}, EnableOverlay={entry.enableOverlay}, EnableDarkening={entry.enableDarkening}, ForceStart={entry.forceStart}");
+        
+        // Handle Force Start
+        if (entry.forceStart && isDisplaying)
+        {
+            Debug.Log($"[IntermissionTextDisplay] TriggerEntryWithDelay: Force Start enabled - interrupting current display");
+            StopCurrentDisplay(true); // Pass true to indicate we are starting a new one
+        }
         
         // Mark as triggered if triggerOnce is enabled
         if (entry.triggerOnce)
@@ -380,7 +413,8 @@ public class IntermissionTextDisplay : MonoBehaviour
         if (entry.triggerDelay > 0f)
         {
             Debug.Log($"[IntermissionTextDisplay] TriggerEntryWithDelay: Waiting {entry.triggerDelay} seconds before displaying Entry[{index}]");
-            yield return new WaitForSeconds(entry.triggerDelay);
+            // CRITICAL FIX: Use WaitForSecondsRealtime to avoid freezing if timeScale is 0
+            yield return new WaitForSecondsRealtime(entry.triggerDelay);
             
             // Check spam protection again after delay (another display might have started)
             if (isDisplaying)
@@ -388,6 +422,15 @@ public class IntermissionTextDisplay : MonoBehaviour
                 Debug.Log($"[IntermissionTextDisplay] TriggerEntryWithDelay: Spam protection - Display started during delay, cancelling Entry[{index}]");
                 yield break;
             }
+        }
+        
+        currentActiveEntryIndex = index;
+        
+        // Notify tutorial manager that intermission entry is starting
+        SimpleTutorialManager tutorialManager = FindObjectOfType<SimpleTutorialManager>();
+        if (tutorialManager != null)
+        {
+            tutorialManager.OnIntermissionEntryStart(index);
         }
         
         if (!string.IsNullOrEmpty(entry.text))
@@ -402,8 +445,17 @@ public class IntermissionTextDisplay : MonoBehaviour
             Debug.LogWarning($"[IntermissionTextDisplay] TriggerEntryWithDelay: Entry[{index}] has empty text, skipping display");
         }
         
+        // Notify tutorial manager that intermission entry is ending
+        if (tutorialManager != null)
+        {
+            tutorialManager.OnIntermissionEntryEnd(index);
+        }
+        
         entryCompleted[index] = true;
         yield return StartCoroutine(CheckPlayAfterEntries(index));
+        
+        currentActiveEntryIndex = -1;
+        activeTriggerCoroutine = null;
     }
     
     private bool HasMoreEntriesAfter(int currentIndex)
@@ -457,6 +509,7 @@ public class IntermissionTextDisplay : MonoBehaviour
         while (nextIndex >= 0)
         {
             var entry = intermissionEntries[nextIndex];
+            currentActiveEntryIndex = nextIndex;
             
             // Mark as triggered if triggerOnce is enabled
             if (entry.triggerOnce)
@@ -489,17 +542,23 @@ public class IntermissionTextDisplay : MonoBehaviour
         
         // Clear displaying flag when all chained entries are complete
         isDisplaying = false;
+        currentActiveEntryIndex = -1;
         Debug.Log($"[IntermissionTextDisplay] CheckPlayAfterEntries: All chained entries complete, isDisplaying={isDisplaying}");
     }
     
     private IEnumerator DisplayEntry(int index, IntermissionEntry entry, bool alreadyDarkened = false, bool hasMoreEntries = false)
     {
-        // Use per-entry settings, fall back to global settings if not set
+        // Use per-entry settings
         bool useText = entry.enableText;
         bool useOverlay = entry.enableOverlay;
-        bool useDarkening = entry.enableDarkening && enableDarkening; // Both entry and global must be enabled
+        bool useDarkening = entry.enableDarkening; // Only the per-entry setting matters now
+        float opacity = entry.overlayOpacity;
+        bool snappy = entry.snappyCanvas;
+        float duration = entry.customDisplayDuration >= 0 ? entry.customDisplayDuration : displayDuration;
+        bool waitInput = entry.waitForInput;
+        KeyCode key = entry.dismissKey;
         
-        yield return StartCoroutine(DisplayTextInternal(entry.text, alreadyDarkened, hasMoreEntries, useText, useOverlay, useDarkening));
+        yield return StartCoroutine(DisplayTextInternal(entry.text, alreadyDarkened, hasMoreEntries, useText, useOverlay, useDarkening, opacity, snappy, duration, waitInput, key));
     }
     
     /// <summary>
@@ -537,20 +596,21 @@ public class IntermissionTextDisplay : MonoBehaviour
     
     private IEnumerator DisplayMessage(string message, bool alreadyDarkened = false)
     {
-        // Use default settings for manual message display
-        yield return StartCoroutine(DisplayTextInternal(message, alreadyDarkened, false, true, true, enableDarkening));
+        // Use default settings for manual message display (darkening enabled by default)
+        yield return StartCoroutine(DisplayTextInternal(message, alreadyDarkened, false, true, true, true, 1f, false, displayDuration, false, KeyCode.Space));
     }
     
     /// <summary>
     /// Internal method that handles the actual text display logic - used by both DisplayEntry and DisplayMessage
     /// </summary>
     private IEnumerator DisplayTextInternal(string message, bool alreadyDarkened, bool hasMoreEntries, 
-        bool useText, bool useOverlay, bool useDarkening)
+        bool useText, bool useOverlay, bool useDarkening, float targetOverlayOpacity, bool snappyCanvas,
+        float duration, bool waitForInput, KeyCode dismissKey)
     {
         // Set displaying flag to prevent spam
         isDisplaying = true;
         
-        Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: Starting - Message='{message}', UseText={useText}, UseOverlay={useOverlay}, UseDarkening={useDarkening}, AlreadyDarkened={alreadyDarkened}");
+        Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: Starting - Message='{message}', UseText={useText}, UseOverlay={useOverlay}, UseDarkening={useDarkening}, AlreadyDarkened={alreadyDarkened}, Opacity={targetOverlayOpacity}, Snappy={snappyCanvas}, Duration={duration}, WaitForInput={waitForInput}");
         
         if (textDisplay == null && useText)
         {
@@ -566,12 +626,27 @@ public class IntermissionTextDisplay : MonoBehaviour
         
         FreezeGame();
         SetupTextDisplay(message, useText);
-        SetupCanvasDarkening(useDarkening, alreadyDarkened);
-        SetupOverlay(useOverlay, useDarkening);
+        SetupCanvasDarkening(useDarkening, alreadyDarkened, snappyCanvas);
+        SetupOverlay(useOverlay, useDarkening, alreadyDarkened);
         
-        yield return StartCoroutine(FadeInWithOverlay(alreadyDarkened, useText, useOverlay, useDarkening));
-        Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: Fade in complete, waiting {displayDuration} seconds");
-        yield return new WaitForSecondsRealtime(displayDuration);
+        yield return StartCoroutine(FadeInWithOverlay(alreadyDarkened, useText, useOverlay, useDarkening, targetOverlayOpacity, snappyCanvas));
+        Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: Fade in complete");
+        
+        // Wait for specified duration or input
+        if (waitForInput)
+        {
+            Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: Waiting for {dismissKey} key press...");
+            while (!Input.GetKeyDown(dismissKey))
+            {
+                yield return null;
+            }
+            Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: {dismissKey} pressed, dismissing");
+        }
+        else
+        {
+            Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: Waiting {duration} seconds");
+            yield return new WaitForSecondsRealtime(duration);
+        }
         
         UnfreezeGame();
         yield return StartCoroutine(FadeOutWithOverlay(hasMoreEntries, useText, useOverlay, useDarkening));
@@ -626,7 +701,7 @@ public class IntermissionTextDisplay : MonoBehaviour
     /// <summary>
     /// Sets up canvas darkening effects
     /// </summary>
-    private void SetupCanvasDarkening(bool useDarkening, bool alreadyDarkened)
+    private void SetupCanvasDarkening(bool useDarkening, bool alreadyDarkened, bool snappyCanvas = false)
     {
         if (useDarkening && !alreadyDarkened && canvas != null)
         {
@@ -639,27 +714,93 @@ public class IntermissionTextDisplay : MonoBehaviour
                 }
             }
             
+            // CRITICAL: Don't use SetActive(false) - it prevents tutorial from showing child UI!
+            // Always use CanvasGroup.alpha instead
             if (canvasGroup != null)
             {
-                StartCoroutine(FadeOutCanvas());
+                if (snappyCanvas)
+                {
+                    // Snap immediately to 0 alpha
+                    canvasGroup.alpha = 0f;
+                }
+                else
+                {
+                    // Fade out gradually
+                    StartCoroutine(FadeOutCanvas());
+                }
             }
             else
             {
-                canvas.gameObject.SetActive(false);
+                // No CanvasGroup - add one on the fly
+                Debug.LogWarning("[IntermissionTextDisplay] Canvas has no CanvasGroup! Adding one dynamically.");
+                canvasGroup = canvas.gameObject.AddComponent<CanvasGroup>();
+                originalCanvasAlpha = 1f;
+                
+                if (snappyCanvas)
+                {
+                    canvasGroup.alpha = 0f;
+                }
+                else
+                {
+                    StartCoroutine(FadeOutCanvas());
+                }
             }
+        }
+        else if (!useDarkening && alreadyDarkened && canvas != null)
+        {
+            // If we're already darkened but this entry doesn't want darkening,
+            // restore the canvas
+            Debug.Log($"[IntermissionTextDisplay] SetupCanvasDarkening: Entry doesn't want darkening but canvas is hidden, restoring");
+            StartCoroutine(FadeInCanvas());
         }
     }
     
     /// <summary>
     /// Sets up the dark overlay
     /// </summary>
-    private void SetupOverlay(bool useOverlay, bool useDarkening)
+    private void SetupOverlay(bool useOverlay, bool useDarkening, bool alreadyDarkened)
     {
-        if (useOverlay && useDarkening && darkOverlay != null)
+        if (darkOverlay == null) return;
+        
+        if (useOverlay && useDarkening)
         {
             darkOverlay.gameObject.SetActive(true);
             darkOverlay.transform.SetAsFirstSibling();
+            Debug.Log($"[IntermissionTextDisplay] SetupOverlay: Overlay enabled for this entry");
         }
+        else if (alreadyDarkened && (!useOverlay || !useDarkening))
+        {
+            // If we're already darkened but this entry doesn't want overlay/darkening,
+            // fade out the existing overlay immediately
+            Debug.Log($"[IntermissionTextDisplay] SetupOverlay: Entry doesn't want darkening but overlay is active, fading out");
+            StartCoroutine(FadeOutExistingOverlay());
+        }
+    }
+    
+    /// <summary>
+    /// Fades out an existing overlay when transitioning to an entry that doesn't want it
+    /// </summary>
+    private IEnumerator FadeOutExistingOverlay()
+    {
+        if (darkOverlay == null) yield break;
+        
+        float startAlpha = darkOverlay.color.a;
+        float targetAlpha = 0f;
+        float adjustedDuration = overlayFadeOutDuration / overlayFadeSpeed;
+        float elapsed = 0f;
+        
+        while (elapsed < adjustedDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float rawT = Mathf.Clamp01(elapsed / adjustedDuration);
+            float t = SmoothStep(rawT);
+            float currentAlpha = Mathf.Lerp(startAlpha, targetAlpha, t);
+            SetOverlayColor(currentAlpha);
+            yield return null;
+        }
+        
+        SetOverlayColor(targetAlpha);
+        Debug.Log($"[IntermissionTextDisplay] FadeOutExistingOverlay: Complete");
     }
     
     /// <summary>
@@ -698,7 +839,7 @@ public class IntermissionTextDisplay : MonoBehaviour
         var entry = intermissionEntries[index];
         if (entry != null && !string.IsNullOrEmpty(entry.text))
         {
-            StartCoroutine(TriggerEntryWithDelay(index, entry));
+            activeTriggerCoroutine = StartCoroutine(TriggerEntryWithDelay(index, entry));
         }
     }
     
@@ -726,21 +867,43 @@ public class IntermissionTextDisplay : MonoBehaviour
         entryCompleted.Clear();
     }
     
-    private IEnumerator FadeInWithOverlay(bool alreadyDarkened = false, bool useText = true, bool useOverlay = true, bool useDarkening = true)
+    private IEnumerator FadeInWithOverlay(bool alreadyDarkened = false, bool useText = true, bool useOverlay = true, bool useDarkening = true, float targetOverlayOpacity = 1f, bool snappyCanvas = false)
     {
-        Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Starting - UseText={useText}, UseOverlay={useOverlay}, UseDarkening={useDarkening}, AlreadyDarkened={alreadyDarkened}, EnableTextFadeIn={enableTextFadeIn}");
+        Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Starting - UseText={useText}, UseOverlay={useOverlay}, UseDarkening={useDarkening}, AlreadyDarkened={alreadyDarkened}, EnableTextFadeIn={enableTextFadeIn}, TargetOpacity={targetOverlayOpacity}, Snappy={snappyCanvas}");
         
         // Determine which effects need to fade in
         bool needsTextFade = useText && enableTextFadeIn && textDisplay != null;
-        bool needsOverlayFade = useOverlay && useDarkening && darkOverlay != null && !alreadyDarkened;
         
-        Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: NeedsTextFade={needsTextFade}, NeedsOverlayFade={needsOverlayFade}");
+        // Check if overlay needs fading (either it's not dark yet, or the opacity is different)
+        float currentOverlayAlpha = darkOverlay != null ? darkOverlay.color.a : 0f;
+        bool opacityChanged = Mathf.Abs(currentOverlayAlpha - targetOverlayOpacity) > 0.01f;
+        bool needsOverlayFade = useOverlay && useDarkening && darkOverlay != null && (!alreadyDarkened || opacityChanged);
+        
+        Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: NeedsTextFade={needsTextFade}, NeedsOverlayFade={needsOverlayFade}, OpacityChanged={opacityChanged}");
         
         // CRITICAL FIX: If text should be shown but fade is disabled, show it immediately
         if (useText && textDisplay != null && !enableTextFadeIn)
         {
             Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Text fade disabled, setting text color immediately to visible");
             textDisplay.color = textColor;
+        }
+        
+        // Snappy Canvas: Skip fading and set everything immediately
+        if (snappyCanvas)
+        {
+            Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Snappy Canvas enabled - skipping fade");
+            
+            if (useText && textDisplay != null)
+            {
+                textDisplay.color = textColor;
+            }
+            
+            if (useOverlay && useDarkening && darkOverlay != null)
+            {
+                SetOverlayColor(targetOverlayOpacity);
+            }
+            
+            yield break;
         }
         
         // If neither needs fading, skip the coroutine
@@ -755,7 +918,7 @@ public class IntermissionTextDisplay : MonoBehaviour
             }
             if (needsOverlayFade)
             {
-                SetOverlayColor(1f);
+                SetOverlayColor(targetOverlayOpacity);
                 Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Set overlay color immediately");
             }
             yield break;
@@ -787,10 +950,10 @@ public class IntermissionTextDisplay : MonoBehaviour
             }
         }
         
-        float startOverlayAlpha = alreadyDarkened ? 1f : 0f;
-        float targetOverlayAlpha = 1f;
+        float startOverlayAlpha = 0f;
+        float targetOverlayAlpha = targetOverlayOpacity;
         
-        if (darkOverlay != null && !alreadyDarkened)
+        if (darkOverlay != null)
         {
             startOverlayAlpha = darkOverlay.color.a;
         }
@@ -907,7 +1070,8 @@ public class IntermissionTextDisplay : MonoBehaviour
         }
         else if (keepOverlayDark && useOverlay && useDarkening)
         {
-            SetOverlayColor(1f);
+            // Keep current opacity (don't force to 1f)
+            // This allows chaining entries with different opacities to transition smoothly
         }
     }
     
@@ -927,7 +1091,7 @@ public class IntermissionTextDisplay : MonoBehaviour
         }
         
         canvasGroup.alpha = 0f;
-        canvas.gameObject.SetActive(false);
+        // Don't disable canvas - tutorial needs to show child UI!
     }
     
     private IEnumerator FadeInCanvas()
@@ -935,15 +1099,16 @@ public class IntermissionTextDisplay : MonoBehaviour
         if (canvas == null || canvasGroup == null) yield break;
         
         canvas.gameObject.SetActive(true);
-        canvasGroup.alpha = 0f;
         
+        // Start from current alpha instead of forcing to 0
+        float startAlpha = canvasGroup.alpha;
         float elapsed = 0f;
         
         while (elapsed < canvasFadeDuration)
         {
             elapsed += Time.unscaledDeltaTime;
             float t = elapsed / canvasFadeDuration;
-            canvasGroup.alpha = Mathf.Lerp(0f, originalCanvasAlpha, t);
+            canvasGroup.alpha = Mathf.Lerp(startAlpha, originalCanvasAlpha, t);
             yield return null;
         }
         
@@ -951,40 +1116,144 @@ public class IntermissionTextDisplay : MonoBehaviour
     }
     
     /// <summary>
-    /// Clear the message queue and stop current display
+    /// Stops the currently playing intermission immediately
     /// </summary>
-    public void ClearQueue()
+    public void StopCurrentDisplay(bool startingNew = false)
     {
-        messageQueue.Clear();
+        // CRITICAL FIX: Do NOT use StopAllCoroutines() as it kills the NEW trigger coroutine
+        // that called this method!
+        
         if (currentDisplayCoroutine != null)
         {
             StopCoroutine(currentDisplayCoroutine);
             currentDisplayCoroutine = null;
         }
         
-        if (freezeGame)
+        // Only stop the active trigger coroutine if we are NOT starting a new one
+        // (If we are starting a new one, this variable might already hold the new coroutine)
+        if (!startingNew && activeTriggerCoroutine != null)
         {
-            Time.timeScale = 1f;
+            StopCoroutine(activeTriggerCoroutine);
+            activeTriggerCoroutine = null;
         }
         
-        if (textDisplay != null)
+        // Ensure game is unfrozen
+        UnfreezeGame();
+        
+        // Notify tutorial manager to clean up
+        if (currentActiveEntryIndex >= 0)
         {
-            textDisplay.gameObject.SetActive(false);
+            SimpleTutorialManager tutorialManager = FindObjectOfType<SimpleTutorialManager>();
+            if (tutorialManager != null)
+            {
+                tutorialManager.OnIntermissionEntryEnd(currentActiveEntryIndex);
+            }
+            currentActiveEntryIndex = -1;
         }
         
-        if (enableDarkening)
-        {
-            SetOverlayColor(0f);
-        }
-        
-        if (enableDarkening && canvas != null && canvasWasEnabled)
-        {
-            canvas.gameObject.SetActive(true);
-        }
+        // Force instant cleanup of UI
+        ForceHideInstant();
         
         isDisplaying = false;
+        Debug.Log($"[IntermissionTextDisplay] StopCurrentDisplay: Interrupted current display (StartingNew={startingNew})");
+    }
+
+    /// <summary>
+    /// Triggers any entries associated with the given collider object
+    /// </summary>
+    public void TriggerByObject(GameObject obj)
+    {
+        if (intermissionEntries == null) return;
+        
+        for (int i = 0; i < intermissionEntries.Length; i++)
+        {
+            var entry = intermissionEntries[i];
+            if (entry != null && entry.specificColliderObject == obj)
+            {
+                TryTriggerEntry(i);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Tries to trigger an entry, respecting its conditions (TriggerOnce, etc.)
+    /// </summary>
+    public void TryTriggerEntry(int index)
+    {
+        if (intermissionEntries == null || index < 0 || index >= intermissionEntries.Length) return;
+        
+        var entry = intermissionEntries[index];
+        if (entry == null) return;
+        
+        // Check if allowed to trigger
+        if (!CanTriggerEntry(index, entry))
+        {
+            Debug.Log($"[IntermissionTextDisplay] TryTriggerEntry: Entry[{index}] skipped - already triggered");
+            return;
+        }
+        
+        // Check spam protection (unless forced)
+        if (isDisplaying && !entry.forceStart)
+        {
+            Debug.Log($"[IntermissionTextDisplay] TryTriggerEntry: Entry[{index}] skipped - display active");
+            return;
+        }
+        
+        activeTriggerCoroutine = StartCoroutine(TriggerEntryWithDelay(index, entry));
+    }
+
+    /// <summary>
+    /// Clear the message queue and stop current display
+    /// </summary>
+    public void ClearQueue()
+    {
+        messageQueue.Clear();
+        StopCurrentDisplay(false);
+    }
+    
+    /// <summary>
+    /// FORCE instant hide - skips all fades and immediately restores canvas
+    /// Called by SimpleTutorialManager when tutorial needs immediate cleanup
+    /// </summary>
+    public void ForceHideInstant()
+    {
+        Debug.Log("[IntermissionTextDisplay] ForceHideInstant: Instant cleanup requested");
+        
+        // Hide text immediately - but ONLY the text GameObject itself, not parents
+        if (textDisplay != null)
+        {
+            textDisplay.color = new Color(textColor.r, textColor.g, textColor.b, 0f);
+            textDisplay.gameObject.SetActive(false);
+            Debug.Log($"[IntermissionTextDisplay] Hidden textDisplay: {textDisplay.name}");
+        }
+        
+        // Hide overlay immediately - but ONLY the overlay GameObject itself, not parents
+        if (darkOverlay != null)
+        {
+            // Set alpha to 0
+            Color overlayColor = darkOverlay.color;
+            overlayColor.a = 0f;
+            darkOverlay.color = overlayColor;
+            
+            // Disable the Image component
+            darkOverlay.enabled = false;
+            
+            // Hide the GameObject
+            darkOverlay.gameObject.SetActive(false);
+            
+            Debug.Log($"[IntermissionTextDisplay] Hidden darkOverlay: {darkOverlay.name}");
+        }
+        
+        // Restore canvas immediately
+        if (canvas != null && canvasGroup != null)
+        {
+            canvasGroup.alpha = originalCanvasAlpha;
+            Debug.Log($"[IntermissionTextDisplay] Canvas alpha restored to {originalCanvasAlpha}");
+        }
+        
+        // Reset state
+        isDisplaying = false;
+        
+        Debug.Log("[IntermissionTextDisplay] ForceHideInstant: Complete");
     }
 }
-
-
-
