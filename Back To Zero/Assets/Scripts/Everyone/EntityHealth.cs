@@ -34,6 +34,10 @@ public class Health : MonoBehaviour
         HarvestAbility.HarvestSettingsChanged += OnHarvestSettingsChanged;
         healthBarOriginalLocalPosition = healthBarRect != null ? healthBarRect.localPosition : Vector3.zero;
         EvaluateHarvestability();
+        
+        // Reset to max health when enabled (e.g., after respawn)
+        currentHealth = maxHealth;
+        RefreshHealthBarFill();
     }
 
     private void OnDisable()

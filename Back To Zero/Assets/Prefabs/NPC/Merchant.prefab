@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8711762024274571660}
   - component: {fileID: 4427759566526115154}
   - component: {fileID: 6817370459598280974}
+  - component: {fileID: 9211231930602417712}
   m_Layer: 0
   m_Name: Merchant
   m_TagString: Untagged
@@ -31,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -3, z: 0}
-  m_LocalScale: {x: 10, y: 10, z: 1}
+  m_LocalScale: {x: 11, y: 11, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8848054647384763856}
@@ -179,7 +180,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shopRoot: {fileID: 388343545120030566}
   shopManager: {fileID: 7022187581113733097}
-  interactionRange: 2
+  interactionRange: 4
   playerTransform: {fileID: 0}
   shopItems:
   - itemSO: {fileID: 11400000, guid: 9ace17cda2edaec4cb8c48d15de77842, type: 2}
@@ -215,6 +216,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!210 &9211231930602417712
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1995578487102678916}
+  m_Enabled: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: -3
+  m_SortAtRoot: 0
 --- !u!1001 &3744446687842439186
 PrefabInstance:
   m_ObjectHideFlags: 0

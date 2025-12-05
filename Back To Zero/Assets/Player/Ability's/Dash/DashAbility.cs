@@ -16,6 +16,8 @@ public class DashAbility : Ability
     private Health playerHealth;
     private Collider2D[] playerColliders;
     private readonly List<Collider2D> disabledPlayerColliders = new();
+    private bool dashActive = false;
+    private Coroutine currentDashCoroutine;
     
     public override void Activate()
     {
@@ -40,7 +42,14 @@ public class DashAbility : Ability
             MonoBehaviour runner = playerMove != null ? playerMove : playerObject.GetComponent<MonoBehaviour>();
             if (runner != null)
             {
-                runner.StartCoroutine(PerformDash());
+                // Stop previous dash if still active
+                if (currentDashCoroutine != null)
+                {
+                    runner.StopCoroutine(currentDashCoroutine);
+                    EndDash();
+                }
+                
+                currentDashCoroutine = runner.StartCoroutine(PerformDash());
             }
         }
     }
@@ -74,6 +83,7 @@ public class DashAbility : Ability
         
         dashDirection.Normalize();
         
+        dashActive = true;
         SetPlayerCollidersEnabled(false);
 
         try
@@ -93,28 +103,61 @@ public class DashAbility : Ability
                 playerRigidbody.linearVelocity = dashDirection * dashingPower;
             }
 
-            // Wait for dash duration
-            yield return new WaitForSeconds(dashingTime);
+            // Check for collisions during dash
+            float elapsed = 0f;
+            while (elapsed < dashingTime && dashActive)
+            {
+                // Cast a circle to detect collisions ahead
+                RaycastHit2D[] hits = Physics2D.CircleCastAll(
+                    playerObject.transform.position,
+                    0.5f, // Adjust radius as needed
+                    dashDirection,
+                    playerRigidbody.linearVelocity.magnitude * Time.fixedDeltaTime,
+                    LayerMask.GetMask("Default", "Terrain", "Obstacle") // Add your collision layers
+                );
+
+                // Check if we hit a non-trigger collider
+                foreach (var hit in hits)
+                {
+                    if (hit.collider != null && !hit.collider.isTrigger && hit.collider.gameObject != playerObject)
+                    {
+                        // Hit a solid object, end dash
+                        dashActive = false;
+                        break;
+                    }
+                }
+
+                elapsed += Time.fixedDeltaTime;
+                yield return new WaitForFixedUpdate();
+            }
         }
         finally
         {
-            if (playerRigidbody != null)
-            {
-                playerRigidbody.linearVelocity = Vector2.zero;
-            }
-
-            if (trailRenderer != null)
-            {
-                trailRenderer.emitting = false;
-            }
-
-            if (playerHealth != null)
-            {
-                playerHealth.isInvincible = false;
-            }
-
-            SetPlayerCollidersEnabled(true);
+            EndDash();
+            currentDashCoroutine = null;
         }
+    }
+
+    private void EndDash()
+    {
+        dashActive = false;
+        
+        if (playerRigidbody != null)
+        {
+            playerRigidbody.linearVelocity = Vector2.zero;
+        }
+
+        if (trailRenderer != null)
+        {
+            trailRenderer.emitting = false;
+        }
+
+        if (playerHealth != null)
+        {
+            playerHealth.isInvincible = false;
+        }
+
+        SetPlayerCollidersEnabled(true);
     }
 
     private void SetPlayerCollidersEnabled(bool enabled)

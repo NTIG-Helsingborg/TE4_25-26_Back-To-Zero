@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5677372387861933359}
+  - component: {fileID: 5686256778567704396}
   m_Layer: 0
   m_Name: PotofGreedmiddle 1
   m_TagString: Untagged
@@ -32,6 +33,18 @@ Transform:
   - {fileID: 8080210018076037453}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!210 &5686256778567704396
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4562828038282411940}
+  m_Enabled: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 2
+  m_SortAtRoot: 0
 --- !u!1 &8700436897569576750
 GameObject:
   m_ObjectHideFlags: 0
@@ -140,6 +153,9 @@ MonoBehaviour:
   currentHealth: 1
   isInvincible: 0
   healthBar: {fileID: 0}
+  shieldBar: {fileID: 0}
+  currentShield: 0
+  shieldTimer: 0
   grantsExperienceOnDeath: 0
   experienceReward: 10
   enableHarvestFeedback: 0
