@@ -152,9 +152,11 @@ public class IntermissionTextDisplay : MonoBehaviour
         
         if (darkOverlay != null)
         {
-            darkOverlay.gameObject.SetActive(true);
+            // Don't enable at start - it will be enabled when intermission triggers
+            // Just set the color to 0 and position it
             SetOverlayColor(0f);
             darkOverlay.transform.SetAsFirstSibling();
+            // Keep GameObject state as it is in the scene (disabled by default)
         }
     }
     
@@ -166,6 +168,23 @@ public class IntermissionTextDisplay : MonoBehaviour
         if (darkOverlay != null)
         {
             darkOverlay.color = new Color(overlayColor.r, overlayColor.g, overlayColor.b, alpha);
+            // CRITICAL: Ensure the Image component is enabled and the GameObject is active
+            // Unity might disable components when GameObject is disabled, so re-enable them
+            if (!darkOverlay.enabled)
+            {
+                darkOverlay.enabled = true;
+                Debug.LogWarning($"[IntermissionTextDisplay] SetOverlayColor: darkOverlay Image was disabled, re-enabled it");
+            }
+            if (!darkOverlay.gameObject.activeSelf)
+            {
+                darkOverlay.gameObject.SetActive(true);
+                Debug.LogWarning($"[IntermissionTextDisplay] SetOverlayColor: darkOverlay GameObject was inactive, activated it");
+            }
+            Debug.Log($"[IntermissionTextDisplay] SetOverlayColor: Set overlay alpha to {alpha}, CurrentColor={darkOverlay.color}, GameObjectActive={darkOverlay.gameObject.activeSelf}, ImageEnabled={darkOverlay.enabled}");
+        }
+        else
+        {
+            Debug.LogWarning($"[IntermissionTextDisplay] SetOverlayColor: darkOverlay is NULL! Cannot set color.");
         }
     }
     
@@ -203,13 +222,26 @@ public class IntermissionTextDisplay : MonoBehaviour
         
         if (startEntry != null)
         {
+            if (darkOverlay == null)
+            {
+                Debug.LogWarning($"[IntermissionTextDisplay] HandleStartDarkened: Entry found but darkOverlay is NULL! Cannot apply darkness.");
+                return;
+            }
+            
+            // Set the color but DON'T enable the GameObject - it will be enabled when the entry displays
+            // We can set the color even if disabled, Unity will store it
             SetOverlayColor(startEntry.overlayOpacity);
+            Debug.Log($"[IntermissionTextDisplay] HandleStartDarkened: Overlay color set to opacity {startEntry.overlayOpacity} (GameObject will be enabled when entry displays)");
             
             if (canvas != null && canvasGroup != null)
             {
                 canvasGroup.alpha = 0f;
                 canvas.gameObject.SetActive(false);
             }
+        }
+        else
+        {
+            Debug.Log($"[IntermissionTextDisplay] HandleStartDarkened: No OnStart entry with startDarkened=true found");
         }
     }
     
@@ -627,7 +659,7 @@ public class IntermissionTextDisplay : MonoBehaviour
         FreezeGame();
         SetupTextDisplay(message, useText);
         SetupCanvasDarkening(useDarkening, alreadyDarkened, snappyCanvas);
-        SetupOverlay(useOverlay, useDarkening, alreadyDarkened);
+        SetupOverlay(useOverlay, useDarkening, alreadyDarkened, targetOverlayOpacity);
         
         yield return StartCoroutine(FadeInWithOverlay(alreadyDarkened, useText, useOverlay, useDarkening, targetOverlayOpacity, snappyCanvas));
         Debug.Log($"[IntermissionTextDisplay] DisplayTextInternal: Fade in complete");
@@ -758,22 +790,43 @@ public class IntermissionTextDisplay : MonoBehaviour
     /// <summary>
     /// Sets up the dark overlay
     /// </summary>
-    private void SetupOverlay(bool useOverlay, bool useDarkening, bool alreadyDarkened)
+    private void SetupOverlay(bool useOverlay, bool useDarkening, bool alreadyDarkened, float targetOpacity = 1f)
     {
         if (darkOverlay == null) return;
         
-        if (useOverlay && useDarkening)
+        // CRITICAL FIX: If alreadyDarkened=true, we MUST enable the GameObject
+        // because HandleStartDarkened() already set the color, and it needs to be visible
+        // The entry's enableOverlay/enableDarkening settings control whether to keep it or fade it out
+        if (alreadyDarkened)
         {
+            // Enable the GameObject and Image component
             darkOverlay.gameObject.SetActive(true);
+            darkOverlay.enabled = true;
             darkOverlay.transform.SetAsFirstSibling();
-            Debug.Log($"[IntermissionTextDisplay] SetupOverlay: Overlay enabled for this entry");
+            
+            // CRITICAL: Re-set the color AFTER enabling, because Unity might reset it when enabling
+            // Use the target opacity from the current entry (which should match what HandleStartDarkened set)
+            SetOverlayColor(targetOpacity);
+            Debug.Log($"[IntermissionTextDisplay] SetupOverlay: Re-set overlay color to {targetOpacity} after enabling GameObject (alreadyDarkened=true, currentAlpha={darkOverlay.color.a})");
+            
+            // If this entry doesn't want overlay/darkening, fade it out
+            if (!useOverlay || !useDarkening)
+            {
+                Debug.Log($"[IntermissionTextDisplay] SetupOverlay: Overlay enabled for alreadyDarkened entry, but entry doesn't want darkening (useOverlay={useOverlay}, useDarkening={useDarkening}), fading out");
+                StartCoroutine(FadeOutExistingOverlay());
+            }
+            else
+            {
+                Debug.Log($"[IntermissionTextDisplay] SetupOverlay: Overlay enabled for alreadyDarkened entry (GameObject active, Image enabled, Alpha={darkOverlay.color.a}) - useOverlay={useOverlay}, useDarkening={useDarkening}");
+            }
         }
-        else if (alreadyDarkened && (!useOverlay || !useDarkening))
+        else if (useOverlay && useDarkening)
         {
-            // If we're already darkened but this entry doesn't want overlay/darkening,
-            // fade out the existing overlay immediately
-            Debug.Log($"[IntermissionTextDisplay] SetupOverlay: Entry doesn't want darkening but overlay is active, fading out");
-            StartCoroutine(FadeOutExistingOverlay());
+            // Enable the GameObject and Image component when intermission is triggered
+            darkOverlay.gameObject.SetActive(true);
+            darkOverlay.enabled = true;
+            darkOverlay.transform.SetAsFirstSibling();
+            Debug.Log($"[IntermissionTextDisplay] SetupOverlay: Overlay enabled for this entry (GameObject active, Image enabled)");
         }
     }
     
@@ -916,10 +969,12 @@ public class IntermissionTextDisplay : MonoBehaviour
                 textDisplay.color = textColor;
                 Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Set text color immediately (needsTextFade=true)");
             }
-            if (needsOverlayFade)
+            // CRITICAL FIX: Set overlay color if overlay/darkening is enabled, even if no fade is needed
+            // This ensures the overlay appears when alreadyDarkened=true and opacity matches
+            if (useOverlay && useDarkening && darkOverlay != null)
             {
                 SetOverlayColor(targetOverlayOpacity);
-                Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Set overlay color immediately");
+                Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Set overlay color immediately (useOverlay={useOverlay}, useDarkening={useDarkening}, alreadyDarkened={alreadyDarkened})");
             }
             yield break;
         }
@@ -964,7 +1019,9 @@ public class IntermissionTextDisplay : MonoBehaviour
         }
         else if (useOverlay && useDarkening)
         {
+            // CRITICAL: Set overlay color when no fade is needed (alreadyDarkened case)
             SetOverlayColor(targetOverlayAlpha);
+            Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Set overlay color to {targetOverlayAlpha} (no fade needed, alreadyDarkened={alreadyDarkened}, useOverlay={useOverlay}, useDarkening={useDarkening})");
         }
         
         float elapsed = 0f;
@@ -1001,8 +1058,14 @@ public class IntermissionTextDisplay : MonoBehaviour
             SetOverlayColor(targetOverlayAlpha);
             Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Overlay fade complete");
         }
+        else if (useOverlay && useDarkening && darkOverlay != null)
+        {
+            // Ensure overlay color is set even if no fade was needed (safety check)
+            SetOverlayColor(targetOverlayAlpha);
+            Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Final overlay color set to {targetOverlayAlpha} (no fade needed)");
+        }
         
-        Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Complete - TextAlpha={(textDisplay != null ? textDisplay.color.a.ToString() : "N/A")}");
+        Debug.Log($"[IntermissionTextDisplay] FadeInWithOverlay: Complete - TextAlpha={(textDisplay != null ? textDisplay.color.a.ToString() : "N/A")}, OverlayAlpha={(darkOverlay != null ? darkOverlay.color.a.ToString() : "N/A")}");
     }
     
     private IEnumerator FadeOutWithOverlay(bool keepOverlayDark = false, bool useText = true, bool useOverlay = true, bool useDarkening = true)
