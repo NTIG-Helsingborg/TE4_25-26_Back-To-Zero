@@ -13,9 +13,9 @@ public class Healing : MonoBehaviour
     [SerializeField] private InputActionReference healAction;
     [Tooltip("Inventory manager used to check or consume items when healing via input.")]
     [SerializeField] private InventoryManager inventoryManager;
-    [Tooltip("Item name to consume when healing via input.")]
+    [Tooltip("Item name to consume when healing via input. Auto-populated from Healing Item Definition if assigned.")]
     [SerializeField] private string healingItemName = "Potion";
-    [Tooltip("Item definition providing heal amount when using the input action.")]
+    [Tooltip("Item definition providing heal amount when using the input action. If assigned, item name will be auto-used from this.")]
     [SerializeField] private ItemSO healingItemDefinition;
     [Tooltip("Should the input-triggered heal consume an item once the heal completes?")]
     [SerializeField] private bool consumeItemOnHeal = true;
@@ -41,6 +41,18 @@ public class Healing : MonoBehaviour
     private bool isHealing;
 
     public bool IsHealing => isHealing;
+
+    /// <summary>
+    /// Gets the effective healing item name - uses ItemSO name if available, otherwise falls back to healingItemName string.
+    /// </summary>
+    private string GetEffectiveItemName()
+    {
+        if (healingItemDefinition != null && !string.IsNullOrEmpty(healingItemDefinition.itemName))
+        {
+            return healingItemDefinition.itemName;
+        }
+        return healingItemName;
+    }
 
     private void Awake()
     {
@@ -87,8 +99,32 @@ public class Healing : MonoBehaviour
     /// </summary>
     public bool TryStartHeal(ItemSO itemDefinition)
     {
+        if (itemDefinition == null)
+        {
+            return false;
+        }
+
         int amount = ResolveHealAmount(itemDefinition, fallbackHealAmount);
-        return TryStartHeal(amount, consumeAfterCast: false);
+        
+        // If this is being called from inventory usage, we should consume the item
+        bool shouldConsume = itemDefinition.statToChange == ItemSO.StatToChange.Health &&
+                            inventoryManager != null &&
+                            !string.IsNullOrEmpty(itemDefinition.itemName);
+        
+        if (shouldConsume)
+        {
+            // Check if we have the item before starting heal
+            if (inventoryManager.GetItemCount(itemDefinition.itemName) <= 0)
+            {
+                return false;
+            }
+            
+            // Store the item name for consumption after heal completes
+            pendingItemName = itemDefinition.itemName;
+            pendingConsumeItem = true;
+        }
+        
+        return TryStartHeal(amount, consumeAfterCast: shouldConsume);
     }
 
     /// <summary>
@@ -119,7 +155,11 @@ public class Healing : MonoBehaviour
 
         pendingHealAmount = healAmount;
         pendingConsumeItem = consumeAfterCast;
-        pendingItemName = consumeAfterCast ? healingItemName : null;
+        // Only override pendingItemName if it's not already set (from TryStartHeal(ItemSO))
+        if (consumeAfterCast && string.IsNullOrEmpty(pendingItemName))
+        {
+            pendingItemName = GetEffectiveItemName();
+        }
         healRoutine = StartCoroutine(HealRoutine());
         return true;
     }
@@ -161,11 +201,14 @@ public class Healing : MonoBehaviour
         ItemSO definitionToUse = healingItemDefinition;
         int healAmount = ResolveHealAmount(definitionToUse, fallbackHealAmount);
 
+        // Get the effective item name (from ItemSO if available, otherwise from string field)
+        string effectiveItemName = GetEffectiveItemName();
+        
         bool shouldConsume = consumeItemOnHeal &&
                              inventoryManager != null &&
-                             !string.IsNullOrEmpty(healingItemName);
+                             !string.IsNullOrEmpty(effectiveItemName);
 
-        if (shouldConsume && inventoryManager.GetItemCount(healingItemName) <= 0)
+        if (shouldConsume && inventoryManager.GetItemCount(effectiveItemName) <= 0)
         {
             return;
         }
