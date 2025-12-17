@@ -392,7 +392,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87e2a0dd75eb5401395c1c2331d50b9b, type: 3}
   m_Name: Objects
   m_EditorClassIdentifier: 
-  maxHealth: 25
+  maxHealth: 24
   currentHealth: 0
   isInvincible: 0
   healthBar: {fileID: 3740044683486148573}

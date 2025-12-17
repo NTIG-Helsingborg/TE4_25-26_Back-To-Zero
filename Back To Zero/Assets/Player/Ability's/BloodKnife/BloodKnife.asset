@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Bloodknife
   abilitySprite: {fileID: -3405186859655012684, guid: 2fb21b4fc00ad0840b6ae35c6c7c212a, type: 3}
-  cooldownTime: 0.3
+  cooldownTime: 0.4
   activeTime: 0
-  damage: 10
+  damage: 8
   range: 10
   speed: 18
-  HpCost: 5
+  HpCost: 3
   IsAbility: 1
   BloodKnifePrefab: {fileID: 3137868050130833703, guid: aba6c88923875fa499c13ae470d1028a, type: 3}
   firePointChildName: SpellTransform

@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: BloodWhip
   abilitySprite: {fileID: 4895402694010236284, guid: ea8b02aa146815d498b064ca711c4a25, type: 3}
-  cooldownTime: 0
+  cooldownTime: 1.2
   activeTime: 0.32
-  damage: 10
+  damage: 15
   knockbackForce: 3
   maxLength: 5
   thickness: 0.1
-  HpCost: 5
+  HpCost: 6
   IsAbility: 1
   segmentCount: 16
   extendTime: 0.12

@@ -560,7 +560,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bfbff9436fde064b80791ee45ff8876, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resistance: 1
+  resistance: 0.5
   defaultDuration: 0.15
 --- !u!114 &3439214215697392983
 MonoBehaviour:

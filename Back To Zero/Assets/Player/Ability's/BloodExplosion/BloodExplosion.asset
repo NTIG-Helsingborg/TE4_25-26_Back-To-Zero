@@ -16,11 +16,11 @@ MonoBehaviour:
   abilitySprite: {fileID: 2200852615102758396, guid: 3798ee278ccb2884b9f23688c161c031, type: 3}
   cooldownTime: 4
   activeTime: 0
-  damage: 20
+  damage: 25
   radius: 3.5
   range: 18
   speed: 7
-  HpCost: 10
+  HpCost: 15
   IsAbility: 1
   knockbackForce: 2
   damageLayers:

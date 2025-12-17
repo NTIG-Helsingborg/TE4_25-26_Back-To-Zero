@@ -16,10 +16,10 @@ MonoBehaviour:
   abilitySprite: {fileID: -2054530540237406577, guid: b425492b72a58f740b98bbb7b4fa797d, type: 3}
   cooldownTime: 1
   activeTime: 0.5
-  damage: 10
+  damage: 17
   knockbackForce: 3
   lifetime: 0.5
-  HpCost: 5
+  HpCost: 6
   IsAbility: 1
   slashPrefab: {fileID: 9040097098050866608, guid: a090cbda3bc275341a39faf62c279367, type: 3}
   firePointChildName: SpellTransform
