@@ -120,26 +120,47 @@ public class Projectiles : MonoBehaviour
         }
         else
         {
-            TryDamage(hit.gameObject);
-            DestroySelf();
+            // Only destroy if we actually damaged something (has Health component)
+            if (TryDamage(hit.gameObject))
+            {
+                DestroySelf();
+            }
+            // If no Health component (walls, ground, etc.), don't destroy - let projectile continue
         }
     }
 
     private bool IsOwner(Collider2D hit)
     {
         if (!owner) return false;
+        
+        // Check if the hit GameObject is the owner
+        if (hit.gameObject == owner) return true;
+        
+        // Check if the hit object is a child of the owner (walk up the hierarchy)
+        Transform current = hit.transform;
+        while (current != null)
+        {
+            if (current.gameObject == owner) return true;
+            current = current.parent;
+        }
+        
+        // Check via rigidbody (backup method for non-trigger collisions)
         var hitRb = hit.attachedRigidbody;
-        return hitRb && hitRb.gameObject == owner;
+        if (hitRb && hitRb.gameObject == owner) return true;
+        
+        return false;
     }
 
-    private void TryDamage(GameObject target)
+    private bool TryDamage(GameObject target)
     {
         var health = target.GetComponent<Health>();
         if (health != null && !health.isInvincible)
         {
             health.TakeDamage(damage);
             // Debug.Log($"Projectile dealt {damage} to {target.name}");
+            return true; // Successfully damaged
         }
+        return false; // No health component or invincible
     }
 
     private void DoExplosion()
