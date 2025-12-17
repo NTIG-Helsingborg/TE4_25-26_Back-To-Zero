@@ -1581,7 +1581,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventoryManager: {fileID: 0}
   moneyText: {fileID: 7513165979756640876}
-  gemsText: {fileID: 0}
+  gemsText: {fileID: 961182230136158293}
   moneyItemName: Coin
   gemItemName: Gem
 --- !u!1 &3560479423441704906
