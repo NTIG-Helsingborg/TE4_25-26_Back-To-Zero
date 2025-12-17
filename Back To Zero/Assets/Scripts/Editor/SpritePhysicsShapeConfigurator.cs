@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// Editor tool to configure sprite physics shapes to be full boxes.
@@ -87,101 +88,47 @@ public class SpritePhysicsShapeConfigurator : EditorWindow
     
     private void ConfigureSpritesToFullBox()
     {
-        int configuredCount = 0;
-        int failedCount = 0;
-        HashSet<string> modifiedPaths = new HashSet<string>();
+        // Note: Unity's API for programmatically setting physics shapes is not available in all versions
+        // This tool now provides instructions instead of doing it automatically
         
+        int spriteCount = selectedSprites.Count(s => s != null);
+        
+        if (spriteCount == 0)
+        {
+            EditorUtility.DisplayDialog("No Sprites Selected", "Please add sprites to configure.", "OK");
+            return;
+        }
+        
+        string instructions = "To configure sprite physics shapes to be full boxes:\n\n" +
+            "1. Select each sprite in the Project window\n" +
+            "2. In the Inspector, click 'Sprite Editor'\n" +
+            "3. In the Sprite Editor window, select 'Custom Physics Shape' from the dropdown\n" +
+            "4. Click 'Generate' or manually create a box shape with 4 points:\n" +
+            "   - Bottom-left: (0, 0)\n" +
+            "   - Bottom-right: (sprite width, 0)\n" +
+            "   - Top-right: (sprite width, sprite height)\n" +
+            "   - Top-left: (0, sprite height)\n" +
+            "5. Click 'Apply' to save changes\n\n" +
+            $"You have {spriteCount} sprite(s) selected. Configure them manually using the steps above.";
+        
+        EditorUtility.DisplayDialog("Manual Configuration Required", instructions, "OK");
+        
+        // Open the first sprite in Sprite Editor if available
         foreach (Sprite sprite in selectedSprites)
         {
-            if (sprite == null) continue;
-            
-            string path = AssetDatabase.GetAssetPath(sprite);
-            if (string.IsNullOrEmpty(path)) continue;
-            
-            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
-            if (importer == null)
+            if (sprite != null)
             {
-                failedCount++;
-                Debug.LogWarning($"Could not get TextureImporter for sprite '{sprite.name}' at '{path}'");
-                continue;
-            }
-            
-            // Get sprite data - works for both single and multiple sprites
-            SpriteMetaData[] spriteMetaData = importer.spritesheet;
-            
-            if (spriteMetaData == null || spriteMetaData.Length == 0)
-            {
-                failedCount++;
-                Debug.LogWarning($"No sprite data found for '{sprite.name}' at '{path}'. Make sure the texture is imported as a Sprite.");
-                continue;
-            }
-            
-            // Find the sprite in the spritesheet (for single sprites, this will be index 0)
-            int spriteIndex = -1;
-            for (int i = 0; i < spriteMetaData.Length; i++)
-            {
-                if (spriteMetaData[i].name == sprite.name)
+                string path = AssetDatabase.GetAssetPath(sprite);
+                if (!string.IsNullOrEmpty(path))
                 {
-                    spriteIndex = i;
+                    // Select the sprite in the project window
+                    Selection.activeObject = sprite;
+                    EditorGUIUtility.PingObject(sprite);
                     break;
                 }
             }
-            
-            if (spriteIndex == -1)
-            {
-                failedCount++;
-                Debug.LogWarning($"Could not find sprite '{sprite.name}' in spritesheet at '{path}'");
-                continue;
-            }
-            
-            // Get the sprite's rect
-            Rect spriteRect = spriteMetaData[spriteIndex].rect;
-            
-            // Calculate full box physics shape (in sprite pixels)
-            // The physics shape is in local sprite coordinates (0,0 is bottom-left of sprite)
-            Vector2[] physicsShape = new Vector2[]
-            {
-                new Vector2(0, 0),                                    // Bottom-left
-                new Vector2(spriteRect.width, 0),                    // Bottom-right
-                new Vector2(spriteRect.width, spriteRect.height),    // Top-right
-                new Vector2(0, spriteRect.height)                     // Top-left
-            };
-            
-            // Set physics shape
-            List<Vector2[]> physicsShapes = new List<Vector2[]>();
-            physicsShapes.Add(physicsShape);
-            spriteMetaData[spriteIndex].physicsShape = physicsShapes.ToArray();
-            
-            // Update spritesheet (works for both single and multiple sprites)
-            importer.spritesheet = spriteMetaData;
-            
-            // Mark for reimport
-            EditorUtility.SetDirty(importer);
-            modifiedPaths.Add(path);
-            configuredCount++;
         }
         
-        // Reimport all modified assets
-        foreach (string path in modifiedPaths)
-        {
-            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
-        }
-        
-        AssetDatabase.Refresh();
-        
-        string message = $"Configured {configuredCount} sprite(s) to use full-box physics shapes.";
-        if (failedCount > 0)
-        {
-            message += $"\n\n{failedCount} sprite(s) could not be configured (see console for details).";
-        }
-        message += "\n\nThe sprites have been reimported. Your TilemapCollider2D should now generate full-tile box colliders.";
-        
-        EditorUtility.DisplayDialog("Configuration Complete", message, "OK");
-        
-        Debug.Log($"Configured {configuredCount} sprite(s) to use full-box physics shapes.");
-        if (failedCount > 0)
-        {
-            Debug.LogWarning($"Failed to configure {failedCount} sprite(s).");
-        }
+        Debug.Log($"Sprite Physics Shape Configurator: Please configure {spriteCount} sprite(s) manually using the Sprite Editor.");
     }
 }
