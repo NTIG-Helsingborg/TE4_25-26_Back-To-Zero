@@ -31,10 +31,16 @@ public class InventoryManager : MonoBehaviour
     [Tooltip("The active equipment slots where equipped artifacts/equipment are placed.")]
     [SerializeField] private ActiveEquipmentSlot[] activeEquipmentSlots;
     
-    //Adds all Abilitys on start for testing purposes
+    //Adds abilities on start (for testing / starting loadouts)
     [Header("Startup Settings")]
-    [Tooltip("If enabled, all abilities from ItemSOs will be added to inventory on start.")]
-    [SerializeField] private bool addAllAbilitiesOnStart = true;
+    [Tooltip("If enabled, abilities will be added to inventory on start.")]
+    [SerializeField] private bool addAbilitiesOnStart = false;
+    
+    [Tooltip("If true, all abilities from ItemSOs are added on start. If false, only abilities listed in 'startingAbilities' are added.")]
+    [SerializeField] private bool useAllAbilitiesFromItemSOs = true;
+    
+    [Tooltip("Optional list of specific ability ItemSOs to add on start when 'useAllAbilitiesFromItemSOs' is false.")]
+    [SerializeField] private ItemSO[] startingAbilities;
     
     private ItemSlot selectedAbilitySlot = null; // Track which ability slot is selected
     private ItemSlot selectedArtifactSlot = null; // Track which artifact slot is selected
@@ -106,10 +112,49 @@ public class InventoryManager : MonoBehaviour
 
     private void Start()
     {
-        // Add all abilities to inventory on start if enabled
-        if (addAllAbilitiesOnStart)
+        // Add abilities to inventory on start if enabled
+        if (!addAbilitiesOnStart)
+            return;
+
+        if (useAllAbilitiesFromItemSOs)
         {
+            // Old behavior: add all abilities marked as abilities in itemSOs
             AddAllAbilitiesToInventory();
+        }
+        else
+        {
+            // New behavior: only add abilities specified in startingAbilities
+            if (startingAbilities == null || startingAbilities.Length == 0)
+            {
+                Debug.LogWarning("InventoryManager: 'addAbilitiesOnStart' is enabled but no startingAbilities are assigned.");
+                return;
+            }
+
+            foreach (ItemSO ability in startingAbilities)
+            {
+                if (ability == null)
+                {
+                    Debug.LogWarning("InventoryManager: Null entry found in startingAbilities list, skipping.");
+                    continue;
+                }
+
+                // Ensure this ItemSO is actually flagged as an ability
+                if (ability.isAbility != 1)
+                {
+                    Debug.LogWarning($"InventoryManager: ItemSO '{ability.itemName}' in startingAbilities is not marked as an ability (isAbility != 1), skipping.");
+                    continue;
+                }
+
+                int leftover = AddItem(ability.itemName, ability.itemSprite, 1, ability.itemDescription, 2);
+                if (leftover == 0)
+                {
+                    Debug.Log($"InventoryManager: Added starting ability '{ability.itemName}' to inventory.");
+                }
+                else
+                {
+                    Debug.LogWarning($"InventoryManager: Could not fully add starting ability '{ability.itemName}' (leftover: {leftover}). Inventory might be full.");
+                }
+            }
         }
     }
 
@@ -271,16 +316,23 @@ public class InventoryManager : MonoBehaviour
         
         for (int i = 0; i < targetSlots.Length; i++)
         {
-                       if (targetSlots[i] != null && !targetSlots[i].isFull && 
-               (targetSlots[i].quantity == 0 || string.IsNullOrEmpty(targetSlots[i].itemName) || targetSlots[i].itemName == itemName))
-           {
-               int leftOverItems = targetSlots[i].AddItem(itemName, itemIcon, quantity, itemDescription);
-               Debug.Log($"Added {itemName} to {slotType} slot {i}");
-               if (leftOverItems > 0)
-                   leftOverItems = AddItem(itemName, itemIcon, leftOverItems, itemDescription, typeOverride);
+            if (targetSlots[i] != null && !targetSlots[i].isFull && 
+                (targetSlots[i].quantity == 0 || string.IsNullOrEmpty(targetSlots[i].itemName) || targetSlots[i].itemName == itemName))
+            {
+                int leftOverItems = targetSlots[i].AddItem(itemName, itemIcon, quantity, itemDescription);
+                Debug.Log($"Added {itemName} to {slotType} slot {i}");
+                
+                // If this is an ability being added (from any source), try to auto-assign it
+                if (isAbility)
+                {
+                    TryAutoAssignNewAbility(itemName, itemIcon, itemDescription);
+                }
+
+                if (leftOverItems > 0)
+                    leftOverItems = AddItem(itemName, itemIcon, leftOverItems, itemDescription, typeOverride);
 
                 return leftOverItems;
-           }
+            }
         }
         
         Debug.Log($"All {slotType} inventory slots are full!");
@@ -691,6 +743,106 @@ public class InventoryManager : MonoBehaviour
     public ActiveSlot[] GetActiveSlots()
     {
         return activeSlots;
+    }
+
+    /// <summary>
+    /// Attempts to automatically assign a newly received ability to the first
+    /// available active slots (up to 3). This is called whenever an ability item
+    /// is successfully added to the ability inventory, regardless of source.
+    /// </summary>
+    private void TryAutoAssignNewAbility(string abilityItemName, Sprite icon, string description)
+    {
+        if (activeSlots == null || activeSlots.Length == 0)
+        {
+            Debug.LogWarning("InventoryManager: No activeSlots configured, cannot auto-assign abilities.");
+            return;
+        }
+
+        // Find a source ability inventory slot that actually holds this ability
+        ItemSlot sourceAbilitySlot = null;
+        if (abilitySlot != null)
+        {
+            for (int i = 0; i < abilitySlot.Length; i++)
+            {
+                if (abilitySlot[i] != null &&
+                    !string.IsNullOrEmpty(abilitySlot[i].itemName) &&
+                    abilitySlot[i].itemName == abilityItemName &&
+                    abilitySlot[i].quantity > 0)
+                {
+                    sourceAbilitySlot = abilitySlot[i];
+                    break;
+                }
+            }
+        }
+
+        if (sourceAbilitySlot == null)
+        {
+            // Nothing in inventory to consume (should not normally happen right after AddItem)
+            Debug.LogWarning($"InventoryManager: Could not find ability inventory slot holding '{abilityItemName}' to auto-assign.");
+            return;
+        }
+
+        // Check if this ability is already equipped in any active slot
+        for (int i = 0; i < activeSlots.Length; i++)
+        {
+            if (activeSlots[i] != null &&
+                !string.IsNullOrEmpty(activeSlots[i].itemName) &&
+                activeSlots[i].itemName == abilityItemName)
+            {
+                // Already equipped somewhere, do not auto-assign again
+                return;
+            }
+        }
+
+        // Assign to the first empty active slots, but only within the first 3
+        int maxAutoAssignSlots = Mathf.Min(3, activeSlots.Length);
+        for (int i = 0; i < maxAutoAssignSlots; i++)
+        {
+            var slot = activeSlots[i];
+            if (slot == null)
+                continue;
+
+            // Empty slot: no item currently equipped
+            if (string.IsNullOrEmpty(slot.itemName) || slot.quantity <= 0)
+            {
+                // Consume one ability from inventory first
+                sourceAbilitySlot.quantity -= 1;
+                if (sourceAbilitySlot.quantity <= 0)
+                {
+                    sourceAbilitySlot.EmptySlot();
+                }
+                else
+                {
+                    sourceAbilitySlot.UpdateQuantityDisplay();
+                }
+
+                int leftover = slot.AddItem(abilityItemName, icon, 1, description);
+                if (leftover == 0)
+                {
+                    Debug.Log($"InventoryManager: Auto-assigned new ability '{abilityItemName}' to active slot index {i}.");
+                    
+                    // Notify AbilitySetter so keybinds/holders get updated
+                    NotifyAbilitySetter();
+                }
+                else
+                {
+                    // Revert inventory change if equip failed for some reason
+                    if (sourceAbilitySlot != null)
+                    {
+                        sourceAbilitySlot.quantity += 1;
+                        sourceAbilitySlot.UpdateQuantityDisplay();
+                    }
+
+                    Debug.LogWarning($"InventoryManager: Failed to auto-assign '{abilityItemName}' to active slot {i} (leftover {leftover}).");
+                }
+
+                // Only assign this new ability to a single slot
+                return;
+            }
+        }
+
+        // If we reach here, either first three slots are filled or unable to assign
+        Debug.Log($"InventoryManager: Could not auto-assign '{abilityItemName}' - first {maxAutoAssignSlots} active slots are already occupied.");
     }
 
     /// <summary>
