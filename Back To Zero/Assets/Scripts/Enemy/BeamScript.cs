@@ -58,6 +58,14 @@ public class BossBeam : MonoBehaviour
     void Start()
     {
         SetupBeam();
+        
+        // Disable EntityDamage component if present - BossBeam handles its own damage logic
+        EntityDamage entityDamage = GetComponent<EntityDamage>();
+        if (entityDamage != null)
+        {
+            entityDamage.enabled = false;
+            Debug.Log($"[{gameObject.name}] Disabled EntityDamage component - BossBeam handles damage");
+        }
     }
 
     void SetupBeam()
@@ -180,18 +188,28 @@ public class BossBeam : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D other)
     {
-        // Ignore boss and other enemies
-        if (other.CompareTag("Boss") || other.CompareTag("Enemy"))
+        // ONLY damage objects with the "Player" tag - check the object itself and its parent hierarchy
+        bool isPlayer = false;
+        Transform checkTransform = other.transform;
+        
+        // Check the object itself and all parents up the hierarchy
+        while (checkTransform != null)
+        {
+            if (checkTransform.CompareTag("Player"))
+            {
+                isPlayer = true;
+                break;
+            }
+            checkTransform = checkTransform.parent;
+        }
+        
+        // If it's not a player (or child of player), ignore it completely
+        if (!isPlayer)
         {
             return;
         }
 
-        // Only damage player
-        if (!other.CompareTag("Player"))
-        {
-            return;
-        }
-
+        // Only proceed if we found a Player tag
         Health targetHealth = other.GetComponent<Health>();
 
         if (targetHealth != null && !targetHealth.isInvincible)

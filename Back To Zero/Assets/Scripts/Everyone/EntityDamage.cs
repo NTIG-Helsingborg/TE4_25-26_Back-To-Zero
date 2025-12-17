@@ -304,6 +304,28 @@ public class EntityDamage : MonoBehaviour
     {
         if (!isContinuousDamage) return;
         if (!CanDamage(other.gameObject)) return;
+        
+        // If this is a boss beam, only damage players
+        BossBeam bossBeam = GetComponent<BossBeam>();
+        if (bossBeam != null)
+        {
+            // Only damage objects with Player tag
+            bool isPlayer = false;
+            Transform checkTransform = other.transform;
+            while (checkTransform != null)
+            {
+                if (checkTransform.CompareTag("Player"))
+                {
+                    isPlayer = true;
+                    break;
+                }
+                checkTransform = checkTransform.parent;
+            }
+            if (!isPlayer)
+            {
+                return; // Not a player, ignore
+            }
+        }
 
         Health targetHealth = other.gameObject.GetComponent<Health>();
 
