@@ -185,6 +185,12 @@ public class EnemySpawner : MonoBehaviour
                     continue;
                 }
                 
+                // Mark this enemy as wave-spawned so only these count toward wave completion.
+                if (newEnemy.GetComponent<WaveSpawnedMarker>() == null)
+                {
+                    newEnemy.AddComponent<WaveSpawnedMarker>();
+                }
+
                 // Automatically assign player reference to spawned enemy
                 if (playerAssigner != null)
                 {

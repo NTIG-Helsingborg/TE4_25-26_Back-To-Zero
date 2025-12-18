@@ -405,8 +405,8 @@ public class Health : MonoBehaviour
             return;
         }
 
-        // Notify wave manager immediately (optional)
-        if (WaveManager.Instance != null)
+        // Notify wave manager only for wave-spawned enemies
+        if (WaveManager.Instance != null && GetComponent<WaveSpawnedMarker>() != null)
             WaveManager.Instance.OnEnemyKilled();
 
         GrantExperience();
