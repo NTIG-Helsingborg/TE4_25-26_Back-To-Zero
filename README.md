@@ -1,5 +1,7 @@
 # Back To Zero
 
+<img width="957" height="536" alt="Screenshot 2025-12-21 at 20 34 12" src="https://github.com/user-attachments/assets/a91da0c1-8151-4f97-a7b7-7df2303b2a0b" />
+
 The game is available on [itch.io](https://andi-g.itch.io/back-to-zero), but **we recommend downloading the game** as the browser version can be laggy.
 
 ## ⚠️ Important: Firewall Warning
