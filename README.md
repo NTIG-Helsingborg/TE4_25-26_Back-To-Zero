@@ -1,5 +1,7 @@
 # Back To Zero
 
+The game is available on [itch.io](https://andi-g.itch.io/back-to-zero), but **we recommend downloading the game** as the browser version can be laggy.
+
 ## ⚠️ Important: Firewall Warning
 
 **This project does not have code signing**, which means Windows Firewall may block the application.
